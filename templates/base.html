@@ -1,0 +1,1363 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hazumake Store - Premium Top-Up{% endblock %}</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="preload" as="image" href="{% static 'images/hero1.jpg' %}">
+    <link rel="preload" as="image" href="{% static 'images/hero2.jpg' %}">
+    <link rel="preload" as="image" href="{% static 'images/hero3.jpg' %}">
+    <link rel="preload" as="image" href="{% static 'images/hero4.jpg' %}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💎</text></svg>">
+    
+    <style>
+        /* =========================================
+           AAA GAMING VARIABLES & RESET
+           ========================================= */
+        :root {
+            --bg-color: #0A0A0F;
+            --primary: #7C3AED;
+            --accent: #06B6D4;
+            --card-bg: #1A1A2E;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #FFFFFF;
+            --text-muted: #A0A0B0;
+            --glass-bg: rgba(10, 10, 25, 0.6);
+            --success: #10B981;
+            --error: #EF4444;
+            --warning: #F59E0B;
+            --safe-padding-mobile: 1rem;
+            --safe-padding-tablet: 1.5rem;
+            --safe-padding-desktop: 2rem;
+            --border-radius: 16px;
+            --border-radius-sm: 12px;
+            --border-radius-lg: 20px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.5);
+            scroll-behavior: smooth;
+        }
+
+        /* =========================================================
+           1. GLOBAL STRUCTURAL RESET (Fixes Overflow & Scrolling)
+           ========================================================= */
+        *, *::before, *::after {
+            box-sizing: border-box; /* Forces padding to stay INSIDE the width */
+            -webkit-font-smoothing: subpixel-antialiased;
+            -moz-osx-font-smoothing: auto;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%; /* Prevents iOS text zooming */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overscroll-behavior-x: none;
+            font-weight: 300; /* Premium lighter weight */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            letter-spacing: 0.01em; /* Subtle letter spacing for premium feel */
+        }
+
+        /* Ensure images never stretch past their containers */
+        img, svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* =========================================================
+           2. REUSABLE MOBILE-NATIVE COMPONENTS
+           ========================================================= */
+        /* Standardized Modern App Touch Target (Codashop style) */
+        .btn-native {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 48px; /* Standard Apple/Android touch target */
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary-action {
+            background: linear-gradient(135deg, #7C3AED, #06B6D4);
+            color: #FFFFFF;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-primary-action:active {
+            transform: scale(0.97); /* Native app tap feedback */
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* =========================================
+           BACKGROUND ENGINE (ARTWORK, HEX GRID, PARTICLES)
+           ========================================= */
+        .bg-artwork {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop') center/cover;
+            opacity: 0.08;
+            z-index: -3;
+            pointer-events: none;
+            mix-blend-mode: luminosity;
+        }
+
+        @media (max-width: 768px) {
+            .bg-artwork {
+                opacity: 0.05;
+            }
+        }
+
+        .bg-hex-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='69.28' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 17.32l-20 11.55L0 17.32V-5.77l20-11.55L40-5.77V17.32zm0 46.19l-20 11.55-20-11.55V40.41l20-11.55 20 11.55v23.09zM20 51.96l-20 11.55v-23.09l20-11.55 20 11.55v23.09L20 51.96z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .bg-hex-grid {
+                background-image: url("data:image/svg+xml,%3Csvg width='40' height='69.28' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 17.32l-20 11.55L0 17.32V-5.77l20-11.55L40-5.77V17.32zm0 46.19l-20 11.55-20-11.55V40.41l20-11.55 20 11.55v23.09zM20 51.96l-20 11.55v-23.09l20-11.55 20 11.55v23.09L20 51.96z' fill='%23ffffff' fill-opacity='0.01' fill-rule='evenodd'/%3E%3C/svg%3E");
+            }
+        }
+
+        /* Nebula Glows - Reduced on Mobile */
+        .nebula {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.3;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .nebula-violet {
+            background: var(--primary);
+            width: 60vw;
+            height: 60vw;
+            top: -10%;
+            left: -10%;
+        }
+        .nebula-cyan {
+            background: var(--accent);
+            width: 40vw;
+            height: 40vw;
+            bottom: 0;
+            right: -5%;
+        }
+
+        /* Mobile: Reduce nebula size and opacity */
+        @media (max-width: 768px) {
+            .nebula {
+                opacity: 0.15;
+                filter: blur(80px);
+            }
+            .nebula-violet {
+                width: 80vw;
+                height: 80vw;
+                top: -30%;
+                left: -30%;
+            }
+            .nebula-cyan {
+                width: 60vw;
+                height: 60vw;
+                bottom: -20%;
+                right: -20%;
+            }
+        }
+
+        /* Floating Particles Container */
+        #particles-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0; pointer-events: none; overflow: hidden;
+        }
+        .gem-particle {
+            position: absolute; bottom: -50px;
+            animation: floatUp linear infinite; opacity: 0;
+            filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.8));
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg) scale(0.5); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100vh) rotate(360deg) scale(1); opacity: 0; }
+        }
+
+        /* =========================================
+           GLASS NAVBAR (DYNAMIC SCROLL)
+           ========================================= */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background-clip: text; -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900; letter-spacing: 1px;
+        }
+
+        .glass-nav {
+            background: rgba(10, 10, 15, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            will-change: background-color, box-shadow;
+        }
+
+        .glass-nav.scrolled {
+            background: rgba(10, 10, 15, 0.9);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(124, 58, 237, 0.2);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+            animation: navSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Hamburger Menu Button */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .hamburger:hover { background: rgba(255,255,255,0.1); }
+        .hamburger span {
+            width: 25px; height: 3px; background: white; margin: 3px 0;
+            transition: all 0.3s ease; border-radius: 2px;
+        }
+        .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); }
+
+        /* Mobile Menu Overlay */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100dvh;
+            background: rgba(10, 10, 15, 0.98);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 1rem;
+            padding: 4rem 1rem 2rem;
+            overflow-y: auto;
+            animation: mobileMenuFade 0.25s ease;
+        }
+        @keyframes mobileMenuFade {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .mobile-menu .nav-link {
+            font-size: 1.25rem; padding: 1rem 1.25rem;
+            width: min(90%, 340px); max-width: 340px; text-align: center;
+            border-radius: 14px; transition: all 0.3s ease;
+        }
+        .mobile-menu .nav-link:hover {
+            background: rgba(124, 58, 237, 0.25); transform: scale(1.03);
+        }
+        .mobile-menu .nav-actions { flex-direction: column; gap: 1rem; width: 100%; align-items: center; }
+        .mobile-menu .btn-nav { width: min(90%, 340px); max-width: 340px; }
+
+        /* =========================================
+           RESPONSIVE DESIGN - MOBILE FIRST
+           ========================================= */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.8rem 1rem;
+                gap: 1rem;
+            }
+            .nav-brand {
+                font-size: 1.4rem;
+            }
+            .nav-links {
+                display: none;
+            }
+            .hamburger {
+                display: flex;
+            }
+            .nav-actions {
+                display: none;
+            }
+            .glass-nav {
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            .nav-brand {
+                font-size: 1.2rem;
+            }
+            .mobile-menu {
+                padding: 4rem 1rem 2rem;
+            }
+            .mobile-menu .nav-link {
+                font-size: 1.1rem;
+                width: 100%;
+                max-width: none;
+                padding: 0.8rem 1rem;
+            }
+            .mobile-menu .btn-nav {
+                width: 100%;
+                max-width: none;
+            }
+        }
+
+        @keyframes navSlideDown {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-brand {
+            font-size: 1.8rem;
+            transition: all 0.3s ease;
+            animation: navSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .nav-brand:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.7));
+        }
+
+        .nav-links { display: flex; gap: 2.5rem; align-items: center; }
+
+        .nav-link {
+            font-size: 1rem; color: var(--text-main); font-weight: 500;
+            transition: all 0.3s ease; position: relative; padding-bottom: 4px;
+        }
+
+        /* Animated underline bar that slides in from left */
+        .nav-link::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0;
+            width: 0%; height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+            transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+            text-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+        }
+
+        .nav-link:hover::after { width: 100%; }
+
+        /* Active page indicator — always shown */
+        .nav-link.active-page {
+            color: var(--accent);
+        }
+        .nav-link.active-page::after { width: 100%; }
+
+        .nav-actions { display: flex; gap: 1.2rem; align-items: center; }
+
+        /* Staggered link entrance */
+        .nav-links .nav-link:nth-child(1) { animation: navFadeIn 0.5s 0.1s both; }
+        .nav-links .nav-link:nth-child(2) { animation: navFadeIn 0.5s 0.2s both; }
+        .nav-links .nav-link:nth-child(3) { animation: navFadeIn 0.5s 0.3s both; }
+        .nav-links .nav-link:nth-child(4) { animation: navFadeIn 0.5s 0.4s both; }
+
+        @keyframes navFadeIn {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Navbar Buttons */
+        .btn-nav {
+            padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 0.95rem;
+            transition: all 0.3s ease; text-decoration: none; cursor: pointer;
+        }
+        .btn-nav-outline {
+            border: 1px solid rgba(255,255,255,0.2); color: white;
+        }
+        .btn-nav-outline:hover {
+            border-color: var(--accent); color: var(--accent); box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+        }
+        .btn-nav-solid {
+            background: var(--primary); color: white; border: none;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+        }
+        .btn-nav-solid:hover {
+            background: #8B5CF6; box-shadow: 0 0 25px rgba(124, 58, 237, 0.7); transform: translateY(-2px);
+        }
+
+        main {
+            flex: 1;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* =========================================
+           REVERSE GLOWING RAIN EFFECT
+           ========================================= */
+        #reverse-rain-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: -2; /* Sits behind the Glass Cards but above the Background Images */
+            pointer-events: none;
+            overflow: hidden;
+            contain: strict;
+        }
+
+        .rain-drop {
+            position: absolute;
+            bottom: -100px; /* Start hidden below screen */
+            border-radius: 50%;
+            animation: shootUp linear infinite;
+            will-change: transform, opacity;
+        }
+
+        /* Cyber Cyan Rain Drop with White-Hot Tip */
+        .rain-cyan {
+            background: linear-gradient(to top, rgba(6,182,212,0), rgba(6,182,212,0.8), #ffffff);
+            box-shadow: 0 0 10px #06B6D4, 0 0 20px #06B6D4, 0 0 40px rgba(6,182,212,0.6);
+        }
+
+        /* Neon Violet Rain Drop with White-Hot Tip */
+        .rain-violet {
+            background: linear-gradient(to top, rgba(124,58,237,0), rgba(124,58,237,0.8), #ffffff);
+            box-shadow: 0 0 10px #7C3AED, 0 0 20px #7C3AED, 0 0 40px rgba(124,58,237,0.6);
+        }
+
+        @keyframes shootUp {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            80% { opacity: 1; filter: brightness(1.5); }
+            100% { transform: translateY(-120vh); opacity: 0; }
+        }
+
+        /* =========================================
+           MOBILE RESPONSIVENESS FIXES
+           ========================================= */
+        @media (max-width: 1024px) {
+            html, body {
+                overflow-x: hidden !important;
+                width: 100% !important;
+                max-width: 100%;
+            }
+
+            .bg-slideshow, 
+            .bg-artwork,
+            .bg-hex-grid,
+            .nebula, 
+            #particles-container, 
+            #reverse-rain-container,
+            .shop-bg-container {
+                width: 100% !important;
+            }
+
+            .hero-split {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 2rem;
+                padding-top: 4rem;
+                width: 100%;
+                overflow-x: hidden;
+            }
+
+            .hero-content {
+                align-items: center;
+                text-align: center;
+                width: 100%;
+                padding: 0 1rem;
+            }
+
+            .hero-title-aaa {
+                font-size: clamp(2.2rem, 10vw, 3.5rem);
+                line-height: 1.2;
+                width: 100%;
+                word-wrap: break-word;
+            }
+
+            .hero-subtitle-aaa {
+                font-size: 0.95rem;
+                line-height: 1.6;
+                margin: 0 auto 2.5rem;
+                max-width: 100%;
+            }
+
+            .glass-scene {
+                display: block !important;
+            }
+
+            .cta-group {
+                flex-direction: row !important;
+                justify-content: center;
+                width: 100%;
+                max-width: 100% !important;
+                gap: 1rem;
+            }
+
+            .btn-glass-action,
+            .btn-topup,
+            .btn-community {
+                width: 100%;
+                max-width: 160px !important;
+                font-size: 0.9rem !important;
+                padding: 0.8rem 1.2rem !important;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .btn-glass-action svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger { 
+                display: flex !important; 
+            }
+            
+            .nav-links, .nav-actions { 
+                display: none !important; 
+            }
+
+            /* Show mobile menu actions */
+            .mobile-menu .nav-actions {
+                display: flex !important;
+                flex-direction: column;
+                gap: 1rem;
+                margin-top: 1rem;
+                padding-top: 1rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                width: 100%;
+                align-items: center;
+            }
+
+            .mobile-menu .btn-nav {
+                width: min(90%, 340px);
+                max-width: 340px;
+                text-align: center;
+                padding: 0.8rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            /* (Per-page templates handle their own .product-grid / .product-card / .btn-buy mobile sizing —
+               base.html no longer forces a 1-column grid or rebinds buy-button height here.) */
+        }
+
+        @media (max-width: 480px) {
+            .cta-group {
+                gap: 0.5rem;
+            }
+            
+            .btn-glass-action,
+            .btn-topup,
+            .btn-community {
+                padding: 0.8rem 0.5rem !important;
+                font-size: 0.85rem !important;
+                max-width: 140px !important;
+            }
+        }
+
+        /* =========================================
+           🚀 HOMEPAGE PRODUCT CARD COMPACT GRID (mobile only)
+           Scoped to homepage shop section so it doesn't conflict with shop pages
+           ========================================= */
+        @media (max-width: 768px) {
+            #shop-section > div > div {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+                gap: 1rem !important;
+            }
+
+            .home-product-card {
+                padding: 1rem !important;
+                border-radius: 14px !important;
+            }
+
+            .home-product-card .card-emoji {
+                width: 50px !important;
+                height: 50px !important;
+                font-size: 3rem !important;
+                margin: 0 auto 0.8rem auto !important;
+            }
+
+            .home-product-card .card-amount {
+                font-size: 1.4rem !important;
+                margin-bottom: 0.2rem !important;
+            }
+
+            .home-product-card .card-name {
+                font-size: 0.75rem !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .home-product-card .card-price-box {
+                background: rgba(124, 58, 237, 0.45) !important;
+                backdrop-filter: blur(10px) !important;
+                border: 1px solid rgba(124, 58, 237, 0.8) !important;
+                padding: 8px !important;
+                margin-bottom: 1rem !important;
+                border-radius: 8px !important;
+            }
+
+            .home-product-card .card-price-box .price-coins {
+                font-size: 0.95rem !important;
+            }
+
+            .home-product-card .card-price-box .price-inr {
+                font-size: 0.75rem !important;
+                color: rgba(255, 255, 255, 0.85) !important;
+            }
+
+            .home-product-card .card-buy-btn {
+                height: 38px !important;
+                font-size: 0.85rem !important;
+                border-radius: 8px !important;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .glass-scene {
+                display: flex !important;
+                transform: scale(0.65) !important;
+                transform-origin: top center !important;
+                height: 320px !important;
+                margin-top: -2rem !important;
+                margin-bottom: -4rem !important;
+                width: 100% !important;
+            }
+
+            .hero-split {
+                padding-top: 2rem !important;
+                gap: 1rem !important;
+            }
+
+            .hero-title-aaa {
+                font-size: clamp(2.5rem, 8vw, 3.5rem) !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .hero-subtitle-aaa {
+                font-size: 0.9rem !important;
+                max-width: 90% !important;
+                margin: 0 auto 1.5rem !important;
+            }
+
+            .btn-glass-action {
+                padding: 0.8rem 1.5rem !important;
+                font-size: 0.9rem !important;
+                min-width: 130px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-grid, #shop-section > div > div {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.75rem !important;
+                padding: 0 0.5rem !important;
+            }
+
+            .glass-scene {
+                transform: scale(0.5) !important;
+                height: 250px !important;
+                margin-bottom: -5rem !important;
+            }
+
+            .hero-badge {
+                padding: 0.4rem 1rem !important;
+                font-size: 0.75rem !important;
+            }
+        }
+
+        /* =========================================
+           📱 GLOBAL NATIVE APP MOBILE OVERRIDES
+           Scoped to product/shop containers only — does NOT affect
+           contact, orders, wallet, auth, etc. cards.
+           ========================================= */
+        @media (max-width: 768px) {
+            /* 1. PRODUCT GRID — 2 column compact (only inside shop/product sections) */
+            .product-grid,
+            .game-shop-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px !important;
+                padding: 0 12px !important;
+            }
+
+            /* 2. HOME-PAGE PRODUCT CARD STYLING — only homepage cards */
+            .home-product-card {
+                padding: 16px 12px !important;
+                border-radius: 16px !important;
+                background: rgba(15, 15, 25, 0.85) !important;
+                border: 1.5px solid rgba(124, 58, 237, 0.4) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                min-height: 180px !important;
+            }
+
+            /* Remove the giant dark placeholder boxes inside homepage product cards */
+            .home-product-card > .image-placeholder,
+            .home-product-card > .card-image-bg {
+                background: transparent !important;
+                height: auto !important;
+                width: auto !important;
+                min-height: 0 !important;
+                padding: 0 !important;
+                margin-bottom: 10px !important;
+            }
+
+            /* Center homepage product card icons (sizing is controlled by the page itself) */
+            .home-product-card .card-icon,
+            .home-product-card .card-emoji {
+                margin: 0 auto 10px auto !important;
+                object-fit: contain !important;
+            }
+
+            /* 3. NATIVE SWIPEABLE FILTER TABS */
+            .filter-container {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                justify-content: flex-start !important;
+                padding: 0 16px 16px 16px !important;
+                margin: 0 -16px 20px -16px !important;
+                gap: 10px !important;
+            }
+
+            .filter-container::-webkit-scrollbar {
+                display: none !important;
+            }
+
+            .filter-tab {
+                white-space: nowrap !important;
+                flex: 0 0 auto !important;
+                padding: 10px 20px !important;
+                font-size: 0.9rem !important;
+                border-radius: 50px !important;
+            }
+
+            /* 4. NATIVE 3D WIDGET FLATTEN (homepage glass-scene only) */
+            .glass-scene {
+                perspective: none !important;
+                height: auto !important;
+                min-height: 250px !important;
+                margin: 2rem auto 4rem auto !important;
+                transform: none !important;
+            }
+
+            .glass-stack {
+                width: 100% !important;
+                max-width: 340px !important;
+                height: auto !important;
+                transform: none !important;
+                margin: 0 auto !important;
+                transition: none !important;
+            }
+
+            .stack-layer-1 { display: none !important; }
+
+            .stack-layer-2 {
+                position: relative !important;
+                transform: none !important;
+                padding: 24px !important;
+                background: linear-gradient(135deg, rgba(25, 20, 40, 0.9), rgba(10, 10, 20, 0.95)) !important;
+                border-radius: 20px !important;
+            }
+
+            .stack-orb {
+                width: 70px !important;
+                height: 70px !important;
+                margin-bottom: 1.2rem !important;
+            }
+
+            .stack-layer-3 { display: none !important; }
+
+            /* 5. TYPOGRAPHY — homepage hero only */
+            .hero-title-aaa {
+                font-size: clamp(2rem, 8vw, 2.5rem) !important;
+                line-height: 1.2 !important;
+                padding: 0 16px !important;
+                margin-bottom: 1rem !important;
+            }
+
+            /* Homepage product price box */
+            .home-product-card .card-price-box {
+                width: 100% !important;
+                padding: 8px !important;
+                background: rgba(124, 58, 237, 0.3) !important;
+                border: 1px solid rgba(124, 58, 237, 0.6) !important;
+            }
+
+            /* Native-app form controls — minimum 44px touch target,
+               proper readable size (16px) so iOS doesn't auto-zoom on focus */
+            input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="hidden"]),
+            select,
+            textarea {
+                font-size: 16px !important; /* Prevents iOS zoom on focus */
+                min-height: 44px;
+            }
+        }
+
+        /* Native App Page Header (Mobile Only) */
+        .native-app-header {
+            display: none;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-right: 12px;
+        }
+
+        .back-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .page-header-title {
+            color: #FFFFFF;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            /* Hide the main desktop navbar on specific app pages if desired, or keep both */
+            /* .glass-nav { display: none; } */ 
+            
+            .native-app-header {
+                display: flex;
+            }
+            
+            /* Adjust padding below header */
+            .hero-split, .wallet-container, .shop-container, .contact-layout-wrapper {
+                padding-top: 1rem !important;
+            }
+        }
+
+        /* =========================================================
+           🚀 GLOBAL GAME CARD FIX (STRICT ASPECT RATIO)
+           ========================================================= */
+        /* Target the grid container */
+        .games-grid, 
+        #games-section > div[style*="grid"] {
+            display: grid !important;
+            /* Use a fixed minimum width, but allow it to fill space. NEVER stretch height */
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+            gap: 16px !important;
+            align-items: start !important; /* Prevents rows from stretching to match tallest item */
+            padding: 0 16px !important;
+            width: 100% !important;
+        }
+
+        /* Target the cards themselves */
+        .game-card {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            
+            /* 🚨 THE MAGIC FIX: Force a square/compact shape, physically impossible to stretch 🚨 */
+            height: auto !important;
+            min-height: 0 !important;
+            aspect-ratio: 1 / 1.1 !important; /* Almost perfectly square */
+            
+            padding: 16px 12px !important;
+            background: rgba(15, 15, 25, 0.9) !important;
+            border: 1px solid rgba(124, 58, 237, 0.4) !important;
+            border-radius: 16px !important;
+            text-align: center !important;
+            overflow: hidden !important;
+            position: relative !important;
+        }
+
+        /* Strip out all the broken internal wrappers causing empty space */
+        .game-card-content, 
+        .game-card-top, 
+        .game-card-bottom {
+            display: contents !important; /* Makes the wrappers invisible to the layout */
+        }
+
+        /* Fix the Game Icon sizes inside the card */
+        .game-icon-wrap, .game-icon {
+            width: 56px !important;
+            height: 56px !important;
+            margin: 0 auto 12px auto !important;
+            flex-shrink: 0 !important;
+            background: rgba(0, 0, 0, 0.4) !important;
+            border-radius: 12px !important;
+            border: 1px solid rgba(124, 58, 237, 0.5) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .game-icon-wrap img, .game-icon img {
+            width: 80% !important;
+            height: 80% !important;
+            object-fit: contain !important;
+        }
+
+        /* Fix the Text Typography */
+        .game-name {
+            font-size: 0.85rem !important;
+            font-weight: 700 !important;
+            line-height: 1.2 !important;
+            margin-bottom: 6px !important;
+            display: -webkit-box !important;
+            line-clamp: 2 !important;
+            -webkit-line-clamp: 2 !important; /* Max 2 lines */
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            color: #FFFFFF !important;
+        }
+
+        .game-short { display: none !important; } /* Hide this to save space on mobile */
+
+        /* Fix the Package Counter Pill */
+        .game-package-count, .game-products {
+            background: rgba(6, 182, 212, 0.15) !important;
+            color: #06B6D4 !important;
+            border: 1px solid rgba(6, 182, 212, 0.3) !important;
+            padding: 4px 10px !important;
+            border-radius: 50px !important;
+            font-size: 0.7rem !important;
+            font-weight: 700 !important;
+            margin-top: auto !important; /* Push to bottom of the new square card */
+        }
+
+        /* Hide the random arrow circles causing layout breaks */
+        .game-arrow { display: none !important; }
+
+        /* 📱 MOBILE SPECIFIC TWEAKS */
+        @media (max-width: 480px) {
+            .games-grid, #games-section > div[style*="grid"] {
+                grid-template-columns: repeat(2, 1fr) !important; /* EXACTLY 2 per row on small phones */
+                gap: 12px !important;
+            }
+            
+            .game-card {
+                padding: 12px 8px !important;
+            }
+            
+            .game-icon-wrap, .game-icon {
+                width: 48px !important;
+                height: 48px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .game-name { font-size: 0.75rem !important; }
+        }
+
+        /* FOOTER STYLES */
+        .site-footer {
+            background-color: #0A0A0F;
+            border-top: 1px solid rgba(124, 58, 237, 0.25);
+            padding: 4rem 5% 2rem;
+            margin-top: auto;
+            width: 100%;
+        }
+
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+
+        .footer-brand,
+        .footer-links,
+        .footer-support {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .footer-brand h2,
+        .footer-support h3 {
+            margin: 0 0 0.75rem;
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .footer-brand p,
+        .footer-links a,
+        .footer-support a {
+            color: rgba(226, 232, 240, 0.9);
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+        }
+
+        .footer-links a {
+            font-weight: 500;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: color 0.25s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .footer-support a.cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.85rem 1.75rem;
+            background: rgba(124, 58, 237, 0.15);
+            border: 1px solid rgba(124, 58, 237, 0.45);
+            border-radius: 12px;
+            color: #FFFFFF;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .footer-support a.cta:hover {
+            transform: translateY(-2px);
+            background: rgba(124, 58, 237, 0.25);
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.15);
+        }
+
+        .footer-copy {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            color: #71717A;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer-inner {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .footer-support {
+                text-align: left;
+            }
+            .footer-copy {
+                margin-top: 2rem;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- 🌌 CINEMATIC BACKGROUND ENGINE -->
+    <div class="bg-artwork"></div>
+    <div class="bg-hex-grid"></div>
+    <div class="nebula nebula-violet"></div>
+    <div class="nebula nebula-cyan"></div>
+    <div id="particles-container"></div> <!-- Vanilla JS controls this below -->
+     <div id="reverse-rain-container"></div>
+
+    <!-- Navbar -->
+    <header class="glass-nav" id="mainNav">
+        <nav class="navbar">
+            <a href="{% url 'home' %}" class="nav-brand gradient-text">Hazumake</a>
+            
+            <div class="nav-links">
+                <a href="{% url 'home' %}" 
+                   class="nav-link {% if request.resolver_match.url_name == 'home' %}active-page{% endif %}"
+                   id="nav-home-btn">Home</a>
+
+                <!-- On homepage: scrolls down to shop section. On other pages: goes to /shop/ -->
+                <a href="{% url 'shop' %}" 
+                   class="nav-link {% if request.resolver_match.url_name == 'shop' %}active-page{% endif %}"
+                   id="nav-shop-btn">Shop</a>
+
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'orders' %}" 
+                   class="nav-link {% if request.resolver_match.url_name == 'orders' %}active-page{% endif %}">My Orders</a>
+                <a href="{% url 'wallet' %}" 
+                   class="nav-link {% if request.resolver_match.url_name == 'wallet' %}active-page{% endif %}">Wallet</a>
+                <a href="{% url 'contact' %}" 
+                   class="nav-link {% if request.resolver_match.url_name == 'contact' %}active-page{% endif %}">Contact</a>
+                {% endif %}
+            </div>
+
+            <div class="nav-actions">
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn-nav btn-nav-outline">Profile</a>
+                    <form method="POST" action="{% url 'logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-nav btn-nav-solid">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-nav btn-nav-outline">Login</a>
+                    <a href="{% url 'register' %}" class="btn-nav btn-nav-solid">Register</a>
+                {% endif %}
+            </div>
+
+            <!-- Hamburger Menu Button -->
+            <div class="hamburger" id="hamburger-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu" id="mobile-menu">
+            <a href="{% url 'home' %}" 
+               class="nav-link {% if request.resolver_match.url_name == 'home' %}active-page{% endif %}"
+               id="mobile-nav-home-btn">Home</a>
+
+            <a href="{% url 'shop' %}" 
+               class="nav-link {% if request.resolver_match.url_name == 'shop' %}active-page{% endif %}"
+               id="mobile-nav-shop-btn">Shop</a>
+
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'orders' %}" 
+               class="nav-link {% if request.resolver_match.url_name == 'orders' %}active-page{% endif %}">My Orders</a>
+            <a href="{% url 'wallet' %}" 
+               class="nav-link {% if request.resolver_match.url_name == 'wallet' %}active-page{% endif %}">Wallet</a>
+            <a href="{% url 'contact' %}" 
+               class="nav-link {% if request.resolver_match.url_name == 'contact' %}active-page{% endif %}"
+               id="mobile-nav-contact-btn">Contact</a>
+            {% endif %}
+
+            <div class="nav-actions">
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn-nav btn-nav-outline">Profile</a>
+                    <form method="POST" action="{% url 'logout' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-nav btn-nav-solid">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-nav btn-nav-outline">Login</a>
+                    <a href="{% url 'register' %}" class="btn-nav btn-nav-solid">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+   <!-- Vanilla JS Engine -->
+    <script>
+    // 1. Dynamic Navbar Scroll Effect
+    window.addEventListener('scroll', () => {
+        const nav = document.getElementById('mainNav');
+        if(window.scrollY > 50) { nav.classList.add('scrolled'); } 
+        else { nav.classList.remove('scrolled'); }
+    });
+
+    // 1b. MOBILE HAMBURGER MENU TOGGLE
+    document.addEventListener('DOMContentLoaded', function() {
+        const hamburger = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (hamburger && mobileMenu) {
+            hamburger.addEventListener('click', function() {
+                hamburger.classList.toggle('open');
+                mobileMenu.style.display = mobileMenu.style.display === 'flex' ? 'none' : 'flex';
+            });
+            
+            // Close menu when clicking a link
+            mobileMenu.addEventListener('click', function(e) {
+                if (e.target.classList.contains('nav-link') || e.target.classList.contains('btn-nav') || e.target.tagName === 'BUTTON') {
+                    hamburger.classList.remove('open');
+                    mobileMenu.style.display = 'none';
+                }
+            });
+        }
+    });
+
+    // 1c. SMART SHOP BUTTON — scroll on homepage, navigate on other pages
+    document.addEventListener('DOMContentLoaded', function() {
+        const shopBtn = document.getElementById('nav-shop-btn');
+        const mobileShopBtn = document.getElementById('mobile-nav-shop-btn');
+        const isHomePage = document.body.dataset.page === 'home';
+
+        function handleShopClick(btn) {
+            if (btn && isHomePage) {
+                btn.addEventListener('click', function(e) {
+                    const shopSection = document.getElementById('shop-section');
+                    if (shopSection) {
+                        e.preventDefault();
+                        shopSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Close mobile menu if open
+                        const hamburger = document.getElementById('hamburger-btn');
+                        const mobileMenu = document.getElementById('mobile-menu');
+                        if (hamburger && mobileMenu) {
+                            hamburger.classList.remove('open');
+                            mobileMenu.style.display = 'none';
+                        }
+                    }
+                    // If no #shop-section on homepage, just navigates normally
+                });
+            }
+        }
+
+        handleShopClick(shopBtn);
+        handleShopClick(mobileShopBtn);
+    });
+
+    // 2. REVERSE GLOWING RAIN ENGINE
+    document.addEventListener("DOMContentLoaded", function() {
+        const rainContainer = document.getElementById('reverse-rain-container');
+
+        // Pages set their own density via: document.body.dataset.rainDensity = '160'
+        // Default is 80 if no page sets it
+        const isMobile = window.innerWidth <= 768;
+        const dropCount = parseInt(document.body.dataset.rainDensity || (isMobile ? '40' : '80'));
+
+        for (let i = 0; i < dropCount; i++) {
+            createRainDrop();
+        }
+
+        function createRainDrop() {
+            const drop = document.createElement('div');
+            drop.classList.add('rain-drop');
+
+            const isCyan = Math.random() > 0.5;
+            drop.classList.add(isCyan ? 'rain-cyan' : 'rain-violet');
+
+            // Taller drops = more dramatic streaks
+            const height = Math.random() * 80 + 30; // 30px to 110px
+            drop.style.height = `${height}px`;
+
+            const width = Math.random() * 2 + 1;
+            drop.style.width = `${width}px`;
+
+            drop.style.left = `${Math.random() * 100}vw`;
+
+            // Wider speed range for variety
+            const duration = Math.random() * 3 + 1; // 1s to 4s
+            drop.style.animationDuration = `${duration}s`;
+
+            // Longer max delay so screen stays populated at all times
+            const delay = Math.random() * 8;
+            drop.style.animationDelay = `${delay}s`;
+
+            rainContainer.appendChild(drop);
+        }
+    });
+</script>
+    {% block extra_js %}{% endblock %}
+
+    <!-- ==========================================
+         SOLID, UNBREAKABLE PREMIUM FOOTER 
+         ========================================== -->
+   <!-- ==========================================
+         SLEEK, MINIMAL PREMIUM FOOTER 
+         ========================================== -->
+    <footer style="background-color: #0A0A0F; border-top: 1px solid rgba(124, 58, 237, 0.3); padding: 4rem 5% 2rem; margin-top: auto; position: relative; z-index: 9999; width: 100%;">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 3rem;">
+            
+            <!-- Brand Info -->
+            <div style="flex: 1; min-width: 250px;">
+                <h2 style="font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #7C3AED, #06B6D4); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; letter-spacing: -0.5px;">Hazumake</h2>
+                <p style="color: #9CA3AF; font-size: 0.95rem; line-height: 1.6; max-width: 300px;">Power Up Your Game with internationally recognised MLBB & BGMI servicing.</p>
+            </div>
+
+            <!-- Minimal Quick Links -->
+            <div style="flex: 1; min-width: 250px; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
+                <a href="{% url 'home' %}" style="color: #E2E8F0; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;" onmouseover="this.style.color='#06B6D4'" onmouseout="this.style.color='#E2E8F0'">Home</a>
+                <a href="{% url 'shop' %}" style="color: #E2E8F0; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;" onmouseover="this.style.color='#06B6D4'" onmouseout="this.style.color='#E2E8F0'">Shop</a>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'orders' %}" style="color: #E2E8F0; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;" onmouseover="this.style.color='#06B6D4'" onmouseout="this.style.color='#E2E8F0'">My Orders</a>
+                {% endif %}
+                <!-- Highlighted Contact Link -->
+                <a href="{% url 'contact' %}" style="color: #06B6D4; text-decoration: none; font-weight: 600; font-size: 0.95rem; text-shadow: 0 0 10px rgba(6,182,212,0.4);">Contact Us</a>
+            </div>
+
+            <!-- Sleek CTA to Contact Page -->
+            <div class="footer-support">
+                <h3>Need Assistance?</h3>
+                <a class="cta" href="{% url 'contact' %}">Visit Support Center →</a>
+            </div>
+            
+        </div>
+
+        <div class="footer-copy">
+            &copy; 2026 Hazumake Store. All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>

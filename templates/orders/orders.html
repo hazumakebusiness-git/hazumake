@@ -1,0 +1,428 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Orders - Hazumake{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* =========================================
+       ORDERS PAGE — NATIVE MOBILE-FIRST DESIGN
+       ========================================= */
+
+    .orders-wrap {
+        padding: 1.25rem 1rem 3rem;
+        max-width: 980px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .orders-head {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .orders-head h1 {
+        font-size: clamp(1.7rem, 5vw, 2.4rem);
+        font-weight: 800;
+        color: #FFFFFF;
+        padding: 0;
+        margin: 0 0 0.35rem;
+        line-height: 1.15;
+        background: linear-gradient(135deg, #FFFFFF, var(--accent));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.4px;
+    }
+
+    .orders-head p {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    /* ---- DESKTOP TABLE ---- */
+    .desktop-table-wrap {
+        background: rgba(15, 15, 28, 0.78);
+        border: 1px solid rgba(124, 58, 237, 0.22);
+        border-radius: 16px;
+        overflow: hidden;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    .otable {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .otable th {
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 1rem 1.2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        text-align: left;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    .otable td {
+        padding: 1.05rem 1.2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        color: #FFFFFF;
+        font-size: 0.9rem;
+    }
+
+    .otable tr:last-child td { border-bottom: none; }
+    .otable tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    .oid {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-weight: 700;
+        color: #06B6D4;
+        font-size: 0.85rem;
+    }
+
+    .pname { font-weight: 600; }
+    .pdiam { color: var(--text-muted); font-size: 0.8rem; margin-top: 2px; }
+
+    .obadge {
+        display: inline-block;
+        padding: 0.22rem 0.7rem;
+        border-radius: 50px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: capitalize;
+    }
+
+    .obadge-COMPLETED  { background: rgba(16,185,129,0.15); color: #10B981; border: 1px solid rgba(16,185,129,0.3); }
+    .obadge-PENDING    { background: rgba(245,158,11,0.15); color: #F59E0B; border: 1px solid rgba(245,158,11,0.3); }
+    .obadge-PROCESSING { background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); }
+    .obadge-FAILED     { background: rgba(239,68,68,0.15);  color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
+    .obadge-REFUNDED   { background: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.3); }
+    .obadge-WALLET     { background: rgba(6,182,212,0.15);  color: #06B6D4; border: 1px solid rgba(6,182,212,0.3); }
+    .obadge-RAZORPAY   { background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); }
+
+    .odate  { color: var(--text-muted); font-size: 0.85rem; }
+    .ocoins { font-weight: 700; color: var(--primary); }
+
+    .obtn {
+        display: inline-block;
+        padding: 0.45rem 0.9rem;
+        border-radius: 8px;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        background: rgba(124, 58, 237, 0.08);
+    }
+    .obtn:hover { background: var(--primary); color: #FFFFFF; }
+
+    /* ---- MOBILE CARD STACK ---- */
+    .mobile-cards { display: none; }
+
+    .ocard {
+        background: rgba(15, 15, 28, 0.85);
+        border: 1px solid rgba(124, 58, 237, 0.28);
+        border-radius: 14px;
+        padding: 0.95rem 1rem;
+        margin-bottom: 0.7rem;
+        width: 100%;
+        box-sizing: border-box;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: transform 0.15s ease, border-color 0.2s ease;
+    }
+
+    .ocard:active { transform: scale(0.995); border-color: rgba(124, 58, 237, 0.5); }
+
+    .ocard-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.65rem;
+        padding-bottom: 0.6rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .ocard-id {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-weight: 700;
+        color: #06B6D4;
+        font-size: 0.85rem;
+        letter-spacing: 0.2px;
+    }
+
+    .ocard-date {
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        font-weight: 500;
+    }
+
+    .ocard-product {
+        font-weight: 700;
+        color: #FFFFFF;
+        font-size: 0.95rem;
+        line-height: 1.3;
+        margin-bottom: 0.6rem;
+    }
+
+    .ocard-product .diamonds {
+        color: var(--accent);
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-left: 0.25rem;
+    }
+
+    .ocard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.55rem 0.9rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .ocard-field {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .ocard-label {
+        color: var(--text-muted);
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .ocard-val {
+        color: #FFFFFF;
+        font-weight: 600;
+        font-size: 0.88rem;
+    }
+
+    .ocard-val.coins { color: var(--primary); }
+
+    .ocard-badges {
+        display: flex;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.8rem;
+    }
+
+    .ocard-viewbtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 0.7rem;
+        border-radius: 10px;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 0.88rem;
+        text-decoration: none;
+        background: rgba(124, 58, 237, 0.1);
+        transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+        min-height: 44px;
+        box-sizing: border-box;
+        letter-spacing: 0.2px;
+    }
+    .ocard-viewbtn:hover { background: var(--primary); color: #FFFFFF; }
+    .ocard-viewbtn:active { transform: scale(0.98); }
+
+    /* ---- EMPTY STATE ---- */
+    .orders-empty {
+        text-align: center;
+        padding: 3rem 1.25rem;
+        background: rgba(15, 15, 28, 0.78);
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    .orders-empty .eicon { font-size: 3rem; margin-bottom: 0.75rem; }
+    .orders-empty h2 { font-size: 1.3rem; margin-bottom: 0.4rem; font-weight: 700; color: #FFFFFF; }
+    .orders-empty p { color: var(--text-muted); margin-bottom: 1.4rem; font-size: 0.92rem; }
+    .orders-empty a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: #FFFFFF;
+        padding: 0.85rem 2rem;
+        border-radius: 10px;
+        font-weight: 700;
+        text-decoration: none;
+        min-height: 48px;
+        font-size: 0.95rem;
+        transition: transform 0.15s ease, box-shadow 0.25s ease;
+    }
+    .orders-empty a:hover { box-shadow: 0 8px 22px rgba(124, 58, 237, 0.35); }
+    .orders-empty a:active { transform: scale(0.98); }
+
+    /* ---- PAGINATION ---- */
+    .opages {
+        display: flex;
+        justify-content: center;
+        gap: 0.45rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .opage-link {
+        padding: 0.55rem 0.95rem;
+        background: rgba(15, 15, 28, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        color: #FFFFFF;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        min-width: 40px;
+        text-align: center;
+    }
+    .opage-link:hover { background: rgba(255, 255, 255, 0.08); }
+    .opage-link.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #FFFFFF;
+    }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 768px) {
+        .orders-wrap { padding: 1rem 0.85rem 3rem; }
+        .orders-head { margin-bottom: 1.1rem; }
+        .orders-head p { font-size: 0.85rem; }
+
+        .desktop-table-wrap { display: none; }
+        .mobile-cards { display: block; }
+    }
+
+    @media (max-width: 380px) {
+        .orders-wrap { padding: 0.85rem 0.7rem 3rem; }
+        .ocard { padding: 0.85rem 0.9rem; }
+        .ocard-grid { gap: 0.45rem 0.7rem; }
+        .ocard-label { font-size: 0.65rem; }
+        .ocard-val { font-size: 0.82rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="orders-wrap">
+
+    <div class="orders-head">
+        <h1>My Orders</h1>
+        <p>{{ orders.paginator.count }} order{{ orders.paginator.count|pluralize }} total</p>
+    </div>
+
+    {% if orders %}
+
+        {# ── DESKTOP TABLE ── #}
+        <div class="desktop-table-wrap">
+            <table class="otable">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Coins</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td><span class="oid">{{ order.id|slice:":8" }}…</span></td>
+                        <td>
+                            <div class="pname">{{ order.product.name }}</div>
+                            {% if order.product.diamond_amount %}
+                            <div class="pdiam">{{ order.product.diamond_amount }} 💎</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ order.quantity }}</td>
+                        <td><span class="ocoins">{{ order.total_coins }}</span></td>
+                        <td><span class="obadge obadge-{{ order.payment_method }}">{{ order.payment_method }}</span></td>
+                        <td><span class="obadge obadge-{{ order.status }}">{{ order.status }}</span></td>
+                        <td><span class="odate">{{ order.created_at|date:"M d, Y" }}</span></td>
+                        <td><a href="/orders/{{ order.id }}/" class="obtn">View</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# ── MOBILE CARDS ── #}
+        <div class="mobile-cards">
+            {% for order in orders %}
+            <div class="ocard">
+                <div class="ocard-top">
+                    <span class="ocard-id">#{{ order.id|slice:":8" }}</span>
+                    <span class="ocard-date">{{ order.created_at|date:"M d, Y" }}</span>
+                </div>
+
+                <div class="ocard-product">
+                    {{ order.product.name }}{% if order.product.diamond_amount %}<span class="diamonds">· {{ order.product.diamond_amount }} 💎</span>{% endif %}
+                </div>
+
+                <div class="ocard-grid">
+                    <div class="ocard-field">
+                        <span class="ocard-label">Quantity</span>
+                        <span class="ocard-val">×{{ order.quantity }}</span>
+                    </div>
+                    <div class="ocard-field">
+                        <span class="ocard-label">Coins</span>
+                        <span class="ocard-val coins">{{ order.total_coins }}</span>
+                    </div>
+                </div>
+
+                <div class="ocard-badges">
+                    <span class="obadge obadge-{{ order.status }}">{{ order.status }}</span>
+                    <span class="obadge obadge-{{ order.payment_method }}">{{ order.payment_method }}</span>
+                </div>
+
+                <a href="/orders/{{ order.id }}/" class="ocard-viewbtn">View Details →</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if orders.has_other_pages %}
+        <div class="opages">
+            {% if orders.has_previous %}
+            <a href="?page={{ orders.previous_page_number }}" class="opage-link">← Prev</a>
+            {% endif %}
+            {% for i in orders.paginator.page_range %}
+                {% if orders.number == i %}
+                <span class="opage-link active">{{ i }}</span>
+                {% else %}
+                <a href="?page={{ i }}" class="opage-link">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if orders.has_next %}
+            <a href="?page={{ orders.next_page_number }}" class="opage-link">Next →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    {% else %}
+    <div class="orders-empty">
+        <div class="eicon">💎</div>
+        <h2>No orders yet</h2>
+        <p>Start your gaming journey by picking up some diamonds!</p>
+        <a href="/shop/">Browse Shop</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>document.body.dataset.rainDensity = '50';</script>
+{% endblock %}
