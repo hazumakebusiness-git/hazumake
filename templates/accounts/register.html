@@ -263,10 +263,10 @@
             <p class="auth-subtitle">Join Hazumake and power up your game</p>
         </div>
 
-        {% if form.non_field_errors %}
+        {% if messages %}
             <div style="background: rgba(239, 68, 68, 0.1); border-left: 2px solid #EF4444; padding: 12px; border-radius: 8px; margin-bottom: 1.5rem;">
-                {% for error in form.non_field_errors %}
-                    <p style="color: #EF4444; font-size: 0.85rem; margin: 0;">{{ error }}</p>
+                {% for message in messages %}
+                    <p style="color: #EF4444; font-size: 0.85rem; margin: 0;">{{ message }}</p>
                 {% endfor %}
             </div>
         {% endif %}
@@ -275,31 +275,10 @@
             {% csrf_token %}
             
             <div class="form-group">
-                <label for="username">Username</label>
+                <label for="identifier">Email or Username</label>
                 <div class="input-wrapper">
-                    <input type="text" id="username" name="username" class="form-control" 
-                           value="{{ form.username.value|default:'' }}" required placeholder="Choose a username">
+                    <input type="text" id="identifier" name="identifier" class="form-control" required placeholder="Enter email or choose a username">
                 </div>
-                {% if form.username.errors %}
-                    <div class="field-error">
-                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        {{ form.username.errors.0 }}
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <div class="input-wrapper">
-                    <input type="email" id="email" name="email" class="form-control" 
-                           value="{{ form.email.value|default:'' }}" required placeholder="Enter valid email">
-                </div>
-                {% if form.email.errors %}
-                    <div class="field-error">
-                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        {{ form.email.errors.0 }}
-                    </div>
-                {% endif %}
             </div>
 
             <div class="form-group">

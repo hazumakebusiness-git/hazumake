@@ -425,10 +425,7 @@
                     <label>Email</label>
                     <input type="text" value="{{ user.email }}" readonly>
                 </div>
-                <div class="settings-field">
-                    <label>MLBB ID</label>
-                    <input type="text" value="{{ user.mlbb_user_id|default:'Not set' }}" readonly>
-                </div>
+                <!-- MLBB ID removed from profile -->
             </div>
             <div class="action-row" style="margin-top:1.5rem;">
                 <form method="post" action="{% url 'logout' %}" style="margin:0;">

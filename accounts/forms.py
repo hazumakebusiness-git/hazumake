@@ -4,8 +4,10 @@ from django.contrib.auth.password_validation import validate_password
 from .models import CustomUser
 
 class RegisterForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
-    password2 = forms.CharField(widget=forms.PasswordInput, label="confirm password")
+    # Keep the ModelForm around for any admin/legacy usage, but registration
+    # UI now uses a single "identifier" field handled in the view. We only
+    # validate password strength here when used.
+    password = forms.CharField(widget=forms.PasswordInput, required=False)
 
     class Meta:
         model = CustomUser
@@ -13,18 +15,12 @@ class RegisterForm(forms.ModelForm):
 
     def clean_password(self):
         password = self.cleaned_data.get("password")
-        validate_password(password)
+        if password:
+            validate_password(password)
         return password
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        password2 = cleaned_data.get("password2")
-        if password and password2 and password != password2:
-            raise forms.ValidationError("Passwords do not match")
-        return cleaned_data
-
 class LoginForm(AuthenticationForm):
-    username = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email'}))
+    # Accept either email or username as an identifier for login
+    identifier = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Email or Username'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
             
