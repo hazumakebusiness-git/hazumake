@@ -238,4 +238,7 @@ if not DEBUG:
     X_FRAME_OPTIONS = 'DENY'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    CSRF_TRUSTED_ORIGINS = ['https://hazumake.store', 'http://139.59.6.52']
+    CSRF_TRUSTED_ORIGINS = os.environ.get(
+        'CSRF_TRUSTED_ORIGINS',
+        'https://hazumakestore.com,https://www.hazumakestore.com'
+    ).split(',')
