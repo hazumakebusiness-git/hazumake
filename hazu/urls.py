@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 from products.views import home
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('hazumake-control/', admin.site.urls),
     path('', home, name='home'),
     path('', include('core.urls')),
     path('shop/', include('products.urls')),
