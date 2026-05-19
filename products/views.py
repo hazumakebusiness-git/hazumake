@@ -56,7 +56,7 @@ def product_detail(request, pk):
     raw_game_slug = ''
     if product.game:
         raw_game_slug = product.game.supplier_game_code or product.game.slug or ''
-    game_slug = raw_game_slug.replace(' ', '').lower()
+    game_slug = raw_game_slug.replace(' ', '').replace('-', '').lower()
 
     return render(request, 'products/product_detail.html', {
         'product': product,
@@ -71,15 +71,38 @@ def product_detail(request, pk):
 @require_POST
 def verify_player_view(request):
     body = json.loads(request.body)
-    print("VERIFY BODY:", body)  # add this
     game_slug = body.get('game_slug')
-    product_id = body.get('productid')
     player_uid = body.get('uid')
     player_sid = body.get('sid', '')
-    print(f"game_slug={game_slug}, product_id={product_id}, uid={player_uid}, sid={player_sid}")
+    product_id = body.get('productid')
 
-    if not game_slug or not product_id or not player_uid:
+    if not game_slug and product_id:
+        try:
+            fallback_product = Product.objects.select_related('game').get(smile_product_id=product_id)
+            game_slug = fallback_product.game.supplier_game_code or fallback_product.game.slug
+        except Product.DoesNotExist:
+            game_slug = None
+
+    if game_slug:
+        game_slug = str(game_slug).replace(' ', '').replace('-', '').lower()
+
+    if not game_slug or not player_uid:
         return JsonResponse({'error': 'Missing fields'}, status=400)
+
+    if not product_id:
+        p = Product.objects.filter(
+            is_active=True,
+        ).filter(
+            game__supplier_game_code=game_slug,
+        ).first() or Product.objects.filter(
+            is_active=True,
+        ).filter(
+            game__slug=game_slug,
+        ).first()
+        if p:
+            product_id = p.smile_product_id
+        else:
+            return JsonResponse({'error': 'Product ID is required.'}, status=400)
 
     from hazu.smile_api import verify_player
     username = verify_player(game_slug, product_id, player_uid, player_sid)

@@ -631,15 +631,31 @@ def order_list_create(request):
                     payment_status='PAID',
                     status='PROCESSING',
                 )
-                smile_create_order(
-                    game.slug if game else '',
+                game_slug = (game.supplier_game_code or game.slug or '') if game else ''
+                game_slug = game_slug.replace(' ', '').replace('-', '').lower()
+                smile_order_id = smile_create_order(
+                    game_slug,
                     product.smile_product_id,
                     player_uid,
                     player_sid,
                 )
+                if smile_order_id:
+                    order.smile_order_id = smile_order_id
+                    order.status = 'COMPLETED'
+                    order.save()
+                    serializer = OrderSerializer(order)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-            serializer = OrderSerializer(order)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+                order.status = 'FAILED'
+                order.notes = 'Smile.one fulfillment failed.'
+                order.save()
+                return Response(
+                    {
+                        'error': 'Order created but delivery failed. Contact support.',
+                        'order_id': str(order.id),
+                    },
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
 
         elif payment_method == 'GATEWAY':
             with db_transaction.atomic():

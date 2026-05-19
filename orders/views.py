@@ -52,7 +52,7 @@ def place_order(request):
     except (ValueError, TypeError):
         return HttpResponseBadRequest('quantity must be a valid integer.')
 
-    product = get_object_or_404(Product, pk=product_id)
+    product = get_object_or_404(Product, pk=product_id, is_active=True)
     total_coins = product.price_coins * quantity
     total_inr = product.price_inr * quantity
 
@@ -121,7 +121,8 @@ def place_order(request):
             status='PROCESSING',
         )
 
-        game_slug = (game.supplier_game_code or game.slug) if game else ''
+        game_slug = (game.supplier_game_code or game.slug or '') if game else ''
+        game_slug = game_slug.replace(' ', '').replace('-', '').lower()
         smile_order_id = smile_create_order(
             game_slug=game_slug,
             product_id=product.smile_product_id,
@@ -136,6 +137,7 @@ def place_order(request):
             messages.success(request, f'✅ {product.name} delivered! Order ID: {smile_order_id}')
         else:
             order.status = 'FAILED'
+            order.notes = 'Smile.one fulfillment failed.'
             order.save()
             messages.error(request, '⚠️ Payment deducted but delivery failed. Contact support with your order ID.')
 
@@ -238,7 +240,8 @@ def razorpay_order_success(request):
     )
 
     game = product.game
-    game_slug = (game.supplier_game_code or game.slug) if game else ''
+    game_slug = (game.supplier_game_code or game.slug or '') if game else ''
+    game_slug = game_slug.replace(' ', '').replace('-', '').lower()
     smile_order_id = smile_create_order(
         game_slug=game_slug,
         product_id=product.smile_product_id,
@@ -253,6 +256,7 @@ def razorpay_order_success(request):
         messages.success(request, f'✅ {product.name} delivered! Order ID: {smile_order_id}')
     else:
         order.status = 'FAILED'
+        order.notes = 'Smile.one fulfillment failed.'
         order.save()
         messages.error(request, '⚠️ Payment received but delivery failed. Contact support.')
 

@@ -205,7 +205,7 @@ GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
 SMILE_UID = os.environ.get('SMILE_UID', '')
 SMILE_EMAIL = os.environ.get('SMILE_EMAIL', '')
 SMILE_KEY = os.environ.get('SMILE_KEY', '')
-SMILE_BASE_URL = 'https://www.smile.one/br/smilecoin/api'
+SMILE_BASE_URL = os.environ.get('SMILE_BASE_URL', 'https://www.smile.one/serve/api')
 SMILE_BRL_TO_INR = 19.07
 
 # Email configuration

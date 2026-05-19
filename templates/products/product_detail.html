@@ -855,10 +855,10 @@
 <script>
     const purchaseForm = document.getElementById('purchase-form');
     const orderError = document.getElementById('order-error');
-    const submitButton = purchaseForm?.querySelector('.btn-submit');
+    const submitButton = purchaseForm?.querySelector('button[type="submit"]');
     const mobileButton = document.querySelector('.btn-native.btn-primary-action');
 
-    const getCsrfToken = () => document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    const getCsrfToken = () => document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || '';
     const getCsrfTokenFromCookie = () => document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')?.[1] || '';
 
     const updateButtonState = (disabled, text = null) => {
@@ -1005,7 +1005,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': getCsrfTokenFromCookie(),
+                        'X-CSRFToken': getCsrfToken(),
                     },
                     body: JSON.stringify({ game_slug: gameSlug, productid: productId, uid: uid, sid: sid })
                 });
