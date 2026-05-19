@@ -50,11 +50,19 @@ def product_detail(request, pk):
     wallet = None
     if request.user.is_authenticated:
         wallet = request.user.wallet
+    # Determine supplier game slug; prefer supplier_game_code but sanitize
+    # (remove spaces and lowercase) so external APIs like Smile.one receive
+    # the expected identifier (e.g. "mobilelegends").
+    raw_game_slug = ''
+    if product.game:
+        raw_game_slug = product.game.supplier_game_code or product.game.slug or ''
+    game_slug = raw_game_slug.replace(' ', '').lower()
+
     return render(request, 'products/product_detail.html', {
         'product': product,
         'game': product.game,
         'checkout_fields': product.game.checkout_fields if product.game else [],
-        'game_slug': product.game.supplier_game_code or product.game.slug if product.game else '',
+        'game_slug': game_slug,
         'wallet': wallet,
     })
 
@@ -63,15 +71,18 @@ def product_detail(request, pk):
 @require_POST
 def verify_player_view(request):
     body = json.loads(request.body)
+    print("VERIFY BODY:", body)  # add this
     game_slug = body.get('game_slug')
+    product_id = body.get('productid')
     player_uid = body.get('uid')
     player_sid = body.get('sid', '')
+    print(f"game_slug={game_slug}, product_id={product_id}, uid={player_uid}, sid={player_sid}")
 
-    if not game_slug or not player_uid:
+    if not game_slug or not product_id or not player_uid:
         return JsonResponse({'error': 'Missing fields'}, status=400)
 
     from hazu.smile_api import verify_player
-    username = verify_player(game_slug, player_uid, player_sid)
+    username = verify_player(game_slug, product_id, player_uid, player_sid)
 
     if username:
         return JsonResponse({'success': True, 'username': username})

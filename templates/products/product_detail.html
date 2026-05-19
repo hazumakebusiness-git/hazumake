@@ -747,10 +747,10 @@
 
             <form id="purchase-form" method="POST" action="{% url 'create_order' %}">
                 {% csrf_token %}
-                <input type="hidden" name="product_id" value="{{ product.id }}">
                 <input type="hidden" id="game-slug" value="{{ game_slug }}">
-
-                {% for field in checkout_fields %}
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+                <input type="hidden" name="productid" value="{{ product.smile_product_id }}">
+                {% for field in game.checkout_fields %}
                 <div class="form-group">
                     <label for="{{ field.name }}">{{ field.label }}</label>
                     <div class="input-wrapper">
@@ -1000,14 +1000,15 @@
         verifyResult.style.display = 'none';
 
         try {
-            const res = await fetch('{% url "verify_player" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCsrfTokenFromCookie(),
-                },
-                body: JSON.stringify({ game_slug: gameSlug, uid: uid, sid: sid })
-            });
+                const productId = document.querySelector('[name="productid"]')?.value || '';
+                const res = await fetch('{% url "verify_player" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfTokenFromCookie(),
+                    },
+                    body: JSON.stringify({ game_slug: gameSlug, productid: productId, uid: uid, sid: sid })
+                });
 
             const data = await res.json();
 

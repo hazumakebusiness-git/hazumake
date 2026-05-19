@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import CustomUser
+from django.db import IntegrityError
+import uuid
 from wallet.models import Wallet
 from orders.models import Order
 
@@ -110,13 +112,32 @@ def register_view(request):
 
             email = None
 
-        try:
-            user = CustomUser.objects.create_user(email=email, username=username, password=password1)
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect('dashboard')
-        except Exception as e:
-            messages.error(request, f'Error creating account: {str(e)}')
-            return render(request, 'accounts/register.html', {})
+        # Try creating the user; if a UNIQUE constraint error occurs (possible
+        # with concurrent requests or existing DB schema), attempt safe
+        # fallbacks and retry a few times before failing.
+        attempts = 0
+        while attempts < 5:
+            try:
+                user = CustomUser.objects.create_user(email=email, username=username, password=password1)
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                return redirect('dashboard')
+            except IntegrityError as e:
+                attempts += 1
+                # If identifier was an email, try to make username unique by appending a short uuid
+                if '@' in identifier:
+                    base_username = email.split('@')[0]
+                    username = f"{base_username}{uuid.uuid4().hex[:6]}"
+                    continue
+                else:
+                    # If identifier was a username and DB disallows empty emails, generate a unique placeholder email
+                    email = f"{username}{uuid.uuid4().hex[:6]}@no-reply.hazumake"
+                    continue
+            except Exception as e:
+                messages.error(request, f'Error creating account: {str(e)}')
+                return render(request, 'accounts/register.html', {})
+
+        messages.error(request, 'Could not create account due to a uniqueness conflict. Please try a different identifier.')
+        return render(request, 'accounts/register.html', {})
     
     return render(request, 'accounts/register.html', {})
 

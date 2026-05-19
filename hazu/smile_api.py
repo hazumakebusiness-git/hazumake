@@ -41,22 +41,21 @@ def get_product_list(game_slug):
     return response.get('data', {}).get('product', [])
 
 
-def verify_player(game_slug, player_uid, player_sid=''):
+def verify_player(game_slug, product_id, player_uid, player_sid=''):
     extra = {
         'product': game_slug,
-        'uid': player_uid,
+        'productid': str(product_id),
+        'userid': player_uid,
+        'zoneid': player_sid or player_uid,
     }
-    if player_sid:
-        extra['sid'] = player_sid
     try:
-        response = smile_post('getuserinfo', extra)
-        print("VERIFY RESPONSE:", response)
+        response = smile_post('getrole', extra)
+        logger.info("Smile.one verify_player response: %s", response)
         if response.get('status') == 200:
-            data = response.get('data', {})
-            return data.get('username') or data.get('name') or data.get('nickname')
+            return response.get('username')
         return None
     except Exception as e:
-        print("VERIFY ERROR:", e)
+        logger.error("Smile.one verify_player exception: %s", e)
         return None
 
 
@@ -68,14 +67,11 @@ def create_order(game_slug, product_id, player_uid, player_sid=''):
     extra = {
         'product': game_slug,
         'productid': str(product_id),
-        'uid': player_uid,
+        'userid': player_uid,
+        'zoneid': player_sid or player_uid,
     }
-    if player_sid:
-        extra['sid'] = player_sid
-
     try:
         response = smile_post('createorder', extra)
-        print("SMILE RESPONSE:", response)
         logger.info("Smile.one create_order response: %s", response)
         if response.get('status') == 200:
             return str(response.get('order_id') or response.get('game_order', ''))
@@ -83,6 +79,5 @@ def create_order(game_slug, product_id, player_uid, player_sid=''):
             logger.error("Smile.one order failed: %s", response)
             return None
     except Exception as e:
-        print("SMILE ERROR:", e)
         logger.error("Smile.one create_order exception: %s", e)
         return None
