@@ -6,3 +6,4 @@ staticfiles/
 media/
 *.pyc
 .DS_Store
+hazu/.env
