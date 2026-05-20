@@ -1,0 +1,326 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Account - Hazumake Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* =========================================
+       ESPORTS PREMIUM AUTH LAYOUT
+       ========================================= */
+    .auth-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 80px);
+        padding: 4rem 1rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* =========================================
+       THE PREMIUM CARD CONTAINER
+       ========================================= */
+    .premium-card {
+        width: 100%;
+        max-width: 460px;
+        background: rgba(10, 10, 25, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(124, 58, 237, 0.3);
+        border-radius: 20px;
+        box-shadow: 0 0 60px rgba(124, 58, 237, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        padding: 40px 36px;
+        
+        /* Card Entrance Animation */
+        opacity: 0;
+        transform: translateY(20px);
+        animation: cardEntrance 0.4s ease-out forwards;
+    }
+
+    @keyframes cardEntrance {
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header & Typography */
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #7C3AED, #06B6D4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
+    }
+
+    .auth-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-weight: 400;
+    }
+
+    /* =========================================
+       ULTRA-PREMIUM INPUT FIELDS
+       ========================================= */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    /* The Subtle Left-Side Accent Bar */
+    .input-wrapper::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: rgba(124, 58, 237, 0.5);
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+        transition: all 0.3s ease;
+        z-index: 5;
+    }
+
+    .form-control {
+        width: 100%;
+        background: rgba(10, 10, 20, 0.75);
+        border: 1.5px solid rgba(124, 58, 237, 0.5);
+        border-radius: 12px;
+        padding: 14px 18px;
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .form-control::placeholder {
+        color: rgba(160, 160, 176, 0.6);
+    }
+
+    /* ON FOCUS STATE */
+    .form-control:focus {
+        outline: none;
+        border-color: #7C3AED;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25), 0 0 20px rgba(124, 58, 237, 0.4);
+    }
+
+    .input-wrapper:focus-within::before {
+        background: #7C3AED;
+        box-shadow: 2px 0 10px rgba(124, 58, 237, 0.8);
+    }
+
+    /* Form Errors */
+    .field-error {
+        color: #EF4444;
+        font-size: 0.8rem;
+        margin-top: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    /* =========================================
+       CREATE ACCOUNT BUTTON (CRITICAL FIX)
+       ========================================= */
+    .btn-create {
+        width: 100%;
+        height: 52px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #7C3AED, #5B21B6);
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 24px rgba(124, 58, 237, 0.5);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        margin-top: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Hover Shimmer Sweep */
+    .btn-create::after {
+        content: '';
+        position: absolute;
+        top: 0; 
+        left: -100%;
+        width: 50%; 
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transform: skewX(-25deg);
+        transition: left 0.5s ease;
+    }
+
+    .btn-create:hover {
+        background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+        box-shadow: 0 6px 32px rgba(124, 58, 237, 0.75);
+        transform: scale(1.02);
+    }
+
+    .btn-create:hover::after {
+        left: 200%;
+    }
+
+    .btn-create:active {
+        transform: scale(0.98);
+        box-shadow: 0 2px 15px rgba(124, 58, 237, 0.9);
+    }
+
+    /* =========================================
+       FOOTER ELEMENTS
+       ========================================= */
+    .verification-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        color: #06B6D4;
+        font-size: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .verification-note svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+    }
+
+    .auth-footer {
+        text-align: center;
+        color: rgba(160, 160, 176, 0.8);
+        font-size: 0.9rem;
+    }
+
+    .auth-footer a {
+        color: #06B6D4;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+        text-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .auth-wrapper {
+            padding: 2rem 1rem;
+            min-height: auto;
+        }
+
+        .premium-card {
+            max-width: 420px;
+            padding: 32px 26px;
+        }
+
+        .auth-title {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .premium-card { padding: 24px 18px; border-radius: 16px; }
+        .auth-title { font-size: 1.7rem; }
+        .btn-create { height: 48px; font-size: 0.95rem; }
+        .form-group { margin-bottom: 1rem; }
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="auth-wrapper">
+    <div class="premium-card">
+        
+        <div class="auth-header">
+            <h1 class="auth-title">Create Account</h1>
+            <p class="auth-subtitle">Join Hazumake and power up your game</p>
+        </div>
+
+        {% if messages %}
+            <div style="background: rgba(239, 68, 68, 0.1); border-left: 2px solid #EF4444; padding: 12px; border-radius: 8px; margin-bottom: 1.5rem;">
+                {% for message in messages %}
+                    <p style="color: #EF4444; font-size: 0.85rem; margin: 0;">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'register' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="identifier">Email or Username</label>
+                <div class="input-wrapper">
+                    <input type="text" id="identifier" name="identifier" class="form-control" required placeholder="Enter email or choose a username">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="password1" class="form-control" required placeholder="Create a secure password">
+                </div>
+                {% if form.password.errors %}
+                    <div class="field-error">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        {{ form.password.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="password_confirm">Confirm Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password_confirm" name="password2" class="form-control" required placeholder="Repeat password">
+                </div>
+                {% if form.password_confirm.errors %}
+                    <div class="field-error">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        {{ form.password_confirm.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-create">Create Account</button>
+
+            <div class="verification-note">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+                A verification email will be sent to your address
+            </div>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="{% url 'login' %}">Login</a>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

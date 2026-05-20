@@ -1,0 +1,50 @@
+{
+  "product_list": {
+    "url": "https://www.smile.one/smilecoin/api/productlist",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": {
+      "uid": "3268463",
+      "email": "extraofficial144@gmail.com",
+      "product": "mobilelegends",
+      "time": "<unix_timestamp>",
+      "sign": "<md5(md5(sorted_query_string + KEY))>"
+    }
+  },
+  "get_role": {
+    "url": "https://www.smile.one/smilecoin/api/getrole",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": {
+      "uid": "3268463",
+      "email": "extraofficial144@gmail.com",
+      "product": "mobilelegends",
+      "productid": "22590",
+      "userid": "123456789",
+      "zoneid": "1234",
+      "time": "<unix_timestamp>",
+      "sign": "<md5(md5(sorted_query_string + KEY))>"
+    }
+  },
+  "create_order": {
+    "url": "https://www.smile.one/smilecoin/api/createorder",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    "body": {
+      "uid": "3268463",
+      "email": "extraofficial144@gmail.com",
+      "product": "mobilelegends",
+      "productid": "22590",
+      "userid": "123456789",
+      "zoneid": "1234",
+      "time": "<unix_timestamp>",
+      "sign": "<md5(md5(sorted_query_string + KEY))>"
+    }
+  }
+}

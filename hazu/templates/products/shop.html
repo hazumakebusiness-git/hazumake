@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shop - Hazumake Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* =========================================
+       SHOP PAGE - MOBILE-FIRST ARCHITECTURE
+       ========================================= */
+    
+    .shop-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem 1rem;
+        position: relative;
+        z-index: 10;
+        width: 100%;
+    }
+
+    .shop-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .shop-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.8rem;
+    }
+
+    .shop-title {
+        font-size: clamp(1.6rem, 5vw, 2.8rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, white, var(--accent));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.8rem;
+        line-height: 1.2;
+    }
+
+    .shop-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* =========================================
+       GAME GRID - MOBILE FIRST
+       ========================================= */
+    .games-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+        width: 100%;
+        justify-items: stretch;
+    }
+
+    .game-card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.32), rgba(28, 38, 88, 0.96)) !important;
+        border: 1px solid rgba(255,255,255,0.28) !important;
+        box-shadow: 0 18px 44px rgba(255,255,255,0.12), 0 18px 40px rgba(0,0,0,0.16);
+        border-radius: 20px;
+        padding: 1.3rem 1rem;
+        text-decoration: none;
+        color: #eef2ff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.85rem;
+        transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+        position: relative;
+        overflow: hidden;
+        min-height: 190px;
+        width: 100%;
+    }
+
+    .game-card:hover {
+        border-color: rgba(255,255,255,0.45) !important;
+        box-shadow: 0 26px 60px rgba(255,255,255,0.14), 0 14px 35px rgba(0,0,0,0.18);
+        transform: translateY(-5px);
+        background: linear-gradient(180deg, rgba(255,255,255,0.4), rgba(28, 38, 88, 0.98)) !important;
+    }
+
+    .game-banner {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        opacity: 0.38;
+        z-index: 0;
+        filter: blur(0.5px);
+        transition: opacity 0.3s ease;
+    }
+
+    .game-card:hover .game-banner {
+        opacity: 0.58;
+    }
+
+    .game-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: 800;
+        z-index: 1;
+        background: rgba(255,255,255,0.28);
+        border: 1px solid rgba(255,255,255,0.32);
+        color: #111827;
+        flex-shrink: 0;
+    }
+
+    .game-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+
+    .game-name {
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-align: center;
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(255,255,255,0.1);
+        z-index: 1;
+        line-height: 1.3;
+        display: -webkit-box;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        word-break: break-word;
+    }
+
+    .game-products {
+        z-index: 1;
+        background: rgba(255,255,255,0.22);
+        color: #111827;
+        padding: 0.3rem 0.85rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: 1px solid rgba(255,255,255,0.28);
+        white-space: nowrap;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state h3 {
+        font-size: 1.3rem;
+        margin-bottom: 0.8rem;
+        color: white;
+    }
+
+    /* =========================================
+       DESKTOP LAYOUT - 3-4 COLUMNS
+       ========================================= */
+    @media (min-width: 1024px) {
+        .shop-container {
+            padding: 2rem 2rem;
+        }
+
+        .shop-header {
+            margin-bottom: 3.5rem;
+        }
+
+        .shop-badge {
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .shop-title {
+            margin-bottom: 1rem;
+        }
+
+        .shop-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .games-grid {
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.75rem;
+            margin-top: 2.5rem;
+        }
+
+        .game-card {
+            padding: 1.75rem 1.25rem;
+            min-height: 220px;
+            gap: 1rem;
+            border-radius: 22px;
+        }
+
+        .game-icon {
+            width: 72px;
+            height: 72px;
+            font-size: 2.6rem;
+            border-radius: 18px;
+        }
+
+        .game-name {
+            font-size: 1.08rem;
+        }
+
+        .game-products {
+            font-size: 0.78rem;
+            padding: 0.35rem 0.85rem;
+        }
+    }
+
+    /* Tablet: Optimized 2-3 column grid */
+    @media (max-width: 1023px) and (min-width: 769px) {
+        .shop-container {
+            padding: 1.8rem 1.2rem;
+        }
+
+        .games-grid {
+            grid-template-columns: repeat(3, minmax(180px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .game-card {
+            width: 100%;
+            padding: 0.95rem 0.9rem;
+            min-height: 170px;
+        }
+
+        .game-icon {
+            width: 46px;
+            height: 46px;
+            font-size: 1.2rem;
+        }
+
+        .game-name {
+            font-size: 1rem;
+        }
+    }
+
+    /* Mobile: 2 column optimized */
+    @media (max-width: 768px) {
+        .shop-container {
+            padding: 1.2rem 0.75rem;
+        }
+
+        .shop-header {
+            margin-bottom: 2rem;
+        }
+
+        .shop-badge {
+            font-size: 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .shop-title {
+            font-size: clamp(1.4rem, 4.5vw, 2rem);
+            margin-bottom: 0.6rem;
+        }
+
+        .shop-subtitle {
+            font-size: 0.9rem;
+        }
+
+        .games-grid {
+            grid-template-columns: repeat(2, minmax(140px, 1fr));
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+
+        .game-card {
+            width: 100%;
+            padding: 0.95rem 0.9rem;
+            border-radius: 16px;
+            min-height: 155px;
+            gap: 0.5rem;
+        }
+
+        .game-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+        }
+
+        .game-name {
+            font-size: 0.85rem;
+        }
+
+        .game-products {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.65rem;
+        }
+
+        .empty-state {
+            padding: 2.5rem 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.6rem;
+        }
+    }
+
+    /* Small Mobile */
+    @media (max-width: 480px) {
+        .shop-container {
+            padding: 1rem 0.5rem;
+        }
+
+        .shop-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .shop-badge {
+            font-size: 0.7rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .shop-title {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .shop-subtitle {
+            font-size: 0.85rem;
+        }
+
+        .games-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.6rem;
+            margin-top: 1.2rem;
+        }
+
+        .game-card {
+            padding: 0.9rem 0.7rem;
+            min-height: 110px;
+            border-radius: 10px;
+            gap: 0.4rem;
+        }
+
+        .game-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+        }
+
+        .game-name {
+            font-size: 0.75rem;
+        }
+
+        .game-products {
+            font-size: 0.6rem;
+            padding: 0.15rem 0.55rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="shop-container">
+    <div class="shop-header">
+        <div class="shop-badge">Game Selection</div>
+        <h1 class="shop-title">Choose Your Game</h1>
+        <p class="shop-subtitle">Select a game to view top-up packages</p>
+    </div>
+
+    {% if games %}
+    <div class="games-grid">
+        {% for game in games %}
+        <a href="{% url 'game_shop' game.slug %}" class="game-card">
+            {% if game.banner %}
+            <div class="game-banner" style="background-image: url('{{ game.banner.url }}');"></div>
+            {% endif %}
+            
+            <div class="game-icon">
+                {% if game.icon %}
+                <img src="{{ game.icon.url }}" alt="{{ game.name }}">
+                {% else %}
+                {{ game.name|slice:":1"|upper }}
+                {% endif %}
+            </div>
+            
+            <div class="game-name">{{ game.name }}</div>
+            
+            {% if game.product_count %}
+            <div class="game-products">{{ game.product_count }} packages</div>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>Coming Soon</h3>
+        <p>New games are being added regularly. Check back soon!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

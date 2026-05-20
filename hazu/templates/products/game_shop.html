@@ -1,0 +1,586 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ game.name }} - Hazumake Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    html { scroll-behavior: smooth; }
+
+    /* =========================================
+       1. GLOBAL OVERRIDES (Navbar & Footer)
+       ========================================= */
+    .glass-nav {
+        background: rgba(10, 10, 20, 0.85) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-bottom: 1px solid transparent !important;
+        border-image: linear-gradient(90deg, rgba(124, 58, 237, 0.4), rgba(6, 182, 212, 0.4)) 1 !important;
+    }
+
+    footer {
+        border-top: 1px solid transparent !important;
+        border-image: linear-gradient(90deg, rgba(124, 58, 237, 0.4), rgba(6, 182, 212, 0.4)) 1 !important;
+    }
+
+    /* =========================================
+       2. CINEMATIC BACKGROUND (Ken Burns Effect)
+       ========================================= */
+    .shop-bg-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        z-index: -5;
+        pointer-events: none;
+        background: #0A0A0F;
+        contain: layout;
+        overflow: hidden;
+    }
+
+    /* Dark gradient vignette sitting on top of the slideshow */
+    .shop-bg-container::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        background:
+            radial-gradient(ellipse at 60% 40%, transparent 30%, rgba(10,10,15,0.8) 100%),
+            linear-gradient(to bottom, rgba(10,10,15,0.4) 0%, rgba(10,10,15,0.7) 100%);
+        pointer-events: none;
+    }
+
+    .shop-hex-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        background-image: radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px);
+        background-size: 32px 32px;
+    }
+
+    .shop-slide {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        animation: kenBurns 24s ease-in-out infinite;
+        will-change: opacity, transform;
+    }
+
+    .shop-slide-1 { background-image: url('{% static "images/hero1.jpg" %}'); animation-delay: 0s; }
+    .shop-slide-2 { background-image: url('{% static "images/hero2.jpg" %}'); animation-delay: 8s; }
+    .shop-slide-3 { background-image: url('{% static "images/hero3.jpg" %}'); animation-delay: 16s; }
+
+    @keyframes kenBurns {
+        0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.2; }
+        25% { transform: scale(1.1) rotate(1deg); opacity: 0.3; }
+        50% { transform: scale(1.2) rotate(-1deg); opacity: 0.2; }
+        75% { transform: scale(1.1) rotate(0.5deg); opacity: 0.25; }
+    }
+
+    /* =========================================
+       3. GAME HEADER SECTION
+       ========================================= */
+    .game-header {
+        position: relative;
+        z-index: 10;
+        padding: 2rem 1.5rem 1.5rem;
+        text-align: center;
+        background: linear-gradient(to bottom, rgba(10,10,15,0.85) 0%, transparent 100%);
+    }
+
+    .game-banner-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        opacity: 0.15;
+        z-index: -1;
+    }
+
+    .breadcrumb {
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .breadcrumb a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .game-title {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, white, var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+    }
+
+    .game-description {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+        .game-header {
+            padding: 1.5rem 1rem 1rem;
+        }
+        .game-title {
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+        }
+        .game-description {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .game-header {
+            padding: 1rem 0.75rem 0.75rem;
+        }
+        .game-title {
+            font-size: 1.4rem;
+        }
+        .breadcrumb {
+            font-size: 0.8rem;
+            margin-bottom: 0.75rem;
+        }
+        .game-description {
+            font-size: 0.85rem;
+            max-width: 95%;
+        }
+    }
+
+    /* =========================================
+       4. FILTER TABS
+       ========================================= */
+    .filter-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin: 1.5rem 1rem 2rem;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 11;
+        padding: 0 1rem;
+    }
+
+    .filter-tab {
+        padding: 0.6rem 1.2rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .filter-tab:hover,
+    .filter-tab.active {
+        background: rgba(124, 58, 237, 0.2);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    @media (max-width: 768px) {
+        .filter-tabs {
+            margin: 1rem 0 1.5rem;
+            gap: 0.4rem;
+            padding: 0 0.75rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            justify-content: flex-start;
+        }
+        .filter-tab {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .filter-tabs {
+            margin: 0.8rem 0 1.2rem;
+            gap: 0.35rem;
+            padding: 0 0.5rem;
+        }
+        .filter-tab {
+            padding: 0.45rem 0.9rem;
+            font-size: 0.75rem;
+        }
+    }
+
+    /* =========================================
+       5. PRODUCT GRID - EXACTLY LIKE HOME PAGE
+       ========================================= */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.5rem;
+        max-width: 1100px;
+        margin: 1.5rem auto 3rem;
+        padding: 0 1rem;
+        position: relative;
+        z-index: 11;
+        width: 100%;
+    }
+
+    .product-card {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1.5px solid rgba(255,255,255,0.15);
+        background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(12, 16, 30, 0.78));
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.16),
+                    inset 0 1px 0 rgba(255,255,255,0.08);
+        cursor: pointer;
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+        min-height: 200px;
+        text-align: center;
+        text-decoration: none;
+        color: white;
+        opacity: 0;
+        animation: cardFadeInHome 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
+        will-change: transform, opacity;
+    }
+
+    .product-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(124, 58, 237, 0.8);
+        box-shadow: 0 20px 50px rgba(124,58,237,0.25),
+                    inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .product-image {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        opacity: 0.15;
+        transition: opacity 0.35s ease;
+        z-index: 0;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-card-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            135deg,
+            rgba(10,10,25,0.55) 0%,
+            rgba(10,10,25,0.2) 100%
+        );
+        z-index: 1;
+    }
+
+    .product-card:hover .product-image {
+        opacity: 0.28;
+    }
+
+    .product-card-content {
+        position: relative;
+        z-index: 2;
+        padding: 1.4rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        flex: 1;
+    }
+
+    .product-badge {
+        font-size: 0.7rem;
+        color: rgba(160,160,176,0.8);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.6rem;
+        font-weight: 600;
+    }
+
+    .product-name {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #FFFFFF;
+        margin-bottom: 0.4rem;
+        line-height: 1.3;
+    }
+
+    .product-meta {
+        font-size: 0.75rem;
+        color: rgba(160,160,176,0.7);
+        margin-bottom: 0.8rem;
+    }
+
+    .product-price {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-top: auto;
+    }
+
+    .price-coins {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #06B6D4;
+        text-shadow: 0 0 12px rgba(6,182,212,0.5);
+    }
+
+    .price-coins span {
+        font-size: 0.75rem;
+        color: rgba(160,160,176,0.7);
+    }
+
+    .price-inr {
+        font-size: 0.75rem;
+        color: rgba(160,160,176,0.7);
+        margin-top: 0.2rem;
+    }
+
+    .btn-buy {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(124,58,237,0.15);
+        border: 1px solid rgba(124,58,237,0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .product-card:hover .btn-buy {
+        background: rgba(124,58,237,0.4);
+        border-color: rgba(124,58,237,0.8);
+        box-shadow: 0 0 12px rgba(124,58,237,0.5);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-muted);
+        grid-column: 1 / -1;
+    }
+
+    .empty-state h3 {
+        font-size: 1.3rem;
+        margin-bottom: 0.8rem;
+        color: white;
+    }
+
+    @keyframes cardFadeInHome {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================================
+       MOBILE RESPONSIVE OPTIMIZATION
+       ========================================= */
+    @media (max-width: 768px) {
+        .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+            margin: 1rem auto 2.5rem;
+            padding: 0 0.8rem;
+        }
+
+        .product-card {
+            min-height: 180px;
+        }
+
+        .product-card-content {
+            padding: 1rem 0.9rem;
+        }
+
+        .product-badge {
+            font-size: 0.65rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .product-name {
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .product-meta {
+            font-size: 0.7rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .price-coins {
+            font-size: 0.95rem;
+        }
+
+        .price-coins span {
+            font-size: 0.7rem;
+        }
+
+        .price-inr {
+            font-size: 0.7rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.6rem;
+            margin: 0.8rem auto 2rem;
+            padding: 0 0.6rem;
+        }
+
+        .product-card {
+            min-height: 160px;
+        }
+
+        .product-card-content {
+            padding: 0.9rem 0.8rem;
+        }
+
+        .product-badge {
+            font-size: 0.6rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .product-name {
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .product-meta {
+            font-size: 0.65rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-coins {
+            font-size: 0.9rem;
+        }
+
+        .price-coins span {
+            font-size: 0.65rem;
+        }
+
+        .price-inr {
+            font-size: 0.65rem;
+        }
+
+        .btn-buy {
+            width: 28px;
+            height: 28px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Game Header -->
+<div class="game-header">
+    {% if game.banner %}
+    <div class="game-banner-bg" style="background-image: url('{{ game.banner.url }}');"></div>
+    {% endif %}
+
+    <div class="breadcrumb">
+        <a href="{% url 'shop' %}">Shop</a> → {{ game.name }}
+    </div>
+
+    <h1 class="game-title">{{ game.name }}</h1>
+
+    {% if game.description %}
+    <p class="game-description">{{ game.description }}</p>
+    {% endif %}
+</div>
+
+<!-- Background Slideshow -->
+<div class="shop-bg-container">
+    <div class="shop-hex-overlay"></div>
+    <div class="shop-slide shop-slide-1"></div>
+    <div class="shop-slide shop-slide-2"></div>
+    <div class="shop-slide shop-slide-3"></div>
+</div>
+
+<!-- Filter Tabs -->
+<div class="filter-tabs">
+    <a href="{% url 'game_shop' game.slug %}" class="filter-tab{% if not active_type %} active{% endif %}">All</a>
+    {% for type_choice in available_types %}
+    <a href="?type={{ type_choice }}" class="filter-tab{% if active_type == type_choice %} active{% endif %}">{{ type_choice|title }}</a>
+    {% endfor %}
+</div>
+
+<!-- Products Grid -->
+<div class="products-grid">
+    {% for product in products %}
+    <a href="{% url 'product_detail' product.pk %}" class="product-card">
+        {% if product.image %}
+        <div class="product-image" style="background-image: url('{{ product.image.url }}');"></div>
+        {% else %}
+        <div class="product-image" style="background-image: url('{% static 'images/hero1.jpg' %}');"></div>
+        {% endif %}
+        
+        <div class="product-card-overlay"></div>
+
+        <div class="product-card-content">
+            <div class="product-badge">{{ product.game.name }}</div>
+
+            <div class="product-name">{{ product.name }}</div>
+
+            {% if product.diamond_amount %}
+            <div class="product-meta">{{ product.diamond_amount }} Diamonds</div>
+            {% endif %}
+
+            <div class="product-price">
+                <div>
+                    <div class="price-coins">{{ product.price_coins }} <span>Coins</span></div>
+                    <div class="price-inr">₹{{ product.price_inr }}</div>
+                </div>
+                <div class="btn-buy">
+                    <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+
+    {% if not products %}
+    <div class="empty-state">
+        <h3>No products found</h3>
+        <p>Products for this game are coming soon!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.dataset.rainDensity = '110';
+    });
+</script>
+{% endblock %}

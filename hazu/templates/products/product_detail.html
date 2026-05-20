@@ -1,0 +1,1039 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Hazumake{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* MOBILE-FIRST RESPONSIVE DESIGN */
+    .detail-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-top: 1rem;
+        padding: 0 1rem 4rem;
+        max-width: 100%;
+        width: 100%;
+        position: relative;
+    }
+
+    /* Left Side: Product Info */
+    .product-info {
+        padding: 1.5rem;
+        background: rgba(10, 10, 25, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        order: 2;
+    }
+
+    .product-badge {
+        display: inline-block;
+        background: rgba(6, 182, 212, 0.15);
+        color: var(--accent);
+        padding: 0.4rem 0.9rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        border: 1px solid rgba(6, 182, 212, 0.25);
+    }
+
+    .game-badge {
+        display: inline-block;
+        background: rgba(124, 58, 237, 0.15);
+        color: var(--primary);
+        padding: 0.4rem 0.9rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        margin-left: 0.5rem;
+        border: 1px solid rgba(124, 58, 237, 0.25);
+    }
+
+    .detail-title {
+        font-size: 1.6rem;
+        margin-bottom: 0.8rem;
+        line-height: 1.2;
+        font-weight: 700;
+    }
+
+    .detail-desc {
+        color: var(--text-muted);
+        line-height: 1.5;
+        margin-bottom: 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .detail-image {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 10px;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        display: block;
+        height: auto;
+    }
+
+    .detail-image.placeholder {
+        min-height: 200px;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 4rem;
+    }
+
+    .mobile-price-display {
+        flex: 1;
+        display: none;
+    }
+
+    .order-error {
+        display: none;
+        color: #fca5a5;
+        margin-bottom: 1rem;
+    }
+
+    .price-display {
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(6, 182, 212, 0.15));
+        padding: 1rem;
+        border-radius: 10px;
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .price-display .coins {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: white;
+    }
+
+    .price-display .coins span {
+        color: var(--primary);
+        font-size: 0.95rem;
+    }
+
+    .price-display .inr {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* Right Side: Checkout Form */
+    .checkout-card {
+        background: rgba(10, 10, 25, 0.6);
+        border-radius: 14px;
+        padding: 1.5rem;
+        order: 1;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+    }
+
+    .checkout-title {
+        font-size: 1.2rem;
+        margin-bottom: 1.2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 0.8rem;
+        font-weight: 700;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.4rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 0.75rem 0.9rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 8px rgba(124, 58, 237, 0.15);
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .player-id-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+
+    /* Payment Methods */
+    .payment-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .payment-option {
+        display: block;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .payment-option input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .payment-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        padding: 0.9rem 1rem;
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        min-height: auto;
+    }
+
+    .payment-card strong {
+        font-size: 0.95rem;
+        color: white;
+    }
+
+    .payment-option input:checked ~ .payment-card {
+        border-color: var(--accent);
+        background: rgba(6, 182, 212, 0.12);
+        box-shadow: 0 0 12px rgba(6, 182, 212, 0.15);
+    }
+
+    .wallet-balance {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .payment-option input:checked ~ .payment-card .wallet-balance {
+        color: var(--accent);
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 0.9rem;
+        font-size: 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: white;
+        transition: all 0.3s ease;
+        display: block;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Error Box */
+    .error-box {
+        background: rgba(239, 68, 68, 0.1);
+        border-left: 3px solid var(--error);
+        padding: 0.9rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .error-box p {
+        color: #fca5a5;
+        font-size: 0.85rem;
+        margin-bottom: 0.2rem;
+    }
+
+    /* Unauthenticated State */
+    .auth-prompt {
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+
+    .auth-prompt h3 {
+        margin-bottom: 0.8rem;
+        font-size: 1.3rem;
+    }
+
+    /* Desktop: 2-column layout */
+    @media (min-width: 1024px) {
+        .detail-container {
+            grid-template-columns: 1.2fr 1fr;
+            gap: 3rem;
+            padding: 0 2rem 5rem;
+        }
+
+        .product-info {
+            padding: 2.5rem;
+            order: 1;
+        }
+
+        .checkout-card {
+            padding: 2rem;
+            order: 2;
+            position: sticky;
+            top: 6rem;
+        }
+
+        .detail-image {
+            max-width: 320px;
+        }
+
+        .detail-title {
+            font-size: 2.2rem;
+        }
+
+        .player-id-row {
+            grid-template-columns: 2fr 1fr;
+        }
+
+        .btn-submit {
+            position: static;
+        }
+    }
+
+    /* Tablet: Optimized single column */
+    @media (max-width: 1023px) and (min-width: 769px) {
+        .detail-container {
+            padding: 0 1.5rem 4.5rem;
+        }
+
+        .product-info {
+            padding: 1.8rem;
+        }
+
+        .checkout-card {
+            padding: 1.8rem;
+        }
+
+        .detail-title {
+            font-size: 1.8rem;
+        }
+
+        .price-display {
+            padding: 1.2rem;
+        }
+
+        .player-id-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Mobile: Compact layout with sticky bottom button */
+    @media (max-width: 768px) {
+        .detail-container {
+            padding: 0 0.8rem 3.5rem;
+            gap: 1.2rem;
+        }
+
+        .product-info {
+            padding: 1.2rem;
+            border-radius: 12px;
+        }
+
+        .checkout-card {
+            padding: 1.2rem;
+            border-radius: 12px;
+        }
+
+        .detail-image {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .detail-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .detail-desc {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .price-display {
+            padding: 0.95rem;
+            border-radius: 8px;
+        }
+
+        .price-display .coins {
+            font-size: 1.4rem;
+        }
+
+        .price-display .coins span {
+            font-size: 0.85rem;
+        }
+
+        .checkout-title {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.7rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.85rem;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .form-control {
+            padding: 0.7rem 0.8rem;
+            font-size: 0.95rem;
+            border-radius: 7px;
+        }
+
+        .payment-methods {
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .payment-card {
+            padding: 0.85rem 0.95rem;
+            border-radius: 8px;
+        }
+
+        .payment-card strong {
+            font-size: 0.9rem;
+        }
+
+        .wallet-balance {
+            font-size: 0.75rem;
+        }
+
+        .btn-submit {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            width: calc(100% - 20px);
+            padding: 0.85rem;
+            font-size: 0.95rem;
+            z-index: 999;
+            border-radius: 9px;
+        }
+
+        .btn-submit {
+            display: none;
+        }
+
+        .error-box {
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .error-box p {
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Mobile Sticky Checkout Button */
+    @media (max-width: 768px) {
+        .mobile-sticky-checkout {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            background: rgba(10, 10, 15, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 12px 12px;
+            border-top: 1.5px solid rgba(124, 58, 237, 0.25);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-native.btn-primary-action {
+            flex: 1;
+            padding: 0.85rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-native.btn-primary-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(124, 58, 237, 0.5);
+        }
+
+        .btn-native.btn-primary-action:active {
+            transform: translateY(0);
+        }
+
+        .btn-native.btn-primary-action:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .mobile-sticky-checkout {
+            padding: 10px 10px;
+            gap: 8px;
+        }
+
+        .btn-native.btn-primary-action {
+            padding: 0.8rem 1.2rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Desktop: Hide mobile button */
+    @media (min-width: 769px) {
+        .mobile-sticky-checkout {
+            display: none;
+        }
+    }
+
+    /* Small Mobile: Extra compact */
+    @media (max-width: 480px) {
+        .detail-container {
+            padding: 0 0.6rem 3.2rem;
+            gap: 1rem;
+        }
+
+        .product-info,
+        .checkout-card {
+            padding: 1rem;
+        }
+
+        .product-badge,
+        .game-badge {
+            font-size: 0.7rem;
+            padding: 0.35rem 0.8rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .detail-title {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-desc {
+            font-size: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .price-display {
+            padding: 0.9rem;
+        }
+
+        .price-display .coins {
+            font-size: 1.3rem;
+        }
+
+        .checkout-title {
+            font-size: 1rem;
+            margin-bottom: 0.9rem;
+            padding-bottom: 0.6rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-control {
+            padding: 0.65rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .payment-methods {
+            gap: 0.55rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .payment-card {
+            padding: 0.8rem 0.9rem;
+        }
+
+        .payment-card strong {
+            font-size: 0.85rem;
+        }
+
+        .wallet-balance {
+            font-size: 0.7rem;
+        }
+
+        .btn-submit {
+            bottom: 8px;
+            left: 8px;
+            right: 8px;
+            width: calc(100% - 16px);
+            padding: 0.8rem;
+            font-size: 0.9rem;
+            border-radius: 8px;
+        }
+    }
+</style>
+
+<style>
+/* Payment Processing Overlay */
+#payment-processing-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 10, 15, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 99999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(124, 58, 237, 0.2);
+    border-top: 4px solid #06B6D4;
+    border-right: 4px solid #7C3AED;
+    border-radius: 50%;
+    animation: spinLoader 1s linear infinite;
+    margin-bottom: 20px;
+    box-shadow: 0 0 25px rgba(124, 58, 237, 0.4);
+}
+
+@keyframes spinLoader {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.payment-text {
+    color: #FFFFFF;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* Modern Payment Selection Cards */
+.payment-methods-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 2rem;
+}
+
+.payment-method-card {
+    position: relative;
+    cursor: pointer;
+    display: block;
+}
+
+.payment-method-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.payment-card-ui {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: rgba(15, 15, 25, 0.6);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.payment-method-card input[type="radio"]:checked + .payment-card-ui {
+    background: rgba(124, 58, 237, 0.15);
+    border-color: #7C3AED;
+    box-shadow: 0 0 0 1px #7C3AED, 0 4px 15px rgba(124, 58, 237, 0.2);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <!-- Left Column: Product Information -->
+    <div class="product-info glass">
+        <span class="product-badge">{{ product.diamond_amount }} Diamonds</span>
+        {% if game %}
+        <span class="game-badge">{{ product.game.name }}</span>
+        {% endif %}
+        <h1 class="detail-title gradient-text">{{ product.name }}</h1>
+        
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="detail-image">
+        {% else %}
+            <div class="detail-image placeholder">
+                💎
+            </div>
+        {% endif %}
+
+        <p class="detail-desc">
+            {{ product.description|default:"Top up your MLBB account instantly. Safe, secure, and fast delivery directly to your game." }}
+        </p>
+
+        <div class="price-display">
+            <div class="coins">{{ product.price_coins }} <span>Coins</span></div>
+            <div class="inr">Equivalent to ₹{{ product.price_inr }}</div>
+        </div>
+    </div>
+
+    <!-- Right Column: Checkout Form -->
+    <div class="checkout-card glass">
+        <h2 class="checkout-title">Purchase Details</h2>
+
+        {% if request.user.is_authenticated %}
+            
+            {% if form.errors %}
+            <div class="error-box">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <p>{{ field|title }}: {{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form id="purchase-form" method="POST" action="{% url 'create_order' %}">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+                <input type="hidden" name="productid" value="{{ product.smile_product_id }}">
+                {% for field in game.checkout_fields %}
+                <div class="form-group">
+                    <label for="{{ field.name }}">{{ field.label }}</label>
+                    <div class="input-wrapper">
+                        <input type="text"
+                               id="{{ field.name }}"
+                               name="player_fields__{{ field.name }}"
+                               class="form-control"
+                               placeholder="{{ field.placeholder }}"
+                               {% if field.required %}required{% endif %}>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="form-group">
+                    <button type="button" id="verify-btn" 
+                        style="width:100%; padding:0.7rem; border-radius:8px; 
+                               border:1px solid #06B6D4; background:rgba(6,182,212,0.1);
+                               color:#06B6D4; font-weight:700; font-size:0.9rem; cursor:pointer;
+                               transition:all 0.2s;">
+                        🔍 Verify Player
+                    </button>
+                </div>
+                <div id="verify-result" style="display:none; padding:0.8rem 1rem; 
+                     border-radius:8px; margin-bottom:1rem; font-size:0.9rem; font-weight:600;">
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" class="form-control" 
+                           value="1" min="1" max="10" required>
+                </div>
+
+                <div class="form-group">
+                    <label style="color: #A0A0B0; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 12px; display: block;">Select Payment</label>
+                    
+                    <div class="payment-methods-grid">
+                        <!-- Option 1: Wallet -->
+                        <label class="payment-method-card">
+                            <input type="radio" name="payment_method" value="WALLET" checked>
+                            <div class="payment-card-ui">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-size: 1.5rem;">👛</span>
+                                    <div>
+                                        <strong style="color: white; display: block; font-size: 1rem;">Hazumake Wallet</strong>
+                                        <span style="color: #06B6D4; font-size: 0.8rem;">Bal: {{ wallet.balance|default:0 }} coins</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <!-- Option 2: Direct Payment (Razorpay logic, but labeled generically) -->
+                        <label class="payment-method-card">
+                            <input type="radio" name="payment_method" value="RAZORPAY">
+                            <div class="payment-card-ui">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-size: 1.5rem;">💳</span>
+                                    <div>
+                                        <strong style="color: white; display: block; font-size: 1rem;">UPI / Card / Netbanking</strong>
+                                        <span style="color: #A0A0B0; font-size: 0.8rem;">Instant Processing</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="order-error" class="order-error"></div>
+                <button type="submit" class="btn btn-primary btn-submit">Confirm Purchase</button>
+            </form>
+
+            <!-- Sticky Mobile Checkout Button -->
+            <div class="mobile-sticky-checkout">
+                <div class="mobile-price-display">
+                    <!-- Optional: Show total price here on mobile -->
+                </div>
+                <button type="submit" form="purchase-form" class="btn-native btn-primary-action">Pay Now</button>
+            </div>
+
+        {% else %}
+            
+            <div class="auth-prompt">
+                <h3>Login Required</h3>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">You must be logged in to make a purchase.</p>
+                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary" style="padding: 1rem 2rem;">Login to Purchase</a>
+            </div>
+
+        {% endif %}
+    </div>
+
+    <!-- LOADING OVERLAY -->
+    <div id="payment-processing-overlay" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(10,10,15,0.9); backdrop-filter:blur(12px); flex-direction:column; align-items:center; justify-content:center;">
+        <div class="payment-spinner"></div>
+        <div class="payment-text">Processing Payment...</div>
+        <div style="color:#A0A0B0; font-size:0.85rem; margin-top:8px;">Please do not close this page.</div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    const purchaseForm = document.getElementById('purchase-form');
+    const orderError = document.getElementById('order-error');
+    const submitButton = purchaseForm?.querySelector('button[type="submit"]');
+    const mobileButton = document.querySelector('.btn-native.btn-primary-action');
+
+    const getCsrfToken = () => document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || '';
+    const getCsrfTokenFromCookie = () => document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='))?.split('=')?.[1] || '';
+
+    const updateButtonState = (disabled, text = null) => {
+        if (submitButton) {
+            submitButton.disabled = disabled;
+            if (text) submitButton.textContent = text;
+        }
+        if (mobileButton) {
+            mobileButton.disabled = disabled;
+            if (text) mobileButton.textContent = text;
+        }
+    };
+
+    const resetButtonState = () => {
+        updateButtonState(false, 'Pay Now');
+    };
+
+    if (purchaseForm) {
+        purchaseForm.addEventListener('submit', async (event) => {
+            const paymentMethod = purchaseForm.querySelector('input[name="payment_method"]:checked')?.value;
+            const overlay = document.getElementById('payment-processing-overlay');
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+            if (paymentMethod !== 'RAZORPAY') {
+                return;
+            }
+
+            event.preventDefault();
+            
+            // 🌟 1. SHOW THE FULLSCREEN LOADER
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+            
+            orderError.style.display = 'none';
+            orderError.textContent = '';
+            updateButtonState(true, 'Processing Payment...');
+
+            const formData = new FormData(purchaseForm);
+            const payload = {
+                product_id: formData.get('product_id'),
+                quantity: formData.get('quantity'),
+                payment_method: formData.get('payment_method'),
+            };
+
+            for (const [key, value] of formData.entries()) {
+                if (key.startsWith('player_fields__')) {
+                    payload[key] = value;
+                }
+            }
+
+            try {
+                const response = await fetch(purchaseForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json();
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || 'Unable to create payment order.');
+                }
+
+                const options = {
+                    key: data.key_id,
+                    amount: data.amount_paise,
+                    currency: 'INR',
+                    order_id: data.razorpay_order_id,
+                    name: '{{ product.name }}',
+                    description: 'Hazumake purchase',
+                    handler: async function(response) {
+                        const successPayload = new FormData();
+                        successPayload.append('razorpay_payment_id', response.razorpay_payment_id);
+                        successPayload.append('razorpay_order_id', response.razorpay_order_id);
+                        successPayload.append('razorpay_signature', response.razorpay_signature);
+
+                        const result = await fetch('{% url "razorpay_order_success" %}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': getCsrfToken(),
+                            },
+                            body: successPayload,
+                        });
+
+                        if (result.ok || result.redirected) {
+                            window.location.href = '{% url "orders" %}';
+                        } else {
+                            overlay.style.display = 'none';
+                            orderError.style.display = 'block';
+                            orderError.textContent = 'Order confirmation failed. Check My Orders.';
+                            resetButtonState();
+                        }
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            // 🌟 2. HIDE THE LOADER IF THEY CANCEL/CLOSE THE RAZORPAY WINDOW
+                            overlay.style.display = 'none';
+                            resetButtonState();
+                        }
+                    }
+                };
+
+                const razorpay = new Razorpay(options);
+                razorpay.open();
+                
+            } catch (error) {
+                // 🌟 4. HIDE THE LOADER IF THERE IS A BACKEND ERROR
+                overlay.style.display = 'none';
+                orderError.style.display = 'block';
+                orderError.textContent = error.message || 'Payment request failed.';
+                resetButtonState();
+            }
+        });
+    }
+
+    const verifyBtn = document.getElementById('verify-btn');
+    const verifyResult = document.getElementById('verify-result');
+
+    verifyBtn?.addEventListener('click', async function() {
+        const uid = document.querySelector('[name="player_fields__uid"], [name="player_fields__player_id"], [name="player_fields__user_id"]')?.value?.trim();
+        const sid = document.querySelector('[name="player_fields__sid"], [name="player_fields__zone_id"], [name="player_fields__server_id"]')?.value?.trim() || '';
+
+        if (!uid) {
+            verifyResult.style.display = 'block';
+            verifyResult.style.background = 'rgba(239,68,68,0.1)';
+            verifyResult.style.border = '1px solid rgba(239,68,68,0.3)';
+            verifyResult.style.color = '#EF4444';
+            verifyResult.textContent = '⚠️ Please enter your Player ID first';
+            return;
+        }
+
+        verifyBtn.disabled = true;
+        verifyBtn.textContent = 'Verifying...';
+        verifyResult.style.display = 'none';
+
+        try {
+                const verifyUrl = "{% url 'verify_player' game.slug %}";
+                const productId = document.querySelector('[name="productid"]')?.value || '';
+                const res = await fetch(verifyUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({ uid: uid, sid: sid, productid: productId })
+                });
+
+            const data = await res.json();
+
+            verifyResult.style.display = 'block';
+
+            if (data.status === 200) {
+                verifyResult.style.background = 'rgba(16,185,129,0.1)';
+                verifyResult.style.border = '1px solid rgba(16,185,129,0.3)';
+                verifyResult.style.color = '#10B981';
+                verifyResult.textContent = '✅ Player found: ' + data.username;
+            } else {
+                verifyResult.style.background = 'rgba(239,68,68,0.1)';
+                verifyResult.style.border = '1px solid rgba(239,68,68,0.3)';
+                verifyResult.style.color = '#EF4444';
+                verifyResult.textContent = '❌ ' + (data.message || 'Player not found. Check your ID and Zone ID.');
+            }
+        } catch (e) {
+            verifyResult.style.display = 'block';
+            verifyResult.style.background = 'rgba(239,68,68,0.1)';
+            verifyResult.style.border = '1px solid rgba(239,68,68,0.3)';
+            verifyResult.style.color = '#EF4444';
+            verifyResult.textContent = '❌ Verification failed. Try again.';
+        } finally {
+            verifyBtn.disabled = false;
+            verifyBtn.textContent = '🔍 Verify Player';
+        }
+    });
+</script>
+{% endblock %}

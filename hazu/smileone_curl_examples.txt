@@ -1,0 +1,37 @@
+# Smile.one API curl examples
+
+# 1) Product list
+curl -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "uid=3268463" \
+  -d "email=extraofficial144@gmail.com" \
+  -d "time=$(date +%s)" \
+  -d "product=mobilelegends" \
+  -d "sign=<generated-sign>" \
+  https://www.smile.one/smilecoin/api/productlist
+
+# 2) Verify player role
+curl -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "uid=3268463" \
+  -d "email=extraofficial144@gmail.com" \
+  -d "time=$(date +%s)" \
+  -d "product=mobilelegends" \
+  -d "productid=22590" \
+  -d "userid=123456789" \
+  -d "zoneid=1234" \
+  -d "sign=<generated-sign>" \
+  https://www.smile.one/smilecoin/api/getrole
+
+# 3) Create order
+curl -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "uid=3268463" \
+  -d "email=extraofficial144@gmail.com" \
+  -d "time=$(date +%s)" \
+  -d "product=mobilelegends" \
+  -d "productid=22590" \
+  -d "userid=123456789" \
+  -d "zoneid=1234" \
+  -d "sign=<generated-sign>" \
+  https://www.smile.one/smilecoin/api/createorder
