@@ -200,7 +200,7 @@ GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
 
 # Smile.one supplier settings
 SMILE_BASE_URL = os.environ.get('SMILE_BASE_URL', 'https://www.smile.one')
-SMILE_API_PREFIX = os.environ.get('SMILE_API_PREFIX', 'smilecoin/api')
+SMILE_API_PREFIX = os.environ.get('SMILE_API_PREFIX', 'br/smilecoin/api')
 SMILE_COUNTRY = os.environ.get('SMILE_COUNTRY', 'br')
 SMILE_KEY = os.environ.get('SMILE_KEY', '')
 SMILE_UID = os.environ.get('SMILE_UID', '')

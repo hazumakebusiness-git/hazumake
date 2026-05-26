@@ -1,5 +1,7 @@
+import hashlib
 import json
 import logging
+import re
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
@@ -37,22 +39,41 @@ def _validate_smileone_config():
 def _normalize_game_slug(game_slug: str) -> str:
     if not game_slug:
         return SMILE_DEFAULT_GAME_NAME
-    return str(game_slug).strip().replace(' ', '').replace('-', '').lower() or SMILE_DEFAULT_GAME_NAME
+
+    normalized = str(game_slug).strip().lower()
+    normalized = re.sub(r'[^a-z0-9]+', '', normalized)
+
+    if normalized in ('mlbb', 'mobilelegendsbangbang', 'mobilelegendsbang', 'mobilelegendsbb'):
+        return 'mobilelegends'
+    if normalized.startswith('mobilelegends') and normalized != 'mobilelegends':
+        return 'mobilelegends'
+
+    return normalized or SMILE_DEFAULT_GAME_NAME
 
 
 def _build_url(endpoint: str) -> str:
     base = settings.SMILE_BASE_URL.rstrip('/')
     prefix = getattr(settings, 'SMILE_API_PREFIX', SMILE_API_PREFIX).strip('/')
-    return f"{base}/{prefix}/{endpoint.lstrip('/')}"
+
+    if prefix and base.endswith(prefix):
+        return f"{base}/{endpoint.lstrip('/')}"
+    if prefix:
+        return f"{base}/{prefix}/{endpoint.lstrip('/')}"
+    return f"{base}/{endpoint.lstrip('/')}"
 
 
 def _build_payload(extra_params: dict) -> dict:
     _validate_smileone_config()
+    clean_extra = {
+        k: str(v).strip()
+        for k, v in extra_params.items()
+        if v is not None and str(v).strip() != ''
+    }
     payload = {
         'uid': str(settings.SMILE_UID).strip(),
         'email': str(settings.SMILE_EMAIL).strip(),
         'time': int(time.time()),
-        **{k: str(v).strip() for k, v in extra_params.items() if v is not None},
+        **clean_extra,
     }
     payload['sign'] = generate_smileone_sign(payload, str(settings.SMILE_KEY).strip())
     logger.debug('SmileOne payload built: %s', payload)
@@ -62,6 +83,18 @@ def _build_payload(extra_params: dict) -> dict:
 
 
 def _parse_smileone_response(response_text: str) -> dict:
+    if not isinstance(response_text, str):
+        response_text = str(response_text or '')
+
+    raw_trimmed = response_text.strip()
+    lower_trimmed = raw_trimmed.lower()
+    if not raw_trimmed:
+        logger.error('SmileOne returned empty response')
+        raise SmileOneError('Empty Smile.one response')
+    if lower_trimmed.startswith('<') or '<html' in lower_trimmed or 'cloudflare' in lower_trimmed:
+        logger.error('SmileOne returned HTML/Cloudflare response: %s', raw_trimmed[:500])
+        raise SmileOneError('Smile.one returned non-JSON response')
+
     try:
         parsed = json.loads(response_text)
         logger.debug('SmileOne raw response JSON: %s', parsed)
@@ -69,6 +102,80 @@ def _parse_smileone_response(response_text: str) -> dict:
     except json.JSONDecodeError:
         logger.error('Unable to parse Smile.one response as JSON: %s', response_text)
         raise SmileOneError('Invalid Smile.one response format')
+
+
+def _generate_getrole_sign(uid: str, zone: str, timestamp: int) -> str:
+    if zone:
+        raw_string = f"uid={uid}&zone={zone}&time={timestamp}&{str(settings.SMILE_KEY).strip()}"
+    else:
+        raw_string = f"uid={uid}&time={timestamp}&{str(settings.SMILE_KEY).strip()}"
+    logger.debug('SmileOne getrole raw sign string: %s', raw_string)
+    return hashlib.md5(raw_string.encode('utf-8')).hexdigest()
+
+
+def _build_getrole_payload(user_id: str, zone_id: str) -> dict:
+    _validate_smileone_config()
+    payload = {
+        'uid': str(user_id).strip(),
+        'time': int(time.time()),
+    }
+    zone_value = str(zone_id).strip()
+    if zone_value:
+        payload['zone'] = zone_value
+    payload['sign'] = _generate_getrole_sign(payload['uid'], payload.get('zone', ''), payload['time'])
+    logger.debug('SmileOne getrole payload built: %s', payload)
+    return payload
+
+
+def _http_post_json(url: str, payload: dict, timeout: int = 15) -> dict:
+    logger.info('SmileOne request URL: %s', url)
+    logger.info('SmileOne outgoing JSON payload: %s', payload)
+    headers = {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Hazumake/1.0 (+https://hazumake.com)',
+    }
+
+    if requests is not None:
+        try:
+            response = requests.post(url, json=payload, timeout=timeout, headers=headers)
+            logger.info('SmileOne response status: %s', response.status_code)
+            logger.info('SmileOne raw response body: %s', response.text)
+            response.raise_for_status()
+            return _parse_smileone_response(response.text)
+        except requests.exceptions.HTTPError as exc:
+            body = exc.response.text if exc.response is not None else ''
+            logger.warning('SmileOne HTTP error %s: %s', exc.response.status_code if exc.response is not None else 'N/A', body)
+            try:
+                return _parse_smileone_response(body)
+            except SmileOneError as parse_exc:
+                logger.error('SmileOne parse failure after HTTP error: %s', parse_exc)
+                return {'status': 500, 'message': str(parse_exc)}
+        except requests.exceptions.RequestException as exc:
+            logger.error('SmileOne connection error: %s', exc)
+            raise SmileOneError(f'Smile.one connection failed: {exc}')
+
+    request_body = json.dumps(payload).encode('utf-8')
+    request = Request(url, data=request_body)
+    request.add_header('Content-Type', 'application/json')
+    request.add_header('User-Agent', 'Hazumake/1.0 (+https://hazumake.com)')
+
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            body = response.read().decode('utf-8')
+            logger.info('SmileOne response status: %s', response.status)
+            logger.info('SmileOne raw response body: %s', body)
+            return _parse_smileone_response(body)
+    except HTTPError as exc:
+        body = exc.read().decode('utf-8', errors='ignore')
+        logger.warning('SmileOne HTTP error %s: %s', exc.code, body)
+        try:
+            return _parse_smileone_response(body)
+        except SmileOneError as parse_exc:
+            logger.error('SmileOne parse failure after HTTP error: %s', parse_exc)
+            return {'status': 500, 'message': str(parse_exc)}
+    except URLError as exc:
+        logger.error('SmileOne connection error: %s', exc)
+        raise SmileOneError(f'Smile.one connection failed: {exc}')
 
 
 def _http_post_form(url: str, payload: dict, timeout: int = 30) -> dict:
@@ -89,7 +196,11 @@ def _http_post_form(url: str, payload: dict, timeout: int = 30) -> dict:
         except requests.exceptions.HTTPError as exc:
             body = exc.response.text if exc.response is not None else ''
             logger.warning('SmileOne HTTP error %s: %s', exc.response.status_code if exc.response is not None else 'N/A', body)
-            return _parse_smileone_response(body)
+            try:
+                return _parse_smileone_response(body)
+            except SmileOneError as parse_exc:
+                logger.error('SmileOne parse failure after HTTP error: %s', parse_exc)
+                return {'status': 500, 'message': str(parse_exc)}
         except requests.exceptions.RequestException as exc:
             logger.error('SmileOne connection error: %s', exc)
             raise SmileOneError(f'Smile.one connection failed: {exc}')
@@ -108,7 +219,11 @@ def _http_post_form(url: str, payload: dict, timeout: int = 30) -> dict:
     except HTTPError as exc:
         body = exc.read().decode('utf-8', errors='ignore')
         logger.warning('SmileOne HTTP error %s: %s', exc.code, body)
-        return _parse_smileone_response(body)
+        try:
+            return _parse_smileone_response(body)
+        except SmileOneError as parse_exc:
+            logger.error('SmileOne parse failure after HTTP error: %s', parse_exc)
+            return {'status': 500, 'message': str(parse_exc)}
     except URLError as exc:
         logger.error('SmileOne connection error: %s', exc)
         raise SmileOneError(f'Smile.one connection failed: {exc}')
@@ -171,12 +286,13 @@ def get_product_list(game_slug: str) -> list:
 
 
 def get_role(game_slug: str, product_id: str, player_uid: str, player_sid: str = '') -> str | None:
-    game_slug = _normalize_game_slug(game_slug)
+    normalized_game = _normalize_game_slug(game_slug)
+    logger.debug('SmileOne get_role game slug: %s, product_id: %s', normalized_game, product_id)
     payload = _build_payload({
-        'product': game_slug,
+        'product': normalized_game,
         'productid': str(product_id).strip(),
         'userid': str(player_uid).strip(),
-        'zoneid': str(player_sid).strip() or str(player_uid).strip(),
+        'zoneid': str(player_sid).strip(),
     })
     response = _http_post_form(_build_url('getrole'), payload)
     logger.info('SmileOne get_role response: %s', response)
@@ -192,7 +308,7 @@ def create_order(game_slug: str, product_id: str, player_uid: str, player_sid: s
         'product': game_slug,
         'productid': str(product_id).strip(),
         'userid': str(player_uid).strip(),
-        'zoneid': str(player_sid).strip() or str(player_uid).strip(),
+        'zoneid': str(player_sid).strip(),
     })
     response = _http_post_form(_build_url('createorder'), payload)
     logger.info('SmileOne create_order response: %s', response)

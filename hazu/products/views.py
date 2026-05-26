@@ -6,6 +6,7 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Count, Q
 from django.views.decorators.http import require_POST
 from .models import Product, Game
+from hazu.smile_api import verify_player
 import logging
 logger = logging.getLogger(__name__)
 
@@ -83,18 +84,26 @@ def verify_player_view(request, slug):
         return JsonResponse({'status': 400, 'message': 'Invalid JSON'}, status=400)
 
     if not player_uid or not product_id:
-        return JsonResponse({'status': 400, 'message': 'uid and productid are required'}, status=400)
+        return JsonResponse({'status': 400, 'success': False, 'message': 'uid and productid are required'}, status=400)
 
     from hazu.smile_api import verify_player
     game_slug = game.supplier_game_code or game.slug
+    print('VERIFY PLAYER VIEW CALL', {'slug': slug, 'game_slug': game_slug, 'uid': player_uid, 'sid': player_sid, 'productid': product_id})
     username = verify_player(
         game_slug=game_slug,
         product_id=product_id,
         player_uid=player_uid,
         player_sid=player_sid,
     )
+    print('VERIFY PLAYER VIEW RESULT', {'username': username})
     logger.info("getrole raw: %s", username)
 
     if username:
-        return JsonResponse({'status': 200, 'username': username})
-    return JsonResponse({'status': 400, 'message': 'Verification failed. Try again.'}, status=400)
+        return JsonResponse({
+            'status': 200,
+            'success': True,
+            'nickname': username,
+            'uid': player_uid,
+            'zone': player_sid,
+        })
+    return JsonResponse({'status': 400, 'success': False, 'message': 'Verification failed. Try again.'}, status=400)
