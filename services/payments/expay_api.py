@@ -69,6 +69,10 @@ class ExPayAPI:
             raise ExPayError("ExPay request timed out")
         except requests.exceptions.RequestException as exc:
             logger.error("ExPay HTTP error to %s: %s", endpoint, exc)
+    # Get the actual error response from gateway
+            if hasattr(exc, 'response') and exc.response is not None:
+                logger.error("ExPay response body: %s", exc.response.text)
+                raise ExPayError(f"HTTP error: {exc} | Gateway says: {exc.response.text}")
             raise ExPayError(f"HTTP error: {exc}")
 
         try:

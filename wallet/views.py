@@ -70,12 +70,12 @@ def expay_create_order(request):
         
         # Save WalletTopup record for tracking
         WalletTopup.objects.create(
+
             user=request.user,
-            order_id=order_id,
             payment_transaction_id=result['orderId'],
             amount=amount_value,
             status='PENDING',
-        )
+            )
         
         logger.info('Created ExPay order %s for user %s, amount ₹%s', result['orderId'], request.user.email, amount_value)
         
