@@ -747,7 +747,6 @@
 
             <form id="purchase-form" method="POST" action="{% url 'create_order' %}">
                 {% csrf_token %}
-                <input type="hidden" id="game-slug" value="{{ game_slug }}">
                 <input type="hidden" name="product_id" value="{{ product.id }}">
                 <input type="hidden" name="productid" value="{{ product.smile_product_id }}">
                 {% for field in game.checkout_fields %}
@@ -851,8 +850,29 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
+    /*
+     * Load Razorpay checkout script on-demand to avoid third-party chunk
+     * preloads that may be injected by the provider and reported as unused.
+     */
+    const loadRazorpayScript = () => new Promise((resolve, reject) => {
+        if (typeof window.Razorpay !== 'undefined') return resolve(window.Razorpay);
+        const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+        if (existing) {
+            existing.addEventListener('load', () => resolve(window.Razorpay));
+            existing.addEventListener('error', () => reject(new Error('Razorpay script failed to load')));
+            return;
+        }
+        const s = document.createElement('script');
+        s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        s.async = true;
+        s.crossOrigin = 'anonymous';
+        s.onload = () => resolve(window.Razorpay);
+        s.onerror = () => reject(new Error('Razorpay script failed to load'));
+        document.head.appendChild(s);
+    });
+
+    
     const purchaseForm = document.getElementById('purchase-form');
     const orderError = document.getElementById('order-error');
     const submitButton = purchaseForm?.querySelector('button[type="submit"]');
@@ -965,6 +985,8 @@
                     }
                 };
 
+                // Load Razorpay script on-demand and instantiate
+                await loadRazorpayScript();
                 const razorpay = new Razorpay(options);
                 razorpay.open();
                 
@@ -982,9 +1004,8 @@
     const verifyResult = document.getElementById('verify-result');
 
     verifyBtn?.addEventListener('click', async function() {
-        const uid = document.querySelector('[name="player_fields__uid"], [name="player_fields__player_id"], [name="player_fields__user_id"]')?.value?.trim();
-        const sid = document.querySelector('[name="player_fields__sid"], [name="player_fields__zone_id"], [name="player_fields__server_id"]')?.value?.trim() || '';
-        const gameSlug = document.getElementById('game-slug')?.value;
+        const uid = document.querySelector('[name="player_fields__uid"], [name="player_fields__player_id"], [name="player_fields__user_id"], [name="player_fields__playerid"], [name="player_fields__userid"]')?.value?.trim();
+        const sid = document.querySelector('[name="player_fields__sid"], [name="player_fields__zone_id"], [name="player_fields__zoneid"], [name="player_fields__server_id"], [name="player_fields__server"], [name="player_fields__serverid"]')?.value?.trim() || '';
 
         if (!uid) {
             verifyResult.style.display = 'block';
@@ -1000,17 +1021,21 @@
         verifyResult.style.display = 'none';
 
         try {
+                const verifyUrl = "{% url 'verify_player' game.slug %}";
                 const productId = document.querySelector('[name="productid"]')?.value || '';
-                const res = await fetch('{% url "verify_player" %}', {
+                console.log('VERIFY PLAYER REQUEST', { verifyUrl, uid, sid, productId });
+                const res = await fetch(verifyUrl, {
                     method: 'POST',
+                    credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCsrfToken(),
                     },
-                    body: JSON.stringify({ game_slug: gameSlug, productid: productId, uid: uid, sid: sid })
+                    body: JSON.stringify({ uid: uid, sid: sid, productid: productId })
                 });
 
             const data = await res.json();
+            console.log('VERIFY RESPONSE', res.status, data);
 
             verifyResult.style.display = 'block';
 
@@ -1018,12 +1043,12 @@
                 verifyResult.style.background = 'rgba(16,185,129,0.1)';
                 verifyResult.style.border = '1px solid rgba(16,185,129,0.3)';
                 verifyResult.style.color = '#10B981';
-                verifyResult.textContent = '✅ Player found: ' + data.username;
+                verifyResult.textContent = '✅ Player found: ' + data.nickname;
             } else {
                 verifyResult.style.background = 'rgba(239,68,68,0.1)';
                 verifyResult.style.border = '1px solid rgba(239,68,68,0.3)';
                 verifyResult.style.color = '#EF4444';
-                verifyResult.textContent = '❌ Player not found. Check your ID and Zone ID.';
+                verifyResult.textContent = '❌ ' + (data.message || 'Player not found. Check your ID and Zone ID.');
             }
         } catch (e) {
             verifyResult.style.display = 'block';

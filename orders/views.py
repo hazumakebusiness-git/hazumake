@@ -1,8 +1,8 @@
 import json
 import logging
+import time
 from decimal import Decimal
 
-import razorpay
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -11,12 +11,43 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from services.payments.expay_api import get_client as get_expay_client, ExPayError
+
 logger = logging.getLogger(__name__)
 
 from hazu.smile_api import create_order as smile_create_order
 from products.models import Product
 from wallet.models import Transaction
 from .models import Order
+
+
+def _normalize_player_fields(player_fields):
+    normalized = {
+        k.lower().strip(): str(v).strip()
+        for k, v in player_fields.items()
+        if v is not None and str(v).strip() != ''
+    }
+    player_uid = (
+        normalized.get('uid') or
+        normalized.get('player_id') or
+        normalized.get('userid') or
+        normalized.get('user_id') or
+        normalized.get('playerid') or
+        ''
+    )
+    player_sid = (
+        normalized.get('sid') or
+        normalized.get('zone_id') or
+        normalized.get('server_id') or
+        normalized.get('zoneid') or
+        ''
+    )
+    return player_uid, player_sid or player_uid
+
+
+def _ensure_smile_product(product):
+    if not product.smile_product_id:
+        raise ValueError('This product is not currently configured for Smile.one fulfillment.')
 
 
 @login_required
@@ -71,6 +102,17 @@ def place_order(request):
                 messages.error(request, f"{field_spec['label']} is required.")
                 return redirect('product_detail', pk=product.id)
 
+    player_uid, player_sid = _normalize_player_fields(player_fields)
+    if not player_uid:
+        messages.error(request, 'Player ID is required for this purchase.')
+        return redirect('product_detail', pk=product.id)
+
+    try:
+        _ensure_smile_product(product)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+        return redirect('product_detail', pk=product.id)
+
     # ─── WALLET PAYMENT ───────────────────────────────────────────
     if payment_method == 'WALLET':
         wallet = request.user.wallet
@@ -88,19 +130,6 @@ def place_order(request):
             amount=total_inr,
             balance_after=wallet.balance,
             note=f'Purchase: {product.name} x{quantity}',
-        )
-
-        player_uid = (
-            player_fields.get('uid') or
-            player_fields.get('player_id') or
-            player_fields.get('user_id') or
-            next(iter(player_fields.values()), '')
-        )
-        player_sid = (
-            player_fields.get('sid') or
-            player_fields.get('zone_id') or
-            player_fields.get('server_id') or
-            ''
         )
 
         logger.info("player_fields keys: %s", list(player_fields.keys()))
@@ -143,34 +172,46 @@ def place_order(request):
 
         return redirect('orders')
 
-    # ─── RAZORPAY PAYMENT ─────────────────────────────────────────
-    if payment_method == 'RAZORPAY':
+    # ─── EXPAY PAYMENT ─────────────────────────────────────────
+    if payment_method == 'EXPAY':
         try:
-            amount_paise = int(total_inr * Decimal('100'))
-        except Exception:
-            return HttpResponseBadRequest('Invalid amount value.')
+            expay_api = get_expay_client()
+            order_id = f"order_{request.user.id}_{int(time.time() * 1000)}"
 
-        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-        razorpay_order = client.order.create({
-            'amount': amount_paise,
-            'currency': 'INR',
-            'payment_capture': 1,
-        })
+            result = expay_api.create_order(
+                customer_mobile=request.user.phone or '9000000000',
+                amount=str(total_inr),
+                order_id=order_id,
+                remark1=f'user_{request.user.id}',
+                remark2=f'product_{product.id}',
+            )
 
-        request.session['pending_razorpay'] = {
-            'product_id': str(product.id),
-            'player_fields': player_fields,
-            'quantity': quantity,
-            'total_coins': total_coins,
-            'total_inr': str(total_inr),
-            'razorpay_order_id': razorpay_order['id'],
-        }
+            order = Order.objects.create(
+                user=request.user,
+                product=product,
+                game=game,
+                quantity=quantity,
+                player_uid=player_uid,
+                player_sid=player_sid,
+                player_fields=player_fields,
+                total_coins=total_coins,
+                total_inr=total_inr,
+                payment_method='EXPAY',
+                payment_status='UNPAID',
+                status='PENDING',
+                payment_transaction_id=result['orderId'],
+            )
 
-        return JsonResponse({
-            'razorpay_order_id': razorpay_order['id'],
-            'amount_paise': razorpay_order['amount'],
-            'key_id': settings.RAZORPAY_KEY_ID,
-        })
+            return JsonResponse({
+                'payment_url': result['payment_url'],
+                'expay_order_id': result['orderId'],
+                'order_id': str(order.id),
+            })
+        except ExPayError as exc:
+            return JsonResponse({'error': str(exc)}, status=400)
+        except Exception as exc:
+            logger.exception('ExPay order creation failed: %s', exc)
+            return JsonResponse({'error': 'Payment gateway error.'}, status=500)
 
     return HttpResponseBadRequest('Invalid payment method.')
 
@@ -208,21 +249,21 @@ def razorpay_order_success(request):
     total_inr = Decimal(session_data['total_inr'])
     player_fields = session_data['player_fields']
 
-    player_uid = (
-        player_fields.get('uid') or
-        player_fields.get('player_id') or
-        player_fields.get('user_id') or
-        next(iter(player_fields.values()), '')
-    )
-    player_sid = (
-        player_fields.get('sid') or
-        player_fields.get('zone_id') or
-        player_fields.get('server_id') or
-        ''
-    )
+    player_uid, player_sid = _normalize_player_fields(player_fields)
+    if not player_uid:
+        messages.error(request, 'Player ID is missing from the payment session. Please try again.')
+        request.session.pop('pending_razorpay', None)
+        return redirect('orders')
 
     logger.info("player_fields keys: %s", list(player_fields.keys()))
     logger.info("player_uid resolved: %s | player_sid: %s", player_uid, player_sid)
+
+    try:
+        _ensure_smile_product(product)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+        request.session.pop('pending_razorpay', None)
+        return redirect('orders')
 
     order = Order.objects.create(
         user=request.user,

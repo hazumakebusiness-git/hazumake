@@ -117,11 +117,11 @@
     }
 
     .btn-topup {
-        background: rgba(124, 58, 237, 0.2); color: white;
+        background: linear-gradient(135deg, var(--primary-3), var(--accent-3)); color: white;
         border: 1px solid rgba(124, 58, 237, 0.6); box-shadow: 0 0 30px rgba(124, 58, 237, 0.3);
     }
     .btn-topup:hover {
-        background: rgba(124, 58, 237, 0.5); transform: translateY(-5px) scale(1.05);
+        background: linear-gradient(135deg, var(--primary-2), var(--primary)); transform: translateY(-5px) scale(1.05);
         box-shadow: 0 10px 30px rgba(124, 58, 237, 0.6), inset 0 0 15px rgba(255,255,255,0.4);
     }
 
@@ -975,6 +975,157 @@
             </div>
         </div>
 
+    </section>
+
+
+    <!-- QUICK ACTIONS ROW (Mobile-optimized) -->
+    <section id="quick-actions" style="
+        padding: 2rem 1rem;
+        position: relative;
+        z-index: 10;
+        background: linear-gradient(180deg, rgba(10,10,25,0.3) 0%, rgba(10,10,15,0) 100%);
+    ">
+        <div style="
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        ">
+            <!-- Quick Action 1: Top Up -->
+            <a href="{% url 'shop' %}" style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.8rem;
+                padding: 1.5rem 1rem;
+                background: rgba(124, 58, 237, 0.12);
+                border: 1px solid rgba(124, 58, 237, 0.3);
+                border-radius: 16px;
+                text-decoration: none;
+                color: white;
+                transition: all 0.3s ease;
+                text-align: center;
+            " onmouseover="this.style.background='rgba(124, 58, 237, 0.25)'; this.style.borderColor='rgba(124, 58, 237, 0.8)'; this.style.boxShadow='0 0 20px rgba(124, 58, 237, 0.3)'" onmouseout="this.style.background='rgba(124, 58, 237, 0.12)'; this.style.borderColor='rgba(124, 58, 237, 0.3)'; this.style.boxShadow='none'">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span style="font-size: 0.9rem; font-weight: 700; letter-spacing: 0.5px;">Top Up</span>
+            </a>
+
+            {% if request.user.is_authenticated %}
+            <!-- Quick Action 2: My Wallet -->
+            <a href="{% url 'wallet' %}" style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.8rem;
+                padding: 1.5rem 1rem;
+                background: rgba(6, 182, 212, 0.12);
+                border: 1px solid rgba(6, 182, 212, 0.3);
+                border-radius: 16px;
+                text-decoration: none;
+                color: white;
+                transition: all 0.3s ease;
+                text-align: center;
+            " onmouseover="this.style.background='rgba(6, 182, 212, 0.25)'; this.style.borderColor='rgba(6, 182, 212, 0.8)'; this.style.boxShadow='0 0 20px rgba(6, 182, 212, 0.3)'" onmouseout="this.style.background='rgba(6, 182, 212, 0.12)'; this.style.borderColor='rgba(6, 182, 212, 0.3)'; this.style.boxShadow='none'">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span style="font-size: 0.9rem; font-weight: 700; letter-spacing: 0.5px;">Wallet</span>
+            </a>
+
+            <!-- Quick Action 3: My Orders -->
+            <a href="{% url 'orders' %}" style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.8rem;
+                padding: 1.5rem 1rem;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 16px;
+                text-decoration: none;
+                color: white;
+                transition: all 0.3s ease;
+                text-align: center;
+            " onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.15)'">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span style="font-size: 0.9rem; font-weight: 700; letter-spacing: 0.5px;">Orders</span>
+            </a>
+
+            <!-- Quick Action 4: Support -->
+            <a href="{% url 'contact' %}" style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.8rem;
+                padding: 1.5rem 1rem;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 16px;
+                text-decoration: none;
+                color: white;
+                transition: all 0.3s ease;
+                text-align: center;
+            " onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.15)'">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <span style="font-size: 0.9rem; font-weight: 700; letter-spacing: 0.5px;">Support</span>
+            </a>
+            {% else %}
+            <!-- Quick Action (Unauthenticated): Sign Up -->
+            <a href="{% url 'register' %}" style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.8rem;
+                padding: 1.5rem 1rem;
+                background: rgba(6, 182, 212, 0.12);
+                border: 1px solid rgba(6, 182, 212, 0.3);
+                border-radius: 16px;
+                text-decoration: none;
+                color: white;
+                transition: all 0.3s ease;
+                text-align: center;
+            " onmouseover="this.style.background='rgba(6, 182, 212, 0.25)'; this.style.borderColor='rgba(6, 182, 212, 0.8)'; this.style.boxShadow='0 0 20px rgba(6, 182, 212, 0.3)'" onmouseout="this.style.background='rgba(6, 182, 212, 0.12)'; this.style.borderColor='rgba(6, 182, 212, 0.3)'; this.style.boxShadow='none'">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                </svg>
+                <span style="font-size: 0.9rem; font-weight: 700; letter-spacing: 0.5px;">Sign Up</span>
+            </a>
+
+            <!-- Quick Action (Unauthenticated): Support -->
+            <a href="{% url 'contact' %}" style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.8rem;
+                padding: 1.5rem 1rem;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 16px;
+                text-decoration: none;
+                color: white;
+                transition: all 0.3s ease;
+                text-align: center;
+            " onmouseover="this.style.background='rgba(255, 255, 255, 0.12)'; this.style.borderColor='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.15)'">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <span style="font-size: 0.9rem; font-weight: 700; letter-spacing: 0.5px;">Support</span>
+            </a>
+            {% endif %}
+        </div>
     </section>
 
 

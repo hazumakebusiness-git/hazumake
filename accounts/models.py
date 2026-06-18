@@ -8,19 +8,25 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 class CustomUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField(unique=True, blank=True, null=True)
-    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(unique=True, blank=False, null=False)
     phone = models.CharField(max_length=20, blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
-    # MLBB fields removed per request
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # Use username as primary login identifier so email may be empty
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = []
+    
+    # Use email as primary login identifier
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']  # Required by AbstractUser, auto-generated from email
 
     def __str__(self):
-        return self.username
+        return self.email
+    
+    def save(self, *args, **kwargs):
+        # Auto-generate username from email if not set
+        if not self.username:
+            base = self.email.split('@')[0][:120]
+            self.username = base or 'user'
+        super().save(*args, **kwargs)
 
 
 class OTPCode(models.Model):

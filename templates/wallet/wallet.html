@@ -694,7 +694,7 @@
         </div>
 
         <!-- Top-up Form -->
-        <div id="topup-section" class="card" data-razorpay-key="{{ razorpay_key_id }}">
+        <div id="topup-section" class="card">
             <h2 class="topup-title">Add Coins</h2>
             
             <div class="preset-grid" id="preset-buttons">
@@ -710,17 +710,10 @@
             </div>
 
             <button type="button" id="pay-btn" class="btn-native btn-primary-action btn-topup-action">Pay Now</button>
-            <div id="loading-msg">Initializing secure payment...</div>
+            <div id="loading-msg" style="display:none; margin-top:1rem; color: #A0A0A0;">Redirecting to secure payment...</div>
+            <div id="error-msg" style="display:none; margin-top:1rem; color: #FF6B6B;"></div>
         </div>
     </div>
-
-    <!-- Hidden Form -->
-    <form id="razorpay-success-form" method="POST" action="{% url 'wallet' %}" class="hidden-form">
-        {% csrf_token %}
-        <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
-        <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
-        <input type="hidden" name="razorpay_signature" id="razorpay_signature">
-    </form>
 
     <!-- Transactions -->
     <div class="card">
@@ -788,16 +781,15 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-    // Razorpay Wallet Top-up JavaScript
+    // ExPay Wallet Top-up JavaScript
     document.addEventListener('DOMContentLoaded', function() {
         const presetButtons = document.querySelectorAll('.btn-preset');
         const amountInput = document.getElementById('topup-amount');
         const payBtn = document.getElementById('pay-btn');
         const loadingMsg = document.getElementById('loading-msg');
-        const topupSection = document.getElementById('topup-section');
-        const razorpayKey = topupSection.getAttribute('data-razorpay-key');
+        const errorMsg = document.getElementById('error-msg');
+        const overlay = document.getElementById('payment-processing-overlay');
 
         // Handle preset button clicks
         presetButtons.forEach(button => {
@@ -816,20 +808,18 @@
         payBtn.addEventListener('click', function() {
             const amount = amountInput.value;
             if (!amount || amount < 10) {
-                alert('Please enter an amount of at least ₹10');
+                errorMsg.textContent = 'Please enter an amount of at least ₹10';
+                errorMsg.style.display = 'block';
                 return;
             }
 
-            // 🌟 1. SHOW THE FULLSCREEN LOADER
-            const overlay = document.getElementById('payment-processing-overlay');
+            errorMsg.style.display = 'none';
             overlay.style.display = 'flex';
-
-            // Show loading message
             loadingMsg.style.display = 'block';
             payBtn.disabled = true;
             payBtn.textContent = 'Processing...';
 
-            // Create Razorpay order
+            // Create ExPay order
             fetch('/wallet/create-order/', {
                 method: 'POST',
                 headers: {
@@ -841,8 +831,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert('Error: ' + data.error);
-                    // 🌟 4. HIDE THE LOADER IF THERE IS A BACKEND ERROR
+                    errorMsg.textContent = 'Error: ' + data.error;
+                    errorMsg.style.display = 'block';
                     overlay.style.display = 'none';
                     loadingMsg.style.display = 'none';
                     payBtn.disabled = false;
@@ -850,52 +840,22 @@
                     return;
                 }
 
-                // Initialize Razorpay
-                const options = {
-                    key: razorpayKey,
-                    amount: data.amount,
-                    currency: 'INR',
-                    order_id: data.order_id,
-                    name: 'Hazumake Store',
-                    description: 'Wallet Top-up',
-                    handler: function(response) {
-                        // Payment successful - submit the hidden form
-                        document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
-                        document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
-                        document.getElementById('razorpay_signature').value = response.razorpay_signature;
-                        document.getElementById('razorpay-success-form').submit();
-                    },
-                    modal: {
-                        ondismiss: function() {
-                            // 🌟 2. HIDE THE LOADER IF THEY CANCEL/CLOSE THE RAZORPAY WINDOW
-                            overlay.style.display = 'none';
-                            loadingMsg.style.display = 'none';
-                            payBtn.disabled = false;
-                            payBtn.textContent = 'Pay Now';
-                        }
-                    },
-                    prefill: {
-                        name: '{{ user.get_full_name|default:user.username }}',
-                        email: '{{ user.email }}',
-                    },
-                    theme: {
-                        color: '#7c3aed'
-                    }
-                };
-
-                const rzp = new Razorpay(options);
-                rzp.open();
-
-                // 🌟 3. HIDE THE LOADER ONCE RAZORPAY ACTUALLY OPENS
-                // Razorpay takes a second to pop up, so we hide our loader once it's ready.
-                setTimeout(() => {
+                // Redirect to ExPay payment URL
+                if (data.payment_url) {
+                    window.location.href = data.payment_url;
+                } else {
+                    errorMsg.textContent = 'Payment URL not received from server';
+                    errorMsg.style.display = 'block';
                     overlay.style.display = 'none';
-                }, 1500);
+                    loadingMsg.style.display = 'none';
+                    payBtn.disabled = false;
+                    payBtn.textContent = 'Pay Now';
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-                // 🌟 4. HIDE THE LOADER IF THERE IS A BACKEND ERROR
+                errorMsg.textContent = 'An error occurred. Please try again.';
+                errorMsg.style.display = 'block';
                 overlay.style.display = 'none';
                 loadingMsg.style.display = 'none';
                 payBtn.disabled = false;

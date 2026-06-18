@@ -14,6 +14,7 @@ class Order(models.Model):
     PAYMENT_CHOICES = (
         ('WALLET', 'Wallet'),
         ('RAZORPAY', 'Razorpay'),
+        ('EXPAY', 'ExPay'),
     )
 
     PAYMENT_STATUS_CHOICES = (
@@ -28,6 +29,13 @@ class Order(models.Model):
     game = models.ForeignKey('products.Game', on_delete=models.PROTECT, null=True)
     smile_product_id = models.CharField(max_length=20, null=True, blank=True)
     smile_order_id = models.CharField(max_length=100, blank=True, null=True)
+    payment_transaction_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text='Payment gateway transaction ID (ExPay orderId, Razorpay order_id, etc.)'
+    )
     player_uid = models.CharField(max_length=50, default='', blank=False)
     player_sid = models.CharField(max_length=50, blank=True, default='')
     quantity = models.PositiveIntegerField(default=1)

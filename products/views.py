@@ -6,6 +6,9 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Count, Q
 from django.views.decorators.http import require_POST
 from .models import Product, Game
+from hazu.smile_api import verify_player
+import logging
+logger = logging.getLogger(__name__)
 
 def home(request):
     featured_games = Game.objects.filter(
@@ -69,45 +72,38 @@ def product_detail(request, pk):
 
 @login_required
 @require_POST
-def verify_player_view(request):
-    body = json.loads(request.body)
-    game_slug = body.get('game_slug')
-    player_uid = body.get('uid')
-    player_sid = body.get('sid', '')
-    product_id = body.get('productid')
+def verify_player_view(request, slug):
+    game = get_object_or_404(Game, slug=slug, is_active=True)
 
-    if not game_slug and product_id:
-        try:
-            fallback_product = Product.objects.select_related('game').get(smile_product_id=product_id)
-            game_slug = fallback_product.game.supplier_game_code or fallback_product.game.slug
-        except Product.DoesNotExist:
-            game_slug = None
+    try:
+        body = json.loads(request.body)
+        player_uid = str(body.get('uid') or body.get('userid', '')).strip()
+        player_sid = str(body.get('sid') or body.get('zoneid', '')).strip()
+        product_id = str(body.get('productid') or body.get('product_id', '')).strip()
+    except (ValueError, AttributeError):
+        return JsonResponse({'status': 400, 'message': 'Invalid JSON'}, status=400)
 
-    if game_slug:
-        game_slug = str(game_slug).replace(' ', '').replace('-', '').lower()
-
-    if not game_slug or not player_uid:
-        return JsonResponse({'error': 'Missing fields'}, status=400)
-
-    if not product_id:
-        p = Product.objects.filter(
-            is_active=True,
-        ).filter(
-            game__supplier_game_code=game_slug,
-        ).first() or Product.objects.filter(
-            is_active=True,
-        ).filter(
-            game__slug=game_slug,
-        ).first()
-        if p:
-            product_id = p.smile_product_id
-        else:
-            return JsonResponse({'error': 'Product ID is required.'}, status=400)
+    if not player_uid or not product_id:
+        return JsonResponse({'status': 400, 'success': False, 'message': 'uid and productid are required'}, status=400)
 
     from hazu.smile_api import verify_player
-    username = verify_player(game_slug, product_id, player_uid, player_sid)
+    game_slug = game.supplier_game_code or game.slug
+    print('VERIFY PLAYER VIEW CALL', {'slug': slug, 'game_slug': game_slug, 'uid': player_uid, 'sid': player_sid, 'productid': product_id})
+    username = verify_player(
+        game_slug=game_slug,
+        product_id=product_id,
+        player_uid=player_uid,
+        player_sid=player_sid,
+    )
+    print('VERIFY PLAYER VIEW RESULT', {'username': username})
+    logger.info("getrole raw: %s", username)
 
     if username:
-        return JsonResponse({'success': True, 'username': username})
-    else:
-        return JsonResponse({'success': False, 'error': 'Player not found'})
+        return JsonResponse({
+            'status': 200,
+            'success': True,
+            'nickname': username,
+            'uid': player_uid,
+            'zone': player_sid,
+        })
+    return JsonResponse({'status': 400, 'success': False, 'message': 'Verification failed. Try again.'}, status=400)

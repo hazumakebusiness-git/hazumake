@@ -32,3 +32,34 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.wallet.user.email} - {self.type} {self.amount}"
+
+
+class WalletTopup(models.Model):
+    STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='wallet_topups')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=10, default='INR')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    payment_method = models.CharField(max_length=20, default='EXPAY')
+    payment_transaction_id = models.CharField(max_length=100, null=True, blank=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    def mark_completed(self):
+        self.status = 'COMPLETED'
+        self.completed_at = timezone.now()
+        self.save()
+
+    def mark_failed(self):
+        self.status = 'FAILED'
+        self.save()
+
+    def __str__(self):
+        return f"{self.user.email} top-up ₹{self.amount} ({self.status})"

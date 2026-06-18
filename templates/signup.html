@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Account - Hazumake Store{% endblock %}
+
+{% block extra_css %}
+<style>
+body { background: var(--bg-color); color: var(--text-main); }
+.auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--safe-padding-desktop); }
+.card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--border-radius-lg); box-shadow: var(--shadow); width: min(520px, 100%); padding: 2.25rem; }
+h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main); }
+p.lead { color: var(--text-muted); margin-bottom: 1.5rem; }
+.stepper { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 1.75rem; }
+.step { width: 14px; height: 14px; border-radius: 999px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.08); }
+.step.active { background: var(--primary-3); box-shadow: 0 0 0 4px rgba(255,107,43,0.13); }
+.form-group { margin-bottom: 1.25rem; }
+label { display: block; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--text-main); }
+input { width: 100%; padding: 1rem 1.1rem; border: 1px solid var(--glass-border); border-radius: var(--border-radius-sm); background: rgba(26,26,46,0.5); color: var(--text-main); font-size: 1rem; transition: all 0.2s ease; }
+input:focus { outline: none; border-color: var(--primary-3); box-shadow: 0 0 0 3px rgba(255,107,43,0.1); }
+button { width: 100%; padding: 1rem 1.1rem; border: none; border-radius: var(--border-radius-sm); background: linear-gradient(135deg, var(--primary-3), var(--accent-3)); color: #fff; font-weight: 700; cursor: pointer; font-size: 1rem; transition: all 0.3s ease; }
+button:hover { box-shadow: 0 8px 24px rgba(255,107,43,0.3); transform: translateY(-2px); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+.message { border-radius: var(--border-radius-sm); padding: 1rem 1.1rem; margin-bottom: 1rem; font-size: 0.95rem; }
+.message.error { background: rgba(248,113,113,0.15); color: #fecaca; border: 1px solid rgba(248,113,113,0.2); }
+.message.success { background: rgba(16,185,129,0.15); color: #a7f3d0; border: 1px solid rgba(16,185,129,0.2); }
+.bottom-link { margin-top: 1.5rem; text-align: center; color: var(--text-muted); }
+.bottom-link a { color: var(--primary-3); text-decoration: none; font-weight: 500; transition: all 0.2s ease; }
+.bottom-link a:hover { color: var(--accent-3); text-decoration: underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="card">
+    <h1>Create your Hazumake account</h1>
+    <p class="lead">Create account with password (recommended) or use a magic link.</p>
+    <div class="stepper">
+      <div class="step" id="step-dot-1"></div>
+      <div class="step" id="step-dot-2"></div>
+      <div class="step" id="step-dot-3"></div>
+    </div>
+
+    <div id="step-1" class="step-panel">
+      <div style="margin-bottom:1rem; text-align:center;">
+        <button id="use-password" style="background:transparent; border:1px dashed rgba(255,255,255,0.08); padding:0.6rem 1rem; border-radius:12px; margin-bottom:0.75rem;">Create with password instead</button>
+      </div>
+      <div class="message success" id="message-step-1" style="display:none;"></div>
+      <div class="message error" id="error-step-1" style="display:none;"></div>
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+      <button id="send-link-btn">Send sign-up link</button>
+    </div>
+
+    <div id="step-2" class="step-panel" style="display:none;">
+      <div class="message success" id="message-step-2"></div>
+      <p>We emailed you a secure sign-up link. Open the link from the same browser to continue.</p>
+      <button id="resend-link-btn">Resend email</button>
+    </div>
+
+    <div id="step-3" class="step-panel" style="display:none;">
+      <div class="message error" id="error-step-3" style="display:none;"></div>
+      <div class="form-group">
+        <label for="password">Set a password</label>
+        <input id="password" type="password" placeholder="New password" autocomplete="new-password" required>
+      </div>
+      <button id="complete-signup-btn">Complete signup</button>
+    </div>
+
+    <p class="bottom-link">Already have an account? <a href="/auth/signin/">Sign in instead</a></p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+  import { auth } from "{% static 'js/firebase_config.js' %}";
+  import {
+    getAuth,
+    sendSignInLinkToEmail,
+    isSignInWithEmailLink,
+    signInWithEmailLink,
+    updatePassword,
+    signInWithEmailAndPassword
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const actionCodeSettings = {
+    url: window.location.origin + '/auth/signup/',
+    handleCodeInApp: true,
+  };
+
+  const stepPanels = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')];
+  const stepDots = [document.getElementById('step-dot-1'), document.getElementById('step-dot-2'), document.getElementById('step-dot-3')];
+  const message1 = document.getElementById('message-step-1');
+  const error1 = document.getElementById('error-step-1');
+  const message2 = document.getElementById('message-step-2');
+  const error3 = document.getElementById('error-step-3');
+
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const sendLinkBtn = document.getElementById('send-link-btn');
+  const resendLinkBtn = document.getElementById('resend-link-btn');
+  const completeSignupBtn = document.getElementById('complete-signup-btn');
+  const usePasswordBtn = document.getElementById('use-password');
+
+  const authInstance = auth;
+
+  function setStep(index) {
+    stepPanels.forEach((panel, idx) => panel.style.display = idx === index ? 'block' : 'none');
+    stepDots.forEach((dot, idx) => dot.classList.toggle('active', idx === index));
+  }
+
+  function showMessage(target, text) {
+    target.textContent = text;
+    target.style.display = 'block';
+  }
+
+  function hideMessage(target) {
+    target.style.display = 'none';
+  }
+
+  async function sendMagicLink() {
+    const email = emailInput.value.trim();
+    hideMessage(error1);
+    if (!email) {
+      showMessage(error1, 'Please enter a valid email address.');
+      return;
+    }
+
+    try {
+      await sendSignInLinkToEmail(authInstance, email, actionCodeSettings);
+      window.localStorage.setItem('hazumake_signup_email', email);
+      showMessage(message1, 'Check your inbox for the sign-up link.');
+      setStep(1);
+      message2.textContent = `Email sent to ${email}. Open the link from this browser.`;
+    } catch (err) {
+      showMessage(error1, err.message || 'Unable to send sign-up link.');
+    }
+  }
+
+  async function handleEmailLink() {
+    if (isSignInWithEmailLink(authInstance, window.location.href)) {
+      let email = window.localStorage.getItem('hazumake_signup_email');
+      if (!email) {
+        email = window.prompt('Please confirm your email for sign-up link:');
+      }
+      if (!email) {
+        return;
+      }
+
+      try {
+        await signInWithEmailLink(authInstance, email, window.location.href);
+        setStep(2);
+        showMessage(message2, 'Email confirmed! Set a password to complete signup.');
+      } catch (err) {
+        showMessage(error1, err.message || 'Invalid or expired sign-up link.');
+      }
+    }
+  }
+
+  async function completeSignup() {
+    const password = passwordInput.value.trim();
+    hideMessage(error3);
+    if (password.length < 8) {
+      showMessage(error3, 'Password must be at least 8 characters long.');
+      return;
+    }
+
+    try {
+      const user = authInstance.currentUser;
+      if (!user) {
+        showMessage(error3, 'Unable to find authenticated Firebase user. Please retry sign-up.');
+        return;
+      }
+      await updatePassword(user, password);
+      const idToken = await user.getIdToken();
+      await fetch('/auth/firebase-session/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''
+        },
+        body: JSON.stringify({ id_token: idToken })
+      });
+      window.location.href = '/dashboard/';
+    } catch (err) {
+      showMessage(error3, err.message || 'Unable to complete signup.');
+    }
+  }
+
+  sendLinkBtn.addEventListener('click', sendMagicLink);
+  resendLinkBtn.addEventListener('click', sendMagicLink);
+  completeSignupBtn.addEventListener('click', completeSignup);
+  usePasswordBtn.addEventListener('click', (e) => {
+    // Show password creation form instead of magic-link flow
+    document.getElementById('step-1').style.display = 'none';
+    document.getElementById('step-3').style.display = 'block';
+    setStep(2);
+  });
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    setStep(0);
+    await handleEmailLink();
+  });
+</script>
+{% endblock %}

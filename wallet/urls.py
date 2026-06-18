@@ -3,5 +3,5 @@ from . import views
 
 urlpatterns = [
     path('', views.wallet_topup, name='wallet'),
-    path('create-order/', views.razorpay_create_order, name='razorpay_create_order'),
+    path('create-order/', views.expay_create_order, name='expay_create_order'),
 ]

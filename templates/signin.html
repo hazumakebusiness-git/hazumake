@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign In - Hazumake Store{% endblock %}
+
+{% block extra_css %}
+<style>
+body { background: var(--bg-color); color: var(--text-main); }
+.auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--safe-padding-desktop); }
+.card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--border-radius-lg); box-shadow: var(--shadow); width: min(520px, 100%); padding: 2.25rem; }
+h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main); }
+p.lead { color: var(--text-muted); margin-bottom: 1.5rem; }
+.stepper { display: flex; justify-content: center; gap: 0.75rem; margin-bottom: 1.75rem; }
+.step { width: 14px; height: 14px; border-radius: 999px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.08); }
+.step.active { background: var(--primary-3); box-shadow: 0 0 0 4px rgba(255,107,43,0.13); }
+.form-group { margin-bottom: 1.25rem; }
+label { display: block; font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--text-main); }
+input { width: 100%; padding: 1rem 1.1rem; border: 1px solid var(--glass-border); border-radius: var(--border-radius-sm); background: rgba(26,26,46,0.5); color: var(--text-main); font-size: 1rem; transition: all 0.2s ease; }
+input:focus { outline: none; border-color: var(--primary-3); box-shadow: 0 0 0 3px rgba(255,107,43,0.1); }
+button { width: 100%; padding: 1rem 1.1rem; border: none; border-radius: var(--border-radius-sm); background: linear-gradient(135deg, var(--primary-3), var(--accent-3)); color: #fff; font-weight: 700; cursor: pointer; font-size: 1rem; transition: all 0.3s ease; }
+button:hover { box-shadow: 0 8px 24px rgba(255,107,43,0.3); transform: translateY(-2px); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+.message { border-radius: var(--border-radius-sm); padding: 1rem 1.1rem; margin-bottom: 1rem; font-size: 0.95rem; }
+.message.error { background: rgba(248,113,113,0.15); color: #fecaca; border: 1px solid rgba(248,113,113,0.2); }
+.message.success { background: rgba(16,185,129,0.15); color: #a7f3d0; border: 1px solid rgba(16,185,129,0.2); }
+.bottom-link { margin-top: 1.5rem; text-align: center; color: var(--text-muted); }
+.bottom-link a { color: var(--primary-3); text-decoration: none; font-weight: 500; transition: all 0.2s ease; }
+.bottom-link a:hover { color: var(--accent-3); text-decoration: underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="card">
+    <h1>Sign in to Hazumake</h1>
+    <p class="lead">Sign in with password or choose magic link if you prefer passwordless.</p>
+    <div class="stepper">
+      <div class="step" id="step-dot-1"></div>
+      <div class="step" id="step-dot-2"></div>
+    </div>
+
+    <div id="password-panel" class="step-panel">
+      <div class="message error" id="error-pass" style="display:none;"></div>
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="identifier">Email</label>
+          <input id="identifier" name="identifier" type="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" placeholder="Your password" required>
+        </div>
+        <button type="submit">Sign in with password</button>
+      </form>
+      <div style="margin-top:1rem; text-align:center;">
+        <button id="show-magic-link" style="background:transparent; border:1px dashed rgba(255,255,255,0.08); padding:0.6rem 1rem; border-radius:12px;">Use magic link instead</button>
+      </div>
+    </div>
+
+    <div id="magic-panel" class="step-panel" style="display:none;">
+      <div class="message error" id="error-step-1" style="display:none;"></div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <button id="send-link-btn">Send sign-in link</button>
+      <div style="margin-top:1rem; text-align:center;">
+        <button id="show-password" style="background:transparent; border:1px dashed rgba(255,255,255,0.08); padding:0.6rem 1rem; border-radius:12px;">Use password instead</button>
+      </div>
+    </div>
+
+    <p class="bottom-link">New here? <a href="/auth/signup/">Create an account</a></p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+  import { auth } from "{% static 'js/firebase_config.js' %}";
+  import {
+    sendSignInLinkToEmail,
+    isSignInWithEmailLink,
+    signInWithEmailLink,
+    getIdToken,
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const actionCodeSettings = {
+    url: window.location.origin + '/auth/signin/',
+    handleCodeInApp: true,
+  };
+
+  const stepPanels = [document.getElementById('step-1'), document.getElementById('step-2')];
+  const stepDots = [document.getElementById('step-dot-1'), document.getElementById('step-dot-2')];
+  const error1 = document.getElementById('error-step-1');
+  const message2 = document.getElementById('message-step-2');
+
+  const emailInput = document.getElementById('email');
+  const sendLinkBtn = document.getElementById('send-link-btn');
+  const resendLinkBtn = document.getElementById('resend-link-btn');
+  const useDifferentEmailBtn = document.getElementById('use-different-email-btn');
+
+  function setStep(index) {
+    stepPanels.forEach((panel, idx) => panel.style.display = idx === index ? 'block' : 'none');
+    stepDots.forEach((dot, idx) => dot.classList.toggle('active', idx === index));
+  }
+
+  function showError(text) {
+    error1.textContent = text;
+    error1.style.display = 'block';
+  }
+
+  function hideError() {
+    error1.style.display = 'none';
+  }
+
+  async function sendMagicLink() {
+    const email = emailInput.value.trim();
+    hideError();
+    if (!email) {
+      showError('Please enter a valid email address.');
+      return;
+    }
+
+    try {
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      window.localStorage.setItem('hazumake_signin_email', email);
+      setStep(1);
+      message2.textContent = `Sign-in link sent to ${email}. Open it in this browser to continue.`;
+    } catch (err) {
+      showError(err.message || 'Unable to send sign-in link.');
+    }
+  }
+
+  async function handleEmailLink() {
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      let email = window.localStorage.getItem('hazumake_signin_email');
+      if (!email) {
+        email = window.prompt('Please confirm your email for sign-in:');
+      }
+      if (!email) {
+        return;
+      }
+
+      try {
+        const userCredential = await signInWithEmailLink(auth, email, window.location.href);
+        const idToken = await userCredential.user.getIdToken();
+        
+        // Extract CSRF token from cookies with validation
+        const getCsrfToken = () => {
+          const match = document.cookie.match(/csrftoken=([^;]+)/);
+          if (!match) {
+            console.warn('CSRF token not found in cookies');
+            return '';
+          }
+          return match[1];
+        };
+        
+        const response = await fetch('/auth/firebase-session/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+          },
+          body: JSON.stringify({ id_token: idToken })
+        });
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Unable to establish session.');
+        }
+        window.location.href = '/dashboard/';
+      } catch (err) {
+        showError(err.message || 'Unable to complete sign-in.');
+      }
+    }
+  }
+
+  sendLinkBtn.addEventListener('click', sendMagicLink);
+  resendLinkBtn.addEventListener('click', sendMagicLink);
+
+  // Toggle between password and magic-link UI
+  document.getElementById('show-magic-link').addEventListener('click', (e) => {
+    document.getElementById('password-panel').style.display = 'none';
+    document.getElementById('magic-panel').style.display = 'block';
+  });
+  document.getElementById('show-password').addEventListener('click', (e) => {
+    document.getElementById('magic-panel').style.display = 'none';
+    document.getElementById('password-panel').style.display = 'block';
+  });
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    setStep(0);
+    await handleEmailLink();
+  });
+</script>
+{% endblock %}

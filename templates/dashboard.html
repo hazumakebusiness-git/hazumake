@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Hazumake{% endblock %}
+
+{% block extra_css %}
+<style>
+.dashboard-container { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+.dashboard-header { margin-bottom: 2rem; }
+.dashboard-header h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+.dashboard-header p { color: #94a3b8; font-size: 1.1rem; }
+
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+
+.card { background: rgba(15, 15, 15, 0.94); border: 1px solid rgba(124, 58, 237, 0.15); border-radius: 20px; padding: 1.75rem; }
+.card h3 { font-size: 1rem; color: #cbd5e1; margin-bottom: 1rem; }
+.card-value { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #7C3AED, #06B6D4); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.card-unit { color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem; }
+
+.action-btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 600; transition: all 0.3s; }
+.action-btn-primary { background: linear-gradient(135deg, #ff6b2b, #f97316); color: #fff; }
+.action-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255, 107, 43, 0.3); }
+.action-btn-secondary { background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid rgba(255,255,255,0.12); }
+.action-btn-secondary:hover { background: rgba(255, 255, 255, 0.12); }
+
+.user-info { margin-bottom: 2rem; }
+.user-info-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.user-info-label { color: #cbd5e1; }
+.user-info-value { color: #f8fafc; font-weight: 600; }
+
+.orders-section, .recent-activity { margin-top: 2rem; }
+.section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
+
+<style>
+.dashboard-container { max-width: 1200px; margin: 0 auto; padding: 3rem var(--safe-padding-desktop); }
+.dashboard-header { margin-bottom: 2rem; }
+.dashboard-header h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main); }
+.dashboard-header p { color: var(--text-muted); font-size: 1.1rem; }
+
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+
+.card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--border-radius-lg); padding: 1.75rem; box-shadow: var(--shadow); transition: all 0.3s ease; }
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: rgba(255,107,43,0.25); }
+.card h3 { font-size: 1rem; color: var(--text-muted); margin-bottom: 1rem; }
+.card-value { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, var(--primary-3), var(--accent-2)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.card-unit { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; }
+
+.action-btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: var(--border-radius-sm); text-decoration: none; font-weight: 600; transition: all 0.3s ease; }
+.action-btn-primary { background: linear-gradient(135deg, var(--primary-3), var(--accent-3)); color: #fff; border: none; }
+.action-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255, 107, 43, 0.3); }
+.action-btn-secondary { background: rgba(255, 255, 255, 0.08); color: #fff; border: 1px solid var(--glass-border); transition: all 0.3s ease; }
+.action-btn-secondary:hover { background: rgba(255, 255, 255, 0.12); border-color: var(--primary-3); }
+
+.user-info { margin-bottom: 2rem; }
+.user-info-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--glass-border); }
+.user-info-label { color: var(--text-muted); }
+.user-info-value { color: var(--text-main); font-weight: 600; }
+
+.orders-section, .recent-activity { margin-top: 2rem; }
+.section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--text-main); }
+
+@media (max-width: 768px) {
+  .dashboard-container { padding: 2rem 1rem; }
+  .dashboard-header h1 { font-size: 1.75rem; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+</style>
+      <h3>🎮 Account Status</h3>
+      <div class="card-value" style="font-size: 1.5rem;">✅</div>
+      <div class="card-unit">Account verified</div>
+      <a href="{% url 'dashboard' %}" class="action-btn action-btn-secondary" style="display: block; margin-top: 1rem; text-align: center;">Settings</a>
+    </div>
+  </div>
+
+  <!-- User Information -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1.5rem;">Account Information</h3>
+    <div class="user-info">
+      <div class="user-info-row">
+        <span class="user-info-label">Email</span>
+        <span class="user-info-value">{{ request.user.email }}</span>
+      </div>
+      <div class="user-info-row">
+        <span class="user-info-label">Name</span>
+        <span class="user-info-value">{{ request.user.first_name|default:"Not set" }} {{ request.user.last_name|default:"" }}</span>
+      </div>
+      <div class="user-info-row">
+        <span class="user-info-label">Member since</span>
+        <span class="user-info-value">{{ request.user.date_joined|date:"M d, Y" }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Orders -->
+  {% if recent_orders %}
+  <div class="orders-section">
+    <h2 class="section-title">Recent Orders</h2>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 2px solid rgba(124, 58, 237, 0.2);">
+            <th style="text-align: left; padding: 1rem; color: #cbd5e1;">Product</th>
+            <th style="text-align: left; padding: 1rem; color: #cbd5e1;">Amount</th>
+            <th style="text-align: left; padding: 1rem; color: #cbd5e1;">Status</th>
+            <th style="text-align: left; padding: 1rem; color: #cbd5e1;">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+            <td style="padding: 1rem; color: #f8fafc;">{{ order.product.name }}</td>
+            <td style="padding: 1rem; color: #f8fafc;">{{ order.product.price }} INR</td>
+            <td style="padding: 1rem;">
+              <span style="display: inline-block; padding: 0.35rem 0.75rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+              {% if order.status == 'COMPLETED' %}background: rgba(34, 197, 94, 0.15); color: #86efac;
+              {% elif order.status == 'PENDING' %}background: rgba(251, 191, 36, 0.15); color: #fcd34d;
+              {% elif order.status == 'FAILED' %}background: rgba(248, 113, 113, 0.15); color: #fecaca;
+              {% endif %}">{{ order.status }}</span>
+            </td>
+            <td style="padding: 1rem; color: #94a3b8;">{{ order.created_at|date:"M d, Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Quick Actions -->
+  <div style="margin-top: 3rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+    <a href="{% url 'shop' %}" class="action-btn action-btn-primary">Browse Games</a>
+    <a href="{% url 'wallet' %}" class="action-btn action-btn-secondary">Manage Wallet</a>
+    <a href="{% url 'orders' %}" class="action-btn action-btn-secondary">View Orders</a>
+    <a href="{% url 'contact' %}" class="action-btn action-btn-secondary">Contact Support</a>
+  </div>
+</div>
+{% endblock %}

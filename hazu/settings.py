@@ -16,13 +16,20 @@ from django.core.exceptions import ImproperlyConfigured
 
 try:
     from dotenv import load_dotenv
-    from pathlib import Path
-    load_dotenv(Path(__file__).resolve().parent / '.env')
+    load_dotenv(Path(__file__).resolve().parent.parent / '.env')
 except ImportError:
     pass
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Firebase Admin SDK path
+FIREBASE_ADMIN_CREDENTIALS = BASE_DIR / 'firebase-adminsdk.json'
+
+# Secure session settings
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+# SESSION_COOKIE_SECURE = True  # uncomment when using HTTPS in production
 
 
 # Quick-start development settings - unsuitable for production
@@ -38,6 +45,10 @@ ALLOWED_HOSTS = os.environ.get(
     'ALLOWED_HOSTS',
     'localhost,127.0.0.1'
 ).split(',')
+
+# Add testserver for Django test client
+if DEBUG:
+    ALLOWED_HOSTS.extend(['testserver', 'testserver:8000'])
 
 # Application definition
 
@@ -59,6 +70,7 @@ INSTALLED_APPS = [
     'products',
     'wallet',
     'core',
+    'payments',
     'rest_framework',
 ]
 
@@ -71,16 +83,28 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
+# Email-based authentication configuration
+LOGIN_URL = '/auth/signin/'
 LOGIN_REDIRECT_URL = '/dashboard/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGOUT_REDIRECT_URL = '/auth/signin/'
 ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # We handle verification manually via OTP
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_SIGNUP_FIELDS = ['email', 'password1', 'password2']
+ACCOUNT_UNIQUE_EMAIL = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online'},
+        'APP': {
+            'client_id': os.environ.get('GOOGLE_CLIENT_ID', ''),
+            'secret': os.environ.get('GOOGLE_CLIENT_SECRET', ''),
+            'key': ''
+        }
     }
 }
 
@@ -197,15 +221,22 @@ SIMPLE_JWT = {
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')
 
+# ExPay Settings (new payment gateway)
+EXPAY_USER_TOKEN = os.environ.get('EXPAY_USER_TOKEN', '048c3ee89e8ef91c1eac113302abad59')
+EXPAY_WEBHOOK_SECRET = os.environ.get('EXPAY_WEBHOOK_SECRET', '00f0e9bc2546a11c35ee346d60e3a58379884acc')
+EXPAY_REDIRECT_URL = os.environ.get('EXPAY_REDIRECT_URL', 'https://hazumakestore.com/payment/return/')
+
 # Google OAuth2 Settings
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
 
 # Smile.one supplier settings
+SMILE_BASE_URL = os.environ.get('SMILE_BASE_URL', 'https://www.smile.one')
+SMILE_API_PREFIX = os.environ.get('SMILE_API_PREFIX', 'br/smilecoin/api')
+SMILE_COUNTRY = os.environ.get('SMILE_COUNTRY', 'br')
+SMILE_KEY = os.environ.get('SMILE_KEY', '')
 SMILE_UID = os.environ.get('SMILE_UID', '')
 SMILE_EMAIL = os.environ.get('SMILE_EMAIL', '')
-SMILE_KEY = os.environ.get('SMILE_KEY', '')
-SMILE_BASE_URL = os.environ.get('SMILE_BASE_URL', 'https://www.smile.one/serve/api')
 SMILE_BRL_TO_INR = 19.07
 
 # Email configuration

@@ -1,69 +1,25 @@
 # Create your views here.
 import json
+import logging
+import time
 from decimal import Decimal, InvalidOperation
 
-import razorpay
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.views.decorators.csrf import csrf_exempt
 
-from .models import Transaction
+from services.payments.expay_api import get_client as get_expay_client, ExPayError
+from .models import Transaction, WalletTopup
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def wallet_topup(request):
     wallet = request.user.wallet
-
-    if request.method == 'POST':
-        razorpay_payment_id = request.POST.get('razorpay_payment_id')
-        razorpay_order_id = request.POST.get('razorpay_order_id')
-        razorpay_signature = request.POST.get('razorpay_signature')
-
-        if not (razorpay_payment_id and razorpay_order_id and razorpay_signature):
-            messages.error(request, 'Payment verification failed.')
-            return redirect('wallet')
-
-        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-        try:
-            client.utility.verify_payment_signature({
-                'razorpay_order_id': razorpay_order_id,
-                'razorpay_payment_id': razorpay_payment_id,
-                'razorpay_signature': razorpay_signature,
-            })
-
-            razorpay_order = client.order.fetch(razorpay_order_id)
-            amount_paise = razorpay_order.get('amount')
-            if amount_paise is None:
-                raise ValueError('Unable to fetch Razorpay order amount.')
-
-            amount_inr = Decimal(amount_paise) / Decimal('100')
-            wallet.balance = wallet.balance + amount_inr
-            wallet.save()
-
-            Transaction.objects.create(
-                wallet=wallet,
-                type='CREDIT',
-                amount=amount_inr,
-                balance_after=wallet.balance,
-                note='Wallet top-up via Razorpay',
-            )
-
-            messages.success(request, f'₹{amount_inr:.2f} added to your wallet!')
-            return redirect('wallet')
-
-        except razorpay.errors.SignatureVerificationError:
-            messages.error(request, 'Payment verification failed.')
-            return redirect('wallet')
-        except Exception as exc:
-            messages.error(request, f'Payment verification failed.')
-            return redirect('wallet')
-
     wallet_inr_estimate = wallet.balance
-    razorpay_key_id = settings.RAZORPAY_KEY_ID
-    print("DEBUG KEY:", razorpay_key_id)  # add this line
     transactions_list = wallet.transactions.all().order_by('-created_at')
     paginator = Paginator(transactions_list, 10)
     page_number = request.GET.get('page')
@@ -72,13 +28,12 @@ def wallet_topup(request):
     return render(request, 'wallet/wallet.html', {
         'wallet': wallet,
         'wallet_inr_estimate': wallet_inr_estimate,
-        'razorpay_key_id': razorpay_key_id,
         'transactions': transactions,
     })
 
-@csrf_exempt
 @login_required
-def razorpay_create_order(request):
+def expay_create_order(request):
+    """Create an ExPay wallet top-up order."""
     if request.method != 'POST':
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
@@ -100,13 +55,38 @@ def razorpay_create_order(request):
         return JsonResponse({'error': 'Minimum top-up amount is ₹10.'}, status=400)
 
     try:
-        amount_paise = int(amount_value * Decimal('100'))
-        razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-        razorpay_order = razorpay_client.order.create({
-            'amount': amount_paise,
-            'currency': 'INR',
-            'payment_capture': 1,
+        # Create unique order ID
+        order_id = f"walletup_{request.user.id}_{int(time.time() * 1000)}"
+        
+        # Call ExPay API to create order
+        api = get_expay_client()
+        result = api.create_order(
+            customer_mobile=request.user.phone or '9000000000',
+            amount=str(amount_value),
+            order_id=order_id,
+            remark1=f'wallet_topup_user_{request.user.id}',
+            remark2='hazumake_wallet',
+        )
+        
+        # Save WalletTopup record for tracking
+        WalletTopup.objects.create(
+            user=request.user,
+            order_id=order_id,
+            payment_transaction_id=result['orderId'],
+            amount=amount_value,
+            status='PENDING',
+        )
+        
+        logger.info('Created ExPay order %s for user %s, amount ₹%s', result['orderId'], request.user.email, amount_value)
+        
+        return JsonResponse({
+            'payment_url': result['payment_url'],
+            'expay_order_id': result['orderId'],
+            'order_id': order_id,
         })
-        return JsonResponse({'order_id': razorpay_order['id'], 'amount': razorpay_order['amount']})
+    except ExPayError as exc:
+        logger.error('ExPay error creating order: %s', exc)
+        return JsonResponse({'error': f'Payment gateway error: {str(exc)}'}, status=400)
     except Exception as exc:
-        return JsonResponse({'error': str(exc)}, status=500)
+        logger.exception('Error creating ExPay order: %s', exc)
+        return JsonResponse({'error': 'An error occurred. Please try again.'}, status=500)
