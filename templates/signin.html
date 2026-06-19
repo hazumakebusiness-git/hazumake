@@ -26,6 +26,10 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 .bottom-link { margin-top: 1.5rem; text-align: center; color: var(--text-muted); }
 .bottom-link a { color: var(--primary-3); text-decoration: none; font-weight: 500; transition: all 0.2s ease; }
 .bottom-link a:hover { color: var(--accent-3); text-decoration: underline; }
+.divider { display: flex; align-items: center; gap: 1rem; margin: 1.25rem 0; color: var(--text-muted); font-size: 0.85rem; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--glass-border); }
+.btn-google { width: 100%; padding: 1rem 1.1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--border-radius-sm); background: rgba(255,255,255,0.05); color: #fff; font-weight: 700; cursor: pointer; font-size: 1rem; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.btn-google:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
 </style>
 {% endblock %}
 
@@ -70,6 +74,17 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
       </div>
     </div>
 
+    <div class="divider">or continue with</div>
+    <button id="google-login-btn" class="btn-google">
+      <svg width="20" height="20" viewBox="0 0 24 24">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Continue with Google
+    </button>
+
     <p class="bottom-link">New here? <a href="/auth/signup/">Create an account</a></p>
   </div>
 </div>
@@ -82,7 +97,8 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
     sendSignInLinkToEmail,
     isSignInWithEmailLink,
     signInWithEmailLink,
-    getIdToken,
+    GoogleAuthProvider,
+    signInWithPopup,
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const actionCodeSettings = {
@@ -90,43 +106,39 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
     handleCodeInApp: true,
   };
 
-  const stepPanels = [document.getElementById('step-1'), document.getElementById('step-2')];
-  const stepDots = [document.getElementById('step-dot-1'), document.getElementById('step-dot-2')];
   const error1 = document.getElementById('error-step-1');
-  const message2 = document.getElementById('message-step-2');
-
   const emailInput = document.getElementById('email');
   const sendLinkBtn = document.getElementById('send-link-btn');
-  const resendLinkBtn = document.getElementById('resend-link-btn');
-  const useDifferentEmailBtn = document.getElementById('use-different-email-btn');
 
-  function setStep(index) {
-    stepPanels.forEach((panel, idx) => panel.style.display = idx === index ? 'block' : 'none');
-    stepDots.forEach((dot, idx) => dot.classList.toggle('active', idx === index));
+  function showError(text) { error1.textContent = text; error1.style.display = 'block'; }
+  function hideError() { error1.style.display = 'none'; }
+
+  function getCsrf() {
+    return document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
   }
 
-  function showError(text) {
-    error1.textContent = text;
-    error1.style.display = 'block';
-  }
-
-  function hideError() {
-    error1.style.display = 'none';
+  async function createSession(idToken) {
+    const response = await fetch('/auth/firebase-session/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+      body: JSON.stringify({ id_token: idToken })
+    });
+    if (response.ok) {
+      window.location.href = '/dashboard/';
+    } else {
+      const data = await response.json();
+      throw new Error(data.error || 'Unable to establish session.');
+    }
   }
 
   async function sendMagicLink() {
     const email = emailInput.value.trim();
     hideError();
-    if (!email) {
-      showError('Please enter a valid email address.');
-      return;
-    }
-
+    if (!email) { showError('Please enter a valid email address.'); return; }
     try {
       await sendSignInLinkToEmail(auth, email, actionCodeSettings);
       window.localStorage.setItem('hazumake_signin_email', email);
-      setStep(1);
-      message2.textContent = `Sign-in link sent to ${email}. Open it in this browser to continue.`;
+      alert(`Sign-in link sent to ${email}. Check your inbox.`);
     } catch (err) {
       showError(err.message || 'Unable to send sign-in link.');
     }
@@ -135,61 +147,42 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   async function handleEmailLink() {
     if (isSignInWithEmailLink(auth, window.location.href)) {
       let email = window.localStorage.getItem('hazumake_signin_email');
-      if (!email) {
-        email = window.prompt('Please confirm your email for sign-in:');
-      }
-      if (!email) {
-        return;
-      }
-
+      if (!email) email = window.prompt('Please confirm your email for sign-in:');
+      if (!email) return;
       try {
         const userCredential = await signInWithEmailLink(auth, email, window.location.href);
         const idToken = await userCredential.user.getIdToken();
-        
-        // Extract CSRF token from cookies with validation
-        const getCsrfToken = () => {
-          const match = document.cookie.match(/csrftoken=([^;]+)/);
-          if (!match) {
-            console.warn('CSRF token not found in cookies');
-            return '';
-          }
-          return match[1];
-        };
-        
-        const response = await fetch('/auth/firebase-session/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken()
-          },
-          body: JSON.stringify({ id_token: idToken })
-        });
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Unable to establish session.');
-        }
-        window.location.href = '/dashboard/';
+        await createSession(idToken);
       } catch (err) {
         showError(err.message || 'Unable to complete sign-in.');
       }
     }
   }
 
-  sendLinkBtn.addEventListener('click', sendMagicLink);
-  resendLinkBtn.addEventListener('click', sendMagicLink);
+  // Google login
+  document.getElementById('google-login-btn').addEventListener('click', async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      await createSession(idToken);
+    } catch (err) {
+      alert(err.message);
+    }
+  });
 
-  // Toggle between password and magic-link UI
-  document.getElementById('show-magic-link').addEventListener('click', (e) => {
+  sendLinkBtn.addEventListener('click', sendMagicLink);
+
+  document.getElementById('show-magic-link').addEventListener('click', () => {
     document.getElementById('password-panel').style.display = 'none';
     document.getElementById('magic-panel').style.display = 'block';
   });
-  document.getElementById('show-password').addEventListener('click', (e) => {
+  document.getElementById('show-password').addEventListener('click', () => {
     document.getElementById('magic-panel').style.display = 'none';
     document.getElementById('password-panel').style.display = 'block';
   });
 
   document.addEventListener('DOMContentLoaded', async () => {
-    setStep(0);
     await handleEmailLink();
   });
 </script>
