@@ -181,7 +181,9 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   });
 
   document.addEventListener('DOMContentLoaded', async () => {
+    console.log('Checking redirect result...');
     const redirectResult = await getRedirectResult(auth);
+    console.log('Redirect result:', redirectResult);
     if (redirectResult) {
       try {
         const idToken = await redirectResult.user.getIdToken();
