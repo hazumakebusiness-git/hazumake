@@ -96,6 +96,8 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
     updatePassword,
     GoogleAuthProvider,
     signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const actionCodeSettings = {
@@ -143,6 +145,7 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
       setStep(1);
       message2.textContent = `Email sent to ${email}. Open the link from this browser.`;
     } catch (err) {
+      console.error('sendSignInLinkToEmail error', err);
       error1.textContent = err.message || 'Unable to send link.';
       error1.style.display = 'block';
     }
@@ -158,6 +161,7 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
         setStep(2);
         message2.textContent = 'Email confirmed! Set a password or skip to continue.';
       } catch (err) {
+        console.error('signInWithEmailLink error', err);
         error1.textContent = err.message || 'Invalid or expired link.';
         error1.style.display = 'block';
       }
@@ -187,7 +191,17 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
       const idToken = await result.user.getIdToken();
       await createSession(idToken);
     } catch (err) {
-      alert(err.message);
+      console.error('Google signInWithPopup error', err);
+      if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request')) {
+        try {
+          await signInWithRedirect(auth, provider);
+        } catch (redirErr) {
+          console.error('signInWithRedirect error', redirErr);
+          alert(redirErr.message || 'Unable to start redirect sign-in.');
+        }
+        return;
+      }
+      alert(err.message || 'Unable to sign up with Google.');
     }
   });
 
@@ -198,6 +212,16 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   document.addEventListener('DOMContentLoaded', async () => {
     setStep(0);
     await handleEmailLink();
+    // Handle redirect result (Google redirect fallback)
+    try {
+      const redirectResult = await getRedirectResult(auth);
+      if (redirectResult && redirectResult.user) {
+        const idToken = await redirectResult.user.getIdToken();
+        await createSession(idToken);
+      }
+    } catch (err) {
+      console.error('getRedirectResult error', err);
+    }
   });
 </script>
 {% endblock %}

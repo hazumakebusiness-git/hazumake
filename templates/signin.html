@@ -99,6 +99,8 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
     signInWithEmailLink,
     GoogleAuthProvider,
     signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const actionCodeSettings = {
@@ -140,6 +142,7 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
       window.localStorage.setItem('hazumake_signin_email', email);
       alert(`Sign-in link sent to ${email}. Check your inbox.`);
     } catch (err) {
+      console.error('sendSignInLinkToEmail error', err);
       showError(err.message || 'Unable to send sign-in link.');
     }
   }
@@ -167,7 +170,18 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
       const idToken = await result.user.getIdToken();
       await createSession(idToken);
     } catch (err) {
-      alert(err.message);
+      console.error('Google signInWithPopup error', err);
+      // If popup is blocked or closed, fallback to redirect sign-in
+      if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request')) {
+        try {
+          await signInWithRedirect(auth, provider);
+        } catch (redirErr) {
+          console.error('signInWithRedirect error', redirErr);
+          alert(redirErr.message || 'Unable to start redirect sign-in.');
+        }
+        return;
+      }
+      alert(err.message || 'Unable to sign in with Google.');
     }
   });
 
@@ -184,6 +198,16 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 
   document.addEventListener('DOMContentLoaded', async () => {
     await handleEmailLink();
+    // Handle redirect result (Google redirect fallback)
+    try {
+      const redirectResult = await getRedirectResult(auth);
+      if (redirectResult && redirectResult.user) {
+        const idToken = await redirectResult.user.getIdToken();
+        await createSession(idToken);
+      }
+    } catch (err) {
+      console.error('getRedirectResult error', err);
+    }
   });
 </script>
 {% endblock %}
