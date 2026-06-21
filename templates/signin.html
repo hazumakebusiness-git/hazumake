@@ -100,8 +100,6 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
     GoogleAuthProvider,
     signInWithRedirect,
     getRedirectResult,
-    setPersistence,
-    browserLocalStorage,
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const actionCodeSettings = {
@@ -163,16 +161,9 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
     }
   }
 
-  // Google login (use redirect to avoid popup blocking)
-  document.getElementById('google-login-btn').addEventListener('click', async () => {
+  document.getElementById('google-login-btn').addEventListener('click', () => {
     const provider = new GoogleAuthProvider();
-    try {
-      await setPersistence(auth, browserLocalStorage);
-      signInWithRedirect(auth, provider);
-    } catch (err) {
-      console.error('Google redirect persistence error:', err);
-      alert('Unable to start Google sign-in: ' + err.message);
-    }
+    signInWithRedirect(auth, provider);
   });
 
   sendLinkBtn.addEventListener('click', sendMagicLink);
@@ -181,33 +172,26 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
     document.getElementById('password-panel').style.display = 'none';
     document.getElementById('magic-panel').style.display = 'block';
   });
+
   document.getElementById('show-password').addEventListener('click', () => {
     document.getElementById('magic-panel').style.display = 'none';
     document.getElementById('password-panel').style.display = 'block';
   });
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Checking redirect result...');
+  // Handle redirect result on page load
+  (async () => {
     try {
       const redirectResult = await getRedirectResult(auth);
-      console.log('Redirect result:', redirectResult);
       if (redirectResult) {
-        try {
-          const idToken = await redirectResult.user.getIdToken();
-          await createSession(idToken);
-          return;
-        } catch (err) {
-          console.error('Session error:', err);
-          alert('Login failed: ' + err.message);
-          return;
-        }
+        const idToken = await redirectResult.user.getIdToken();
+        await createSession(idToken);
+        return;
       }
     } catch (err) {
       console.error('getRedirectResult error:', err);
-      alert('Redirect sign-in failed: ' + err.message);
+      alert('Google sign-in failed: ' + err.message);
     }
-
     await handleEmailLink();
-  });
+  })();
 </script>
 {% endblock %}

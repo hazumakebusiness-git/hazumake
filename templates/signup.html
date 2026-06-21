@@ -52,9 +52,7 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
         <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required>
       </div>
       <button id="send-link-btn">Send sign-up link</button>
-
       <div class="divider">or</div>
-
       <button id="google-signup-btn" class="btn-google">
         <svg width="20" height="20" viewBox="0 0 24 24">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -97,8 +95,6 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
     GoogleAuthProvider,
     signInWithRedirect,
     getRedirectResult,
-    setPersistence,
-    browserLocalStorage,
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const actionCodeSettings = {
@@ -109,7 +105,6 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   const stepPanels = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')];
   const stepDots = [document.getElementById('step-dot-1'), document.getElementById('step-dot-2'), document.getElementById('step-dot-3')];
   const error1 = document.getElementById('error-step-1');
-  const message1 = document.getElementById('message-step-1');
   const message2 = document.getElementById('message-step-2');
   const error3 = document.getElementById('error-step-3');
 
@@ -184,46 +179,30 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
     }
   }
 
-  // Google signup
-  // Google signup (use redirect to avoid popup blocking)
-  document.getElementById('google-signup-btn').addEventListener('click', async () => {
+  document.getElementById('google-signup-btn').addEventListener('click', () => {
     const provider = new GoogleAuthProvider();
-    try {
-      await setPersistence(auth, browserLocalStorage);
-      signInWithRedirect(auth, provider);
-    } catch (err) {
-      console.error('Google redirect persistence error:', err);
-      alert('Unable to start Google sign-up: ' + err.message);
-    }
+    signInWithRedirect(auth, provider);
   });
 
   document.getElementById('send-link-btn').addEventListener('click', sendMagicLink);
   document.getElementById('resend-link-btn').addEventListener('click', sendMagicLink);
   document.getElementById('complete-signup-btn').addEventListener('click', completeSignup);
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    setStep(0);
-    console.log('Checking redirect result...');
+  // Handle redirect result on page load
+  (async () => {
     try {
       const redirectResult = await getRedirectResult(auth);
-      console.log('Redirect result:', redirectResult);
       if (redirectResult) {
-        try {
-          const idToken = await redirectResult.user.getIdToken();
-          await createSession(idToken);
-          return;
-        } catch (err) {
-          console.error('Session error:', err);
-          alert('Login failed: ' + err.message);
-          return;
-        }
+        const idToken = await redirectResult.user.getIdToken();
+        await createSession(idToken);
+        return;
       }
     } catch (err) {
       console.error('getRedirectResult error:', err);
-      alert('Redirect sign-in failed: ' + err.message);
+      alert('Google sign-up failed: ' + err.message);
     }
-
+    setStep(0);
     await handleEmailLink();
-  });
+  })();
 </script>
 {% endblock %}
