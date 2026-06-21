@@ -18,6 +18,6 @@ urlpatterns = [
     path('api/', include('payments.urls', namespace='payments')),
     path('api/', include('api.urls')),
     # Redirect old login/register to new Firebase auth pages
-    path('login/', RedirectView.as_view(url='/auth/signin/', permanent=False), name='login'),
-    path('register/', RedirectView.as_view(url='/auth/signup/', permanent=False), name='register'),
+    path('login/', RedirectView.as_view(url='/accounts/login/'), name='login_redirect'),
+    path('register/', RedirectView.as_view(url='/accounts/register/'), name='register_redirect'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

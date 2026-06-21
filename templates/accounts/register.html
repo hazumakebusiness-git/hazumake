@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Login - Hazumake Store{% endblock %}
+{% block title %}Register - Hazumake Store{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -20,9 +20,6 @@ button { width: 100%; padding: 1rem; border: none; border-radius: var(--border-r
 .message.success { background: rgba(16,185,129,0.15); color: #a7f3d0; border: 1px solid rgba(16,185,129,0.2); }
 .bottom-link { margin-top: 1.5rem; text-align: center; color: var(--text-muted); }
 .bottom-link a { color: var(--primary-3); text-decoration: none; font-weight: 500; }
-.forgot { text-align: right; margin-top: 0.5rem; margin-bottom: 1rem; }
-.forgot a { color: var(--text-muted); font-size: 0.9rem; }
-.forgot a:hover { color: var(--primary-3); }
 .divider { display: flex; align-items: center; gap: 1rem; margin: 1.25rem 0; color: var(--text-muted); font-size: 0.85rem; }
 .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--glass-border); }
 .btn-google { width: 100%; padding: 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: var(--border-radius-sm); background: rgba(255,255,255,0.05); color: #fff; font-weight: 700; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 0.5rem; }
@@ -33,8 +30,8 @@ button { width: 100%; padding: 1rem; border: none; border-radius: var(--border-r
 {% block content %}
 <div class="auth-page">
   <div class="card">
-    <h1>Welcome Back</h1>
-    <p class="lead">Sign in to your Hazumake account.</p>
+    <h1>Create Account</h1>
+    <p class="lead">Enter your email and we'll send you a verification code.</p>
 
     {% if messages %}
     <div class="messages">
@@ -44,23 +41,18 @@ button { width: 100%; padding: 1rem; border: none; border-radius: var(--border-r
     </div>
     {% endif %}
 
-    <form method="POST" action="{% url 'login' %}">
+    <form method="POST" action="{% url 'register' %}">
       {% csrf_token %}
       <div class="form-group">
         <label for="email">Email address</label>
         <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
       </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" placeholder="Your password" required>
-      </div>
-      <div class="forgot"><a href="{% url 'password_reset' %}">Forgot password?</a></div>
-      <button type="submit">Sign In</button>
+      <button type="submit">Send Verification Code</button>
     </form>
 
     <div class="divider">or</div>
 
-    <button id="google-login-btn" class="btn-google">
+    <button id="google-register-btn" class="btn-google">
       <svg width="20" height="20" viewBox="0 0 24 24">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -70,7 +62,7 @@ button { width: 100%; padding: 1rem; border: none; border-radius: var(--border-r
       Continue with Google
     </button>
 
-    <p class="bottom-link">Don't have an account? <a href="/accounts/register/">Register</a></p>
+    <p class="bottom-link">Already have an account? <a href="/accounts/login/">Sign in</a></p>
   </div>
 </div>
 {% endblock %}
@@ -80,7 +72,7 @@ button { width: 100%; padding: 1rem; border: none; border-radius: var(--border-r
   import { auth } from "{% static 'js/firebase_config.js' %}";
   import { GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  document.getElementById('google-login-btn').addEventListener('click', async () => {
+  document.getElementById('google-register-btn').addEventListener('click', async () => {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
@@ -94,7 +86,7 @@ button { width: 100%; padding: 1rem; border: none; border-radius: var(--border-r
         body: JSON.stringify({ id_token: idToken })
       });
       if (response.ok) window.location.href = '/dashboard/';
-      else alert('Google sign-in failed. Please try again.');
+      else alert('Google sign-up failed. Please try again.');
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user') alert(err.message);
     }

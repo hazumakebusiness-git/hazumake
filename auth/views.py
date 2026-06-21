@@ -14,16 +14,15 @@ if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
 
-def signup_view(request):
-    if request.user.is_authenticated:
-        return redirect('/dashboard/')
-    return render(request, 'signup.html')
-
-
 def signin_view(request):
     if request.user.is_authenticated:
-        return redirect('/dashboard/')
-    return render(request, 'signin.html')
+        return redirect('dashboard')
+    return redirect('/accounts/login/')
+
+def signup_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return redirect('/accounts/register/')
 
 
 @csrf_protect
