@@ -184,25 +184,10 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   }
 
   // Google signup
-  document.getElementById('google-signup-btn').addEventListener('click', async () => {
+  // Google signup (use redirect to avoid popup blocking)
+  document.getElementById('google-signup-btn').addEventListener('click', () => {
     const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-      await createSession(idToken);
-    } catch (err) {
-      console.error('Google signInWithPopup error', err);
-      if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request')) {
-        try {
-          await signInWithRedirect(auth, provider);
-        } catch (redirErr) {
-          console.error('signInWithRedirect error', redirErr);
-          alert(redirErr.message || 'Unable to start redirect sign-in.');
-        }
-        return;
-      }
-      alert(err.message || 'Unable to sign up with Google.');
-    }
+    signInWithRedirect(auth, provider);
   });
 
   document.getElementById('send-link-btn').addEventListener('click', sendMagicLink);
@@ -211,17 +196,20 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 
   document.addEventListener('DOMContentLoaded', async () => {
     setStep(0);
-    await handleEmailLink();
-    // Handle redirect result (Google redirect fallback)
+    // First handle any redirect sign-in result (Google)
     try {
       const redirectResult = await getRedirectResult(auth);
       if (redirectResult && redirectResult.user) {
         const idToken = await redirectResult.user.getIdToken();
         await createSession(idToken);
+        return;
       }
     } catch (err) {
       console.error('getRedirectResult error', err);
     }
+
+    // Then handle magic-link email redirects
+    await handleEmailLink();
   });
 </script>
 {% endblock %}

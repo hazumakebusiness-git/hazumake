@@ -162,27 +162,11 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
     }
   }
 
-  // Google login
-  document.getElementById('google-login-btn').addEventListener('click', async () => {
+  // Google login (use redirect to avoid popup blocking)
+  document.getElementById('google-login-btn').addEventListener('click', () => {
     const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-      await createSession(idToken);
-    } catch (err) {
-      console.error('Google signInWithPopup error', err);
-      // If popup is blocked or closed, fallback to redirect sign-in
-      if (err && (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request')) {
-        try {
-          await signInWithRedirect(auth, provider);
-        } catch (redirErr) {
-          console.error('signInWithRedirect error', redirErr);
-          alert(redirErr.message || 'Unable to start redirect sign-in.');
-        }
-        return;
-      }
-      alert(err.message || 'Unable to sign in with Google.');
-    }
+    // start redirect-based sign-in synchronously (required by many browsers)
+    signInWithRedirect(auth, provider);
   });
 
   sendLinkBtn.addEventListener('click', sendMagicLink);
@@ -197,17 +181,20 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
   });
 
   document.addEventListener('DOMContentLoaded', async () => {
-    await handleEmailLink();
-    // Handle redirect result (Google redirect fallback)
+    // First check for a redirect sign-in result from Google
     try {
       const redirectResult = await getRedirectResult(auth);
       if (redirectResult && redirectResult.user) {
         const idToken = await redirectResult.user.getIdToken();
         await createSession(idToken);
+        return; // session created, no further handling needed
       }
     } catch (err) {
       console.error('getRedirectResult error', err);
     }
+
+    // Then handle magic-link email redirects
+    await handleEmailLink();
   });
 </script>
 {% endblock %}
