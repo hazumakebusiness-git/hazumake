@@ -196,19 +196,17 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 
   document.addEventListener('DOMContentLoaded', async () => {
     setStep(0);
-    // First handle any redirect sign-in result (Google)
-    try {
-      const redirectResult = await getRedirectResult(auth);
-      if (redirectResult && redirectResult.user) {
+    const redirectResult = await getRedirectResult(auth);
+    if (redirectResult) {
+      try {
         const idToken = await redirectResult.user.getIdToken();
         await createSession(idToken);
-        return;
+      } catch (err) {
+        console.error('Session error:', err);
+        alert('Login failed: ' + err.message);
       }
-    } catch (err) {
-      console.error('getRedirectResult error', err);
     }
 
-    // Then handle magic-link email redirects
     await handleEmailLink();
   });
 </script>

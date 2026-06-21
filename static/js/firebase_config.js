@@ -4,7 +4,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-aut
 
 const firebaseConfig = {
   apiKey: "AIzaSyCAjt8cq8pvbkhc-FeKAUb6GtcwCwZahQc",
-  authDomain: "hazumake.firebaseapp.com",
+  authDomain: "hazumakestore.com",
   projectId: "hazumake",
   storageBucket: "hazumake.firebasestorage.app",
   messagingSenderId: "1098202035178",
