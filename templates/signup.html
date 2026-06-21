@@ -95,9 +95,10 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
     signInWithEmailLink,
     updatePassword,
     GoogleAuthProvider,
-    signInWithPopup,
     signInWithRedirect,
     getRedirectResult,
+    setPersistence,
+    browserLocalStorage,
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const actionCodeSettings = {
@@ -185,9 +186,15 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 
   // Google signup
   // Google signup (use redirect to avoid popup blocking)
-  document.getElementById('google-signup-btn').addEventListener('click', () => {
+  document.getElementById('google-signup-btn').addEventListener('click', async () => {
     const provider = new GoogleAuthProvider();
-    signInWithRedirect(auth, provider);
+    try {
+      await setPersistence(auth, browserLocalStorage);
+      signInWithRedirect(auth, provider);
+    } catch (err) {
+      console.error('Google redirect persistence error:', err);
+      alert('Unable to start Google sign-up: ' + err.message);
+    }
   });
 
   document.getElementById('send-link-btn').addEventListener('click', sendMagicLink);
@@ -196,15 +203,24 @@ button:disabled { opacity: 0.55; cursor: not-allowed; }
 
   document.addEventListener('DOMContentLoaded', async () => {
     setStep(0);
-    const redirectResult = await getRedirectResult(auth);
-    if (redirectResult) {
-      try {
-        const idToken = await redirectResult.user.getIdToken();
-        await createSession(idToken);
-      } catch (err) {
-        console.error('Session error:', err);
-        alert('Login failed: ' + err.message);
+    console.log('Checking redirect result...');
+    try {
+      const redirectResult = await getRedirectResult(auth);
+      console.log('Redirect result:', redirectResult);
+      if (redirectResult) {
+        try {
+          const idToken = await redirectResult.user.getIdToken();
+          await createSession(idToken);
+          return;
+        } catch (err) {
+          console.error('Session error:', err);
+          alert('Login failed: ' + err.message);
+          return;
+        }
       }
+    } catch (err) {
+      console.error('getRedirectResult error:', err);
+      alert('Redirect sign-in failed: ' + err.message);
     }
 
     await handleEmailLink();
