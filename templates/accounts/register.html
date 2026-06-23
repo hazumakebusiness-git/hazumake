@@ -66,7 +66,6 @@ button { width: 100%; padding: 1rem; border: none; border-radius: var(--border-r
   </div>
 </div>
 {% endblock %}
-
 {% block extra_js %}
 <script type="module">
   import { auth } from "{% static 'js/firebase_config.js' %}";
@@ -77,9 +76,6 @@ button { width: 100%; padding: 1rem; border: none; border-radius: var(--border-r
     getRedirectResult
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  // ── Handle redirect result on every page load ──────────────────────────────
-  // This runs first, before any button click, to catch the result
-  // from a previous signInWithRedirect call.
   (async () => {
     try {
       const result = await getRedirectResult(auth);
@@ -88,54 +84,49 @@ button { width: 100%; padding: 1rem; border: none; border-radius: var(--border-r
       }
     } catch (err) {
       console.error('Redirect result error:', err);
-      if (err.code !== 'auth/popup-closed-by-user') {
-        showError('Google sign-in failed: ' + err.message);
-      }
+      showError('Google sign-in failed: ' + err.message);
     }
   })();
 
-  // ── Button click: try popup, fall back to redirect ─────────────────────────
+  let isSigningIn = false;
+
   document.getElementById('google-register-btn').addEventListener('click', async () => {
+    if (isSigningIn) return;
+    isSigningIn = true;
+
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-
     try {
-      // Attempt popup first
       const result = await signInWithPopup(auth, provider);
       await sendTokenToDjango(result.user);
     } catch (err) {
+      isSigningIn = false;
       if (
         err.code === 'auth/popup-blocked' ||
         err.code === 'auth/popup-closed-by-user' ||
         err.code === 'auth/cancelled-popup-request'
       ) {
-        // Popup was blocked or closed — fall back to redirect silently
-        console.warn('Popup blocked/closed, falling back to redirect:', err.code);
         const provider2 = new GoogleAuthProvider();
         provider2.setCustomParameters({ prompt: 'select_account' });
         await signInWithRedirect(auth, provider2);
-        // Page will reload; result is picked up by getRedirectResult above
       } else {
-        console.error('Google sign-in error:', err);
-        showError(err.message);
+        console.error(err);
+        showError('Google sign-in failed: ' + err.message);
       }
     }
   });
 
-  // ── Shared: send Firebase ID token to Django ───────────────────────────────
   async function sendTokenToDjango(user) {
     const idToken = await user.getIdToken();
     const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
-
     const response = await fetch('/auth/firebase-session/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken,
+        'X-CSRFToken': csrfToken
       },
-      body: JSON.stringify({ id_token: idToken }),
+      body: JSON.stringify({ id_token: idToken })
     });
-
     if (response.ok) {
       window.location.href = '/dashboard/';
     } else {
@@ -145,8 +136,7 @@ button { width: 100%; padding: 1rem; border: none; border-radius: var(--border-r
   }
 
   function showError(msg) {
-    // Try to show in the existing messages area, else alert
-    const container = document.querySelector('.messages') || null;
+    const container = document.querySelector('.messages');
     if (container) {
       container.innerHTML = `<div class="message error">${msg}</div>`;
     } else {
