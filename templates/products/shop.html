@@ -8,9 +8,9 @@
     /* =========================================
        SHOP PAGE - MOBILE-FIRST ARCHITECTURE
        ========================================= */
-    
+
     .shop-container {
-        max-width: 1400px;
+        max-width: 1040px;
         margin: 0 auto;
         padding: 1.5rem 1rem;
         position: relative;
@@ -55,111 +55,236 @@
     }
 
     /* =========================================
-       GAME GRID - MOBILE FIRST
+       GAME GRID - EXACTLY LIKE HOMEPAGE
        ========================================= */
     .games-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-        gap: 1rem;
-        margin-top: 2rem;
-        width: 100%;
-        justify-items: stretch;
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-auto-rows: 1fr !important;
+        gap: 1.5rem !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        max-width: 800px !important;
+        margin: 0 auto 2.5rem !important;
+        box-sizing: border-box !important;
+        padding: 0 1rem !important;
     }
 
     .game-card {
-        background: linear-gradient(180deg, rgba(255,255,255,0.32), rgba(28, 38, 88, 0.96)) !important;
-        border: 1px solid rgba(255,255,255,0.28) !important;
-        box-shadow: 0 18px 44px rgba(255,255,255,0.12), 0 18px 40px rgba(0,0,0,0.16);
-        border-radius: 20px;
-        padding: 1.3rem 1rem;
-        text-decoration: none;
-        color: #eef2ff;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.85rem;
-        transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
-        position: relative;
-        overflow: hidden;
-        min-height: 190px;
-        width: 100%;
+        display: flex !important;
+        flex-direction: column !important;
+        aspect-ratio: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        position: relative !important;
+        cursor: pointer !important;
+        transition: transform 0.35s ease !important;
+        text-decoration: none !important;
+        opacity: 1 !important;
+        will-change: transform, opacity !important;
+        box-sizing: border-box !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
     }
 
-    .game-card:hover {
-        border-color: rgba(255,255,255,0.45) !important;
-        box-shadow: 0 26px 60px rgba(255,255,255,0.14), 0 14px 35px rgba(0,0,0,0.18);
-        transform: translateY(-5px);
-        background: linear-gradient(180deg, rgba(255,255,255,0.4), rgba(28, 38, 88, 0.98)) !important;
+    .game-card-banner {
+        position: absolute !important;
+        inset: 0 !important;
+        background-size: cover !important;
+        background-position: center !important;
+        opacity: 0.24 !important;
+        transition: opacity 0.35s ease !important;
+        z-index: 0 !important;
     }
 
-    .game-banner {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-size: cover;
-        background-position: center;
-        opacity: 0.38;
-        z-index: 0;
-        filter: blur(0.5px);
-        transition: opacity 0.3s ease;
+    .game-card:hover .game-card-banner {
+        opacity: 0.62 !important;
     }
 
-    .game-card:hover .game-banner {
-        opacity: 0.58;
+    /* FIX: the flat dark-on-dark "no-banner" rectangle was invisible
+       against the page background, making cards look empty/broken.
+       Now uses the same themed purple/cyan gradient as the homepage
+       fallback so every card reads as intentional, image or not. */
+    .game-card-banner.no-banner {
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(6, 182, 212, 0.25)) !important;
     }
 
-    .game-icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        font-weight: 800;
-        z-index: 1;
-        background: rgba(255,255,255,0.28);
-        border: 1px solid rgba(255,255,255,0.32);
-        color: #111827;
-        flex-shrink: 0;
+    .game-card-overlay {
+        position: absolute !important;
+        inset: 0 !important;
+        background: linear-gradient(135deg, rgba(10, 10, 25, 0.22) 0%, rgba(10, 10, 25, 0.05) 100%) !important;
+        z-index: 1 !important;
+        pointer-events: none !important;
     }
 
-    .game-icon img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 12px;
+    .game-card-content {
+        position: relative !important;
+        z-index: 2 !important;
+        padding: 1.4rem 1.5rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        height: 100% !important;
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .game-card-top {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.9rem !important;
+        margin-bottom: 0.8rem !important;
+    }
+
+    .game-card-tags {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+        margin-bottom: 0.85rem !important;
+    }
+
+    .game-type-pill {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0.35rem 0.9rem !important;
+        border-radius: 999px !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: rgba(255, 255, 255, 0.85) !important;
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.04em !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .game-icon-wrap {
+        width: 48px !important;
+        height: 48px !important;
+        border-radius: 12px !important;
+        background: rgba(255, 255, 255, 0.16) !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .game-icon-wrap img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+        padding: 6px !important;
+    }
+
+    .game-icon-letter {
+        font-size: 1.1rem !important;
+        font-weight: 900 !important;
+        background: linear-gradient(135deg, #7C3AED, #06B6D4) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        line-height: 1 !important;
+        letter-spacing: 0.02em !important;
     }
 
     .game-name {
-        font-size: 0.95rem;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        font-size: 0.9rem !important;
+        line-height: 1.3 !important;
+        color: #FFFFFF !important;
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.12) !important;
+        margin-bottom: 8px !important;
+    }
+
+    .game-short {
+        font-size: 0.75rem !important;
+        color: rgba(160, 160, 176, 0.7) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        margin-top: 2px !important;
+    }
+
+    .game-card-bottom {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    .game-package-count {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.4rem !important;
+        padding: 0.3rem 0.8rem !important;
+        background: rgba(6, 182, 212, 0.15) !important;
+        border: 1px solid rgba(6, 182, 212, 0.3) !important;
+        border-radius: 50px !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        color: #06B6D4 !important;
+        letter-spacing: 0.3px !important;
+    }
+
+    .game-arrow {
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 50% !important;
+        background: rgba(124, 58, 237, 0.15) !important;
+        border: 1px solid rgba(124, 58, 237, 0.3) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .game-card:hover .game-arrow {
+        background: rgba(124, 58, 237, 0.4) !important;
+        border-color: rgba(124, 58, 237, 0.8) !important;
+        box-shadow: 0 0 12px rgba(124, 58, 237, 0.5) !important;
+    }
+
+    .game-card:hover {
+        transform: translateY(-8px) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
+        box-shadow: 0 24px 55px rgba(255, 255, 255, 0.12), 0 18px 50px rgba(0, 0, 0, 0.22) !important;
+    }
+
+    .glass-card-body,
+    .game-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+    }
+
+    .glass-card-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: fit-content;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.06);
+        color: #A0A0B0;
+        font-size: 0.75rem;
         font-weight: 700;
-        text-align: center;
-        color: #ffffff;
-        text-shadow: 0 0 10px rgba(255,255,255,0.1);
-        z-index: 1;
-        line-height: 1.3;
-        display: -webkit-box;
-        line-clamp: 2;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        word-break: break-word;
+        letter-spacing: 0.03em;
     }
 
     .game-products {
-        z-index: 1;
-        background: rgba(255,255,255,0.22);
-        color: #111827;
-        padding: 0.3rem 0.85rem;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        border: 1px solid rgba(255,255,255,0.28);
-        white-space: nowrap;
+        color: #A0A0B0;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin-top: auto;
     }
 
     /* Empty State */
@@ -175,203 +300,121 @@
         color: white;
     }
 
-    /* =========================================
-       DESKTOP LAYOUT - 3-4 COLUMNS
-       ========================================= */
-    @media (min-width: 1024px) {
-        .shop-container {
-            padding: 2rem 2rem;
-        }
-
-        .shop-header {
-            margin-bottom: 3.5rem;
-        }
-
-        .shop-badge {
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-        }
-
-        .shop-title {
-            margin-bottom: 1rem;
-        }
-
-        .shop-subtitle {
-            font-size: 1.1rem;
-        }
-
-        .games-grid {
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.75rem;
-            margin-top: 2.5rem;
-        }
-
-        .game-card {
-            padding: 1.75rem 1.25rem;
-            min-height: 220px;
-            gap: 1rem;
-            border-radius: 22px;
-        }
-
-        .game-icon {
-            width: 72px;
-            height: 72px;
-            font-size: 2.6rem;
-            border-radius: 18px;
-        }
-
-        .game-name {
-            font-size: 1.08rem;
-        }
-
-        .game-products {
-            font-size: 0.78rem;
-            padding: 0.35rem 0.85rem;
-        }
-    }
-
-    /* Tablet: Optimized 2-3 column grid */
-    @media (max-width: 1023px) and (min-width: 769px) {
-        .shop-container {
-            padding: 1.8rem 1.2rem;
-        }
-
-        .games-grid {
-            grid-template-columns: repeat(3, minmax(180px, 1fr));
-            gap: 1.2rem;
-        }
-
-        .game-card {
-            width: 100%;
-            padding: 0.95rem 0.9rem;
-            min-height: 170px;
-        }
-
-        .game-icon {
-            width: 46px;
-            height: 46px;
-            font-size: 1.2rem;
-        }
-
-        .game-name {
-            font-size: 1rem;
-        }
-    }
-
-    /* Mobile: 2 column optimized */
     @media (max-width: 768px) {
-        .shop-container {
-            padding: 1.2rem 0.75rem;
+        #shop-section {
+            padding: 3rem 1rem 2.5rem !important;
         }
-
-        .shop-header {
-            margin-bottom: 2rem;
-        }
-
-        .shop-badge {
-            font-size: 0.75rem;
-            margin-bottom: 0.6rem;
-        }
-
-        .shop-title {
-            font-size: clamp(1.4rem, 4.5vw, 2rem);
-            margin-bottom: 0.6rem;
-        }
-
-        .shop-subtitle {
-            font-size: 0.9rem;
-        }
-
         .games-grid {
-            grid-template-columns: repeat(2, minmax(140px, 1fr));
-            gap: 0.8rem;
-            margin-top: 1.5rem;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.7rem !important;
+            padding: 0 0.5rem !important;
+            margin: 0 auto 1.5rem !important;
+            max-width: 100% !important;
+            width: 100% !important;
         }
-
         .game-card {
-            width: 100%;
-            padding: 0.95rem 0.9rem;
-            border-radius: 16px;
-            min-height: 155px;
-            gap: 0.5rem;
+            border-radius: 12px !important;
+            aspect-ratio: 1 !important;
         }
-
-        .game-icon {
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
-            border-radius: 10px;
+        .game-card-content {
+            padding: 0.9rem 0.8rem !important;
         }
-
+        .game-card-top {
+            gap: 0.6rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        .game-icon-wrap {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 8px !important;
+        }
+        .game-icon-letter {
+            font-size: 0.85rem !important;
+        }
         .game-name {
-            font-size: 0.85rem;
+            font-size: 0.8rem !important;
+            margin-bottom: 4px !important;
         }
-
-        .game-products {
-            font-size: 0.7rem;
-            padding: 0.25rem 0.65rem;
+        .game-short {
+            font-size: 0.65rem !important;
         }
-
-        .empty-state {
-            padding: 2.5rem 1rem;
+        .game-package-count {
+            font-size: 0.65rem !important;
+            padding: 0.2rem 0.55rem !important;
         }
-
-        .empty-state h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.6rem;
+        .game-arrow {
+            width: 24px !important;
+            height: 24px !important;
         }
     }
 
-    /* Small Mobile */
     @media (max-width: 480px) {
-        .shop-container {
-            padding: 1rem 0.5rem;
-        }
-
-        .shop-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .shop-badge {
-            font-size: 0.7rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .shop-title {
-            font-size: clamp(1.3rem, 4vw, 1.8rem);
-            margin-bottom: 0.5rem;
-        }
-
-        .shop-subtitle {
-            font-size: 0.85rem;
-        }
-
         .games-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.6rem;
-            margin-top: 1.2rem;
+            grid-template-columns: 1fr !important;
+            gap: 0.7rem !important;
+            padding: 0 0.5rem !important;
         }
 
+        /* FIX: aspect-ratio:1 on a full-width single column made the
+           card a giant square with a huge empty middle. Below 480px
+           switch to a compact horizontal row instead — icon, name,
+           and package count all on one line, fixed comfortable height. */
         .game-card {
-            padding: 0.9rem 0.7rem;
-            min-height: 110px;
-            border-radius: 10px;
-            gap: 0.4rem;
+            aspect-ratio: unset !important;
+            height: auto !important;
+            min-height: 0 !important;
+            border-radius: 14px !important;
         }
 
-        .game-icon {
-            width: 40px;
-            height: 40px;
-            font-size: 1.5rem;
+        .game-card-banner,
+        .game-card-banner.no-banner {
+            opacity: 0.18 !important;
+        }
+
+        .game-card-content {
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 0.9rem 1rem !important;
+            gap: 0.75rem !important;
+        }
+
+        .game-card-top {
+            margin-bottom: 0 !important;
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
         }
 
         .game-name {
-            font-size: 0.75rem;
+            font-size: 0.85rem !important;
+            -webkit-line-clamp: 1 !important;
+            margin-bottom: 2px !important;
+        }
+
+        .game-short {
+            font-size: 0.65rem !important;
+        }
+
+        .game-card-bottom {
+            flex: 0 0 auto !important;
+            flex-direction: row !important;
+            gap: 0.5rem !important;
+        }
+
+        .game-package-count {
+            font-size: 0.65rem !important;
+            padding: 0.25rem 0.6rem !important;
+            white-space: nowrap !important;
+        }
+
+        .game-arrow {
+            width: 26px !important;
+            height: 26px !important;
         }
 
         .game-products {
-            font-size: 0.6rem;
-            padding: 0.15rem 0.55rem;
+            font-size: 0.6rem !important;
+            padding: 0.15rem 0.55rem !important;
         }
     }
 </style>
@@ -386,26 +429,52 @@
     </div>
 
     {% if games %}
-    <div class="games-grid">
+    <div class="games-grid card-grid">
         {% for game in games %}
-        <a href="{% url 'game_shop' game.slug %}" class="game-card">
+        <a href="{% url 'game_shop' game.slug %}" class="game-card glass-card">
             {% if game.banner %}
-            <div class="game-banner" style="background-image: url('{{ game.banner.url }}');"></div>
+            <div class="game-card-banner" style="background-image: url('{{ game.banner.url }}');"></div>
+            {% else %}
+            <div class="game-card-banner no-banner"></div>
             {% endif %}
-            
-            <div class="game-icon">
-                {% if game.icon %}
-                <img src="{{ game.icon.url }}" alt="{{ game.name }}">
-                {% else %}
-                {{ game.name|slice:":1"|upper }}
-                {% endif %}
+            <div class="game-card-overlay"></div>
+
+            <div class="game-card-content">
+                <div class="game-card-top">
+                    <div class="game-icon-wrap">
+                        {% if game.icon %}
+                        <img src="{{ game.icon.url }}" alt="{{ game.name }}">
+                        {% else %}
+                        <!-- FIX: prefer the curated short_name (e.g. "ML")
+                             over slicing the raw name, which produced odd
+                             monograms like "MO" for "Mobile Legends..." -->
+                        <span class="game-icon-letter">{{ game.short_name|default:game.name|slice:":2"|upper }}</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="game-name">{{ game.name }}</div>
+                        {% if game.short_name %}
+                        <div class="game-short">{{ game.short_name }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="game-card-bottom">
+                    {% if game.product_count %}
+                    <span class="game-package-count">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2L2 9l10 13L22 9l-10-7z"/>
+                        </svg>
+                        {{ game.product_count }} package{{ game.product_count|pluralize }}
+                    </span>
+                    {% endif %}
+                    <div class="game-arrow">
+                        <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
             </div>
-            
-            <div class="game-name">{{ game.name }}</div>
-            
-            {% if game.product_count %}
-            <div class="game-products">{{ game.product_count }} packages</div>
-            {% endif %}
         </a>
         {% endfor %}
     </div>
@@ -416,4 +485,10 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.body.dataset.rainDensity = '90';
+</script>
 {% endblock %}

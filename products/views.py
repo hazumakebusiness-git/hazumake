@@ -15,16 +15,14 @@ def home(request):
         is_active=True,
         is_featured=True
     ).annotate(
-        product_count=Count('products', filter=Q(products__is_active=True))
+        product_count=Count('products', filter=Q(products__is_active=True)),
+        diamond_count=Count('products', filter=Q(products__is_active=True, products__type='DIAMOND')),
+        starlight_count=Count('products', filter=Q(products__is_active=True, products__type='STARLIGHT')),
+        bundle_count=Count('products', filter=Q(products__is_active=True, products__type='BUNDLE')),
     ).order_by('sort_order')[:6]
-
-    latest_products = Product.objects.filter(
-        is_active=True
-    ).order_by('-created_at')[:3]
 
     return render(request, 'home.html', {
         'featured_games': featured_games,
-        'latest_products': latest_products,
     })
 
 def shop(request):

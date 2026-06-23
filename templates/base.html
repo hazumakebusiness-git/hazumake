@@ -112,6 +112,284 @@
             box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
         }
 
+        /* Reusable glass card and grid system */
+        .card-grid,
+        .shop-product-grid,
+        .products-grid,
+        .games-grid,
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .glass-card,
+        .product-card,
+        .home-product-card,
+        .game-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+            overflow: hidden;
+            border-radius: var(--border-radius-lg);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(10, 10, 20, 0.82));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 26%);
+            pointer-events: none;
+            opacity: 0.25;
+        }
+
+        @media (hover:hover) {
+            .glass-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 22px 62px rgba(0, 0, 0, 0.34), 0 0 28px rgba(124, 58, 237, 0.14);
+                border-color: rgba(255, 255, 255, 0.18);
+            }
+            .glass-card:hover .glass-card-image,
+            .glass-card:hover .product-image,
+            .glass-card:hover .home-product-card-banner,
+            .glass-card:hover .game-card-banner,
+            .glass-card:hover .game-banner {
+                transform: scale(1.05);
+            }
+        }
+
+        .glass-card:active {
+            transform: scale(0.992);
+        }
+
+        .glass-card-image,
+        .glass-card-banner,
+        .product-image,
+        .home-product-card-banner,
+        .game-card-banner,
+        .game-banner {
+            position: relative;
+            width: 100%;
+            padding-top: 62%;
+            background-size: cover;
+            background-position: center;
+            transform: translateZ(0);
+            transition: transform 0.35s ease, opacity 0.35s ease;
+        }
+
+        .glass-card-overlay,
+        .product-card-overlay,
+        .home-product-card-overlay,
+        .game-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(10, 10, 15, 0.04) 0%, rgba(10, 10, 15, 0.5) 60%, rgba(10, 10, 15, 0.92) 100%);
+            pointer-events: none;
+        }
+
+        .glass-card-body,
+        .product-card-content,
+        .home-product-card-content,
+        .game-card-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            padding: 1.25rem;
+            min-height: 120px;
+        }
+
+        .glass-card-badge,
+        .product-badge,
+        .game-package-count,
+        .home-product-price-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: #FFFFFF;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            backdrop-filter: blur(16px);
+        }
+
+        .glass-card-title,
+        .product-name,
+        .home-product-name,
+        .game-name {
+            font-size: clamp(1rem, 1.8vw, 1.2rem);
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .glass-card-meta,
+        .product-meta,
+        .game-short,
+        .home-product-price-subtext,
+        .game-products {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.4;
+        }
+
+        .glass-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: auto;
+        }
+
+        .glass-card-price,
+        .price-coins,
+        .price-inr,
+        .product-price {
+            color: #FFFFFF;
+            font-weight: 800;
+        }
+
+        .glass-card-price {
+            font-size: 1rem;
+        }
+
+        .glass-card-action,
+        .btn-buy,
+        .card-buy-btn,
+        .btn-native {
+            min-height: 44px;
+            min-width: 120px;
+        }
+
+        .glass-card-action {
+            align-self: flex-start;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            min-height: 240px;
+            padding: 1.8rem;
+            border-radius: var(--border-radius-lg);
+            background: rgba(10, 10, 20, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow);
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .empty-state h3 {
+            color: var(--text-main);
+            font-size: clamp(1.5rem, 2vw, 2rem);
+            margin: 0;
+        }
+
+        .empty-state p {
+            max-width: 520px;
+            line-height: 1.75;
+        }
+
+        .back-to-top {
+            position: fixed;
+            right: 1.25rem;
+            bottom: 1.5rem;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(10, 10, 20, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: white;
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.35);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+            z-index: 1002;
+            text-decoration: none;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 38px rgba(0, 0, 0, 0.4);
+            background: rgba(15, 15, 30, 0.96);
+        }
+
+        .card-skeleton {
+            position: relative;
+            overflow: hidden;
+            min-height: 220px;
+            border-radius: var(--border-radius-lg);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow);
+        }
+
+        .card-skeleton::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.05) 100%);
+            transform: translateX(-100%);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            to { transform: translateX(100%); }
+        }
+
+        @media (max-width: 768px) {
+            .glass-card {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: rgba(10, 10, 20, 0.94);
+                box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+            }
+            .card-grid,
+            .shop-product-grid,
+            .products-grid,
+            .games-grid,
+            .product-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 1rem;
+            }
+            .glass-card-overlay {
+                background: linear-gradient(180deg, rgba(10, 10, 15, 0.08) 0%, rgba(10, 10, 15, 0.48) 60%, rgba(10, 10, 15, 0.95) 100%);
+            }
+        }
+
         /* Colorful tab/button utilities */
         .tab-red { background: linear-gradient(135deg, var(--primary-3), var(--accent-3)); color: white; }
         .tab-violet { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: white; }
@@ -296,13 +574,19 @@
 
         /* Hamburger Menu Button */
         .hamburger {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-        }
+
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background: transparent;   /* ← removes the white box */
+        border: none;              /* ← removes any button border */
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+    }
         .hamburger:hover { background: rgba(255,255,255,0.1); }
         .hamburger span {
             width: 25px; height: 3px; background: white; margin: 3px 0;
@@ -571,8 +855,9 @@
            ========================================= */
         #reverse-rain-container {
             position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
+            inset: 0;
+            width: 100%;
+            height: 100%;
             z-index: -2; /* Sits behind the Glass Cards but above the Background Images */
             pointer-events: none;
             overflow: hidden;
@@ -1243,7 +1528,7 @@
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body id="top" data-page="{% block body_data_page %}{% endblock %}">
 
     <!-- 🌌 CINEMATIC BACKGROUND ENGINE -->
     <div class="bg-artwork"></div>
@@ -1441,6 +1726,17 @@
                 }
             });
         }
+
+        const backToTop = document.getElementById('backToTop');
+        if (backToTop) {
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 320) {
+                    backToTop.classList.add('visible');
+                } else {
+                    backToTop.classList.remove('visible');
+                }
+            });
+        }
     });
 
     // 2. REVERSE GLOWING RAIN ENGINE
@@ -1450,6 +1746,9 @@
         // Pages set their own density via: document.body.dataset.rainDensity = '160'
         // Default is 80 if no page sets it
         const isMobile = window.innerWidth <= 768;
+        if (!document.body.dataset.rainDensity) {
+            document.body.dataset.rainDensity = isMobile ? '40' : '80';
+        }
         const dropCount = parseInt(document.body.dataset.rainDensity || (isMobile ? '40' : '80'));
 
         for (let i = 0; i < dropCount; i++) {
@@ -1500,6 +1799,8 @@
   });
 </script>
     {% block extra_js %}{% endblock %}
+
+    <a href="#top" class="back-to-top" id="backToTop" aria-label="Back to top">↑</a>
 
     <!-- ==========================================
          SOLID, UNBREAKABLE PREMIUM FOOTER 

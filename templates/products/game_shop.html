@@ -34,20 +34,19 @@
         height: 100vh;
         z-index: -5;
         pointer-events: none;
-        background: #0A0A0F;
+        background: linear-gradient(180deg, rgba(42, 22, 96, 0.88), rgba(10, 10, 16, 0.96));
         contain: layout;
         overflow: hidden;
     }
 
-    /* Dark gradient vignette sitting on top of the slideshow */
     .shop-bg-container::after {
         content: '';
         position: absolute;
         inset: 0;
         z-index: 3;
         background:
-            radial-gradient(ellipse at 60% 40%, transparent 30%, rgba(10,10,15,0.8) 100%),
-            linear-gradient(to bottom, rgba(10,10,15,0.4) 0%, rgba(10,10,15,0.7) 100%);
+            radial-gradient(ellipse at 50% 30%, rgba(124, 58, 237, 0.12), transparent 34%),
+            linear-gradient(to bottom, rgba(10,10,15,0.12) 0%, rgba(10,10,15,0.92) 100%);
         pointer-events: none;
     }
 
@@ -56,27 +55,7 @@
         inset: 0;
         z-index: 2;
         background-image: radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px);
-        background-size: 32px 32px;
-    }
-
-    .shop-slide {
-        position: absolute;
-        inset: 0;
-        background-size: cover;
-        background-position: center;
-        animation: kenBurns 24s ease-in-out infinite;
-        will-change: opacity, transform;
-    }
-
-    .shop-slide-1 { background-image: url('{% static "images/hero1.jpg" %}'); animation-delay: 0s; }
-    .shop-slide-2 { background-image: url('{% static "images/hero2.jpg" %}'); animation-delay: 8s; }
-    .shop-slide-3 { background-image: url('{% static "images/hero3.jpg" %}'); animation-delay: 16s; }
-
-    @keyframes kenBurns {
-        0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.2; }
-        25% { transform: scale(1.1) rotate(1deg); opacity: 0.3; }
-        50% { transform: scale(1.2) rotate(-1deg); opacity: 0.2; }
-        75% { transform: scale(1.1) rotate(0.5deg); opacity: 0.25; }
+        background-size: 30px 30px;
     }
 
     /* =========================================
@@ -87,19 +66,16 @@
         z-index: 10;
         padding: 2rem 1.5rem 1.5rem;
         text-align: center;
-        background: linear-gradient(to bottom, rgba(10,10,15,0.85) 0%, transparent 100%);
+        background: linear-gradient(180deg, rgba(79, 17, 135, 0.95), rgba(10, 10, 15, 0.96));
+        border-bottom: 1px solid rgba(0, 0, 0, 0.35);
     }
 
-    .game-banner-bg {
-        position: absolute;
-        top: 0;
-        left: 0;
+    .game-header-line {
         width: 100%;
-        height: 100%;
-        background-size: cover;
-        background-position: center;
-        opacity: 0.15;
-        z-index: -1;
+        max-width: 260px;
+        height: 1px;
+        margin: 1.3rem auto 0.8rem;
+        background: rgba(0, 0, 0, 0.55);
     }
 
     .breadcrumb {
@@ -173,7 +149,7 @@
         display: flex;
         justify-content: center;
         gap: 0.5rem;
-        margin: 1.5rem 1rem 2rem;
+        margin: 1.5rem 1rem 1.5rem;
         flex-wrap: wrap;
         position: relative;
         z-index: 11;
@@ -181,23 +157,50 @@
     }
 
     .filter-tab {
-        padding: 0.6rem 1.2rem;
-        background: rgba(0, 0, 0, 0.3);
+        padding: 0.65rem 1.1rem;
+        background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 50px;
+        border-radius: 999px;
         color: var(--text-muted);
         text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s ease;
+        font-weight: 600;
+        transition: all 0.28s ease;
         font-size: 0.85rem;
         white-space: nowrap;
+        min-width: max-content;
     }
 
     .filter-tab:hover,
     .filter-tab.active {
-        background: rgba(124, 58, 237, 0.2);
-        border-color: var(--primary);
-        color: var(--primary);
+        background: rgba(124, 58, 237, 0.22);
+        border-color: rgba(124, 58, 237, 0.4);
+        color: #FFFFFF;
+    }
+
+    .filter-tabs.sticky {
+        position: sticky;
+        top: 72px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+        scroll-padding-inline: 1rem;
+        overscroll-behavior-x: contain;
+        background: rgba(10, 10, 15, 0.96);
+        backdrop-filter: blur(12px);
+        padding: 0.75rem 1rem;
+        margin: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .filter-tabs.sticky .filter-tab {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
     }
 
     @media (max-width: 768px) {
@@ -229,157 +232,235 @@
     }
 
     /* =========================================
-       5. PRODUCT GRID - EXACTLY LIKE HOME PAGE
+       5. PRODUCT GRID
        ========================================= */
+    .product-grid-wrapper {
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+        overflow: hidden;
+    }
+
     .products-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        grid-auto-rows: 1fr;
         gap: 1.5rem;
-        max-width: 1100px;
-        margin: 1.5rem auto 3rem;
-        padding: 0 1rem;
+        max-width: 1040px;
+        margin: 1.5rem auto 0;
+        padding: 0 1rem 0;
         position: relative;
         z-index: 11;
         width: 100%;
+        align-items: stretch;
     }
 
     .product-card {
-        position: relative;
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1.5px solid rgba(255,255,255,0.15);
-        background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(12, 16, 30, 0.78));
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        box-shadow: 0 16px 40px rgba(0,0,0,0.16),
-                    inset 0 1px 0 rgba(255,255,255,0.08);
-        cursor: pointer;
-        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         display: flex;
         flex-direction: column;
-        min-height: 200px;
-        text-align: center;
-        text-decoration: none;
-        color: white;
-        opacity: 0;
-        animation: cardFadeInHome 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
-        will-change: transform, opacity;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(10, 10, 18, 0.98);
+        box-shadow: 0 18px 38px rgba(0, 0, 0, 0.22);
+        transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+        position: relative;
+        min-width: 0;
     }
 
     .product-card:hover {
-        transform: translateY(-8px);
-        border-color: rgba(124, 58, 237, 0.8);
-        box-shadow: 0 20px 50px rgba(124,58,237,0.25),
-                    inset 0 1px 0 rgba(255,255,255,0.08);
+        transform: translateY(-3px);
+        border-color: rgba(124, 58, 237, 0.28);
+        box-shadow: 0 24px 46px rgba(0, 0, 0, 0.24);
     }
 
-    .product-image {
+    .product-card-media {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 4 / 5;
+        min-height: 0;
+        background: rgba(255, 255, 255, 0.03);
+        overflow: hidden;
+        transition: transform 0.35s ease, background-color 0.35s ease;
+    }
+
+    .product-card-media img {
         position: absolute;
         inset: 0;
-        background-size: cover;
-        background-position: center;
-        opacity: 0.15;
-        transition: opacity 0.35s ease;
-        z-index: 0;
-    }
-
-    .product-image img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
+    }
+
+    /* FIX: the old fallback rendered the first character of the product
+       NAME (e.g. "6,570 Diamonds" -> a giant floating "6"). It now shows
+       a themed diamond icon — never raw user text — so it always looks
+       intentional even with zero product images uploaded. */
+    .product-card-media .product-card-avatar {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(160deg, rgba(124,58,237,0.22), rgba(6,182,212,0.14));
+        z-index: 2;
+    }
+
+    .product-card-avatar svg {
+        width: 34%;
+        max-width: 64px;
+        opacity: 0.55;
+        filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.4));
     }
 
     .product-card-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(
-            135deg,
-            rgba(10,10,25,0.55) 0%,
-            rgba(10,10,25,0.2) 100%
-        );
+        background: linear-gradient(180deg, rgba(10, 10, 15, 0.08) 0%, rgba(10, 10, 15, 0.42) 52%, rgba(10, 10, 15, 0.72) 100%);
         z-index: 1;
+        pointer-events: none;
     }
 
-    .product-card:hover .product-image {
-        opacity: 0.28;
+    .product-card:hover .product-card-media {
+        transform: scale(1.01);
     }
 
     .product-card-content {
         position: relative;
         z-index: 2;
-        padding: 1.4rem 1.5rem;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        height: 100%;
-        flex: 1;
+        justify-content: flex-start;
+        gap: 0.75rem;
+        padding: 1.25rem 1.35rem 1.35rem;
+        flex: 1 1 auto;
+        min-height: 0;
+        background: rgba(10, 10, 16, 0.92);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .product-badge {
-        font-size: 0.7rem;
-        color: rgba(160,160,176,0.8);
+        color: rgba(148, 163, 184, 0.85);
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 0.6rem;
-        font-weight: 600;
+        letter-spacing: 0.08em;
+        font-size: 0.7rem;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
     }
 
     .product-name {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #FFFFFF;
-        margin-bottom: 0.4rem;
-        line-height: 1.3;
+        font-size: 1rem;
+        font-weight: 800;
+        color: #F8FAFC;
+        line-height: 1.35;
+        margin: 0;
     }
 
     .product-meta {
-        font-size: 0.75rem;
-        color: rgba(160,160,176,0.7);
-        margin-bottom: 0.8rem;
+        font-size: 0.88rem;
+        color: rgba(148, 163, 184, 0.85);
+        margin-bottom: auto;
+        line-height: 1.5;
     }
 
-    .product-price {
+    .product-footer {
         display: flex;
         justify-content: space-between;
-        align-items: flex-end;
-        margin-top: auto;
+        align-items: center;
+        gap: 0.75rem;
+        padding-top: 0.45rem;
+        margin-top: 0;
+        flex-wrap: wrap;
     }
 
-    .price-coins {
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: #06B6D4;
-        text-shadow: 0 0 12px rgba(6,182,212,0.5);
+    .product-footer > * {
+        min-width: 0;
     }
 
-    .price-coins span {
-        font-size: 0.75rem;
-        color: rgba(160,160,176,0.7);
+    .product-price-large {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: #F8FAFC;
+        line-height: 1.1;
+        min-width: 0;
+        flex: 1 1 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
-    .price-inr {
-        font-size: 0.75rem;
-        color: rgba(160,160,176,0.7);
-        margin-top: 0.2rem;
+    .product-price-small {
+        color: rgba(148, 163, 184, 0.8);
+        font-size: 0.82rem;
+        min-width: 0;
     }
 
     .btn-buy {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: rgba(124,58,237,0.15);
-        border: 1px solid rgba(124,58,237,0.35);
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s ease;
+        padding: 0.75rem 0.95rem;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        min-width: 88px;
+        min-height: 40px;
+        color: #FFFFFF;
+        font-weight: 700;
+        font-size: 0.86rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        flex: 0 0 auto;
+        white-space: nowrap;
     }
 
-    .product-card:hover .btn-buy {
-        background: rgba(124,58,237,0.4);
-        border-color: rgba(124,58,237,0.8);
-        box-shadow: 0 0 12px rgba(124,58,237,0.5);
+    .product-card:hover .btn-buy,
+    .btn-buy:focus-visible {
+        background: rgba(255, 255, 255, 0.16);
+        border-color: rgba(255, 255, 255, 0.18);
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
     }
+
+    .product-card .product-footer {
+        min-width: 0;
+    }
+
+    .product-card.skeleton {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: none;
+        animation: none;
+    }
+
+    .product-card.skeleton .product-card-media,
+    .product-card.skeleton .product-card-content {
+        background: transparent;
+    }
+
+    .product-card.skeleton .skeleton-block {
+        display: block;
+        width: 100%;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .product-card.skeleton .skeleton-block::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+        animation: shimmer 1.5s infinite;
+    }
+
+    .skeleton-line {
+        height: 14px;
+        margin-bottom: 0.85rem;
+    }
+
+    .skeleton-line.short { width: 55%; }
+    .skeleton-line.medium { width: 72%; }
+    .skeleton-line.tall { height: 22px; width: 60%; }
 
     /* Empty State */
     .empty-state {
@@ -404,95 +485,102 @@
        MOBILE RESPONSIVE OPTIMIZATION
        ========================================= */
     @media (max-width: 768px) {
+        .filter-tabs {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            justify-content: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 0.85rem;
+            margin: 0 0 1rem 0;
+        }
+
+        .filter-tabs.sticky {
+            position: sticky;
+            top: 72px;
+            z-index: 20;
+            justify-content: flex-start;
+            margin: 0 0 1rem 0;
+            background: rgba(10, 10, 15, 0.96);
+            backdrop-filter: blur(14px);
+        }
+
         .products-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.8rem;
-            margin: 1rem auto 2.5rem;
-            padding: 0 0.8rem;
+            grid-template-columns: repeat(2, minmax(140px, 1fr));
+            gap: 1rem;
+            margin: 0 auto 1.5rem;
+            padding: 0 0.75rem;
         }
 
         .product-card {
-            min-height: 180px;
+            min-height: 220px;
         }
 
         .product-card-content {
-            padding: 1rem 0.9rem;
+            padding: 1rem 0.95rem;
         }
 
         .product-badge {
-            font-size: 0.65rem;
-            margin-bottom: 0.4rem;
+            font-size: 0.72rem;
         }
 
         .product-name {
-            font-size: 0.85rem;
-            margin-bottom: 0.3rem;
-        }
-
-        .product-meta {
-            font-size: 0.7rem;
-            margin-bottom: 0.6rem;
-        }
-
-        .price-coins {
             font-size: 0.95rem;
         }
 
-        .price-coins span {
-            font-size: 0.7rem;
+        .product-meta {
+            font-size: 0.82rem;
         }
 
-        .price-inr {
-            font-size: 0.7rem;
+        .product-price-large {
+            font-size: 1.1rem;
+        }
+
+        .btn-buy {
+            min-width: 96px;
+            padding: 0.75rem 0.9rem;
         }
     }
 
     @media (max-width: 480px) {
-        .products-grid {
-            grid-template-columns: repeat(2, 1fr);
+        .filter-tabs {
+            padding: 0.75rem 0.6rem;
             gap: 0.6rem;
-            margin: 0.8rem auto 2rem;
-            padding: 0 0.6rem;
+        }
+
+        .products-grid {
+            grid-template-columns: repeat(2, minmax(120px, 1fr));
+            gap: 0.7rem;
+            margin: 0 auto 1.2rem;
+            padding: 0 0.5rem;
         }
 
         .product-card {
-            min-height: 160px;
+            min-height: 210px;
         }
 
         .product-card-content {
-            padding: 0.9rem 0.8rem;
+            padding: 0.95rem 0.8rem;
         }
 
         .product-badge {
-            font-size: 0.6rem;
-            margin-bottom: 0.3rem;
+            font-size: 0.68rem;
         }
 
         .product-name {
-            font-size: 0.8rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .product-meta {
-            font-size: 0.65rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .price-coins {
             font-size: 0.9rem;
         }
 
-        .price-coins span {
-            font-size: 0.65rem;
+        .product-meta {
+            font-size: 0.78rem;
         }
 
-        .price-inr {
-            font-size: 0.65rem;
+        .product-price-large {
+            font-size: 1rem;
         }
 
         .btn-buy {
-            width: 28px;
-            height: 28px;
+            min-width: 88px;
+            padding: 0.7rem 0.85rem;
         }
     }
 </style>
@@ -501,10 +589,6 @@
 {% block content %}
 <!-- Game Header -->
 <div class="game-header">
-    {% if game.banner %}
-    <div class="game-banner-bg" style="background-image: url('{{ game.banner.url }}');"></div>
-    {% endif %}
-
     <div class="breadcrumb">
         <a href="{% url 'shop' %}">Shop</a> → {{ game.name }}
     </div>
@@ -514,18 +598,16 @@
     {% if game.description %}
     <p class="game-description">{{ game.description }}</p>
     {% endif %}
+    <div class="game-header-line"></div>
 </div>
 
-<!-- Background Slideshow -->
+<!-- Raw purple background -->
 <div class="shop-bg-container">
     <div class="shop-hex-overlay"></div>
-    <div class="shop-slide shop-slide-1"></div>
-    <div class="shop-slide shop-slide-2"></div>
-    <div class="shop-slide shop-slide-3"></div>
 </div>
 
 <!-- Filter Tabs -->
-<div class="filter-tabs">
+<div class="filter-tabs sticky">
     <a href="{% url 'game_shop' game.slug %}" class="filter-tab{% if not active_type %} active{% endif %}">All</a>
     {% for type_choice in available_types %}
     <a href="?type={{ type_choice }}" class="filter-tab{% if active_type == type_choice %} active{% endif %}">{{ type_choice|title }}</a>
@@ -533,54 +615,55 @@
 </div>
 
 <!-- Products Grid -->
-<div class="products-grid">
-    {% for product in products %}
-    <a href="{% url 'product_detail' product.pk %}" class="product-card">
-        {% if product.image %}
-        <div class="product-image" style="background-image: url('{{ product.image.url }}');"></div>
-        {% else %}
-        <div class="product-image" style="background-image: url('{% static 'images/hero1.jpg' %}');"></div>
-        {% endif %}
-        
-        <div class="product-card-overlay"></div>
-
-        <div class="product-card-content">
-            <div class="product-badge">{{ product.game.name }}</div>
-
-            <div class="product-name">{{ product.name }}</div>
-
-            {% if product.diamond_amount %}
-            <div class="product-meta">{{ product.diamond_amount }} Diamonds</div>
-            {% endif %}
-
-            <div class="product-price">
-                <div>
-                    <div class="price-coins">{{ product.price_coins }} <span>Coins</span></div>
-                    <div class="price-inr">₹{{ product.price_inr }}</div>
+<div class="product-grid-wrapper">
+    <div class="products-grid card-grid">
+        {% for product in products %}
+        <a href="{% url 'product_detail' product.pk %}" class="product-card glass-card">
+            <div class="product-card-media">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+                {% elif product.game.icon %}
+                <img src="{{ product.game.icon.url }}" alt="{{ product.name }}" loading="lazy" style="opacity:0.45; object-fit:contain; padding:18%;">
+                {% else %}
+                <div class="product-card-avatar">
+                    <svg viewBox="0 0 24 24" fill="#FFFFFF"><path d="M12 2L2 9l10 13L22 9l-10-7z"/></svg>
                 </div>
-                <div class="btn-buy">
-                    <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                    </svg>
+                {% endif %}
+                <div class="product-card-overlay"></div>
+            </div>
+
+            <div class="product-card-content">
+                <div class="product-badge">{{ product.game.name }}</div>
+                <div class="product-name">{{ product.name }}</div>
+                {% if product.diamond_amount %}
+                <div class="product-meta">{{ product.diamond_amount }} Diamonds</div>
+                {% endif %}
+
+                <div class="product-footer">
+                    <div>
+                        <div class="product-price-large">₹{{ product.price_inr }}</div>
+                        <div class="product-price-small">{{ product.price_coins }} Coins</div>
+                    </div>
+                    <span class="btn-buy">Buy</span>
                 </div>
             </div>
-        </div>
-    </a>
-    {% endfor %}
+        </a>
+        {% endfor %}
 
-    {% if not products %}
-    <div class="empty-state">
-        <h3>No products found</h3>
-        <p>Products for this game are coming soon!</p>
+        {% if not products %}
+        <div class="empty-state">
+            <h3>No products found</h3>
+            <p>Products for this game are coming soon!</p>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        document.body.dataset.rainDensity = '110';
+        document.body.dataset.rainDensity = '90';
     });
 </script>
 {% endblock %}
