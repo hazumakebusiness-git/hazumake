@@ -2,12 +2,13 @@ import json
 import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth
 from django.contrib.auth import login, logout
-from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 if not firebase_admin._apps:
     cred = credentials.Certificate(settings.FIREBASE_ADMIN_CREDENTIALS)
