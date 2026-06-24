@@ -8,6 +8,10 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             'description': 'This number appears publicly on the Contact page.',
             'fields': ('store_manager_name', 'store_manager_phone', 'store_manager_whatsapp')
         }),
+        ('Page Backgrounds', {             # <-- just add this second block
+            'description': 'Upload a background image per page. Leave blank to use the default gradient.',
+            'fields': ('home_bg', 'shop_bg', 'game_shop_bg', 'product_bg')
+        }),                                # <-- comma after every block except the last
     )
     def has_add_permission(self, request):
         return not SiteSettings.objects.exists()

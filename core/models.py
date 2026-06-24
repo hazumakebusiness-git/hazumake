@@ -6,7 +6,11 @@ class SiteSettings(models.Model):
     store_manager_phone = models.CharField(max_length=20, default='9612026834')
     store_manager_whatsapp = models.CharField(max_length=20, blank=True,
         help_text='WhatsApp number with country code e.g. 919612026834')
-
+    # --- ADD THESE NEW FIELDS ---
+    home_bg     = models.ImageField(upload_to='backgrounds/', blank=True, null=True, verbose_name='Home Background')
+    shop_bg     = models.ImageField(upload_to='backgrounds/', blank=True, null=True, verbose_name='Shop Page Background')
+    game_shop_bg   = models.ImageField(upload_to='backgrounds/', blank=True, null=True, verbose_name='Game Shop Background')
+    product_bg  = models.ImageField(upload_to='backgrounds/', blank=True, null=True, verbose_name='Product Detail Background')
     class Meta:
         verbose_name = 'Site Settings'
         verbose_name_plural = 'Site Settings'
