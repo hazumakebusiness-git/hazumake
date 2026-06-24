@@ -38,28 +38,30 @@ def firebase_session(request):
         decoded_token = firebase_auth.verify_id_token(id_token)
         uid = decoded_token['uid']
         email = decoded_token.get('email', '')
-        user, created = User.objects.get_or_create(
-            username=uid,
-            defaults={
-                'email': email,
-                'first_name': decoded_token.get('name', '').split(' ')[0],
-                'last_name': ' '.join(decoded_token.get('name', '').split(' ')[1:]),
-            }
-        )
-        if user.email != email:
-            user.email = email
-            user.save()
+
+        # First try to find existing user by email
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Create new user with uid as username
+            user = User.objects.create(
+                username=uid,
+                email=email,
+                first_name=decoded_token.get('name', '').split(' ')[0],
+                last_name=' '.join(decoded_token.get('name', '').split(' ')[1:]),
+            )
 
         # Ensure wallet exists
         try:
             from wallet.models import Wallet
             Wallet.objects.get_or_create(user=user)
-        except Exception as e:
+        except Exception:
             pass
 
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        return JsonResponse({'status': 'ok', 'created': created, 'email': email})
-    except json.JSONDecodeError as e:
+        return JsonResponse({'status': 'ok', 'email': email})
+
+    except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON format'}, status=400)
     except firebase_auth.InvalidIdTokenError:
         return JsonResponse({'error': 'Invalid token'}, status=401)
@@ -67,7 +69,6 @@ def firebase_session(request):
         return JsonResponse({'error': 'Token expired'}, status=401)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
 
 def signout_view(request):
     logout(request)
