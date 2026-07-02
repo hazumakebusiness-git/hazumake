@@ -1,0 +1,1845 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hazumake Store - Premium Top-Up{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <link rel="preload" as="image" href="{% static 'images/hero1.jpg' %}">
+    <link rel="preload" as="image" href="{% static 'images/hero2.jpg' %}">
+    <link rel="preload" as="image" href="{% static 'images/hero3.jpg' %}">
+    <link rel="preload" as="image" href="{% static 'images/hero4.jpg' %}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💎</text></svg>">
+    
+    <style>
+        /* =========================================
+           AAA GAMING VARIABLES & RESET
+           ========================================= */
+        :root {
+            --bg-color: #0A0A0F;
+            --primary: #7C3AED;
+            --primary-2: #8B5CF6;
+            --primary-3: #FF6B2B;
+            --accent-2: #06B6D4;
+            --accent-3: #F97316;
+            --accent: #06B6D4;
+            --card-bg: #1A1A2E;
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #FFFFFF;
+            --text-muted: #A0A0B0;
+            --glass-bg: rgba(10, 10, 25, 0.6);
+            --success: #10B981;
+            --error: #EF4444;
+            --warning: #F59E0B;
+            --safe-padding-mobile: 1rem;
+            --safe-padding-tablet: 1.5rem;
+            --safe-padding-desktop: 2rem;
+            --border-radius: 16px;
+            --border-radius-sm: 12px;
+            --border-radius-lg: 20px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.5);
+            scroll-behavior: smooth;
+        }
+
+        /* =========================================================
+           1. GLOBAL STRUCTURAL RESET (Fixes Overflow & Scrolling)
+           ========================================================= */
+        *, *::before, *::after {
+            box-sizing: border-box; /* Forces padding to stay INSIDE the width */
+            -webkit-font-smoothing: subpixel-antialiased;
+            -moz-osx-font-smoothing: auto;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%; /* Prevents iOS text zooming */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overscroll-behavior-x: none;
+            font-weight: 300; /* Premium lighter weight */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            letter-spacing: 0.01em; /* Subtle letter spacing for premium feel */
+        }
+
+        /* Ensure images never stretch past their containers */
+        img, svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* =========================================================
+           2. REUSABLE MOBILE-NATIVE COMPONENTS
+           ========================================================= */
+        /* Standardized Modern App Touch Target (Codashop style) */
+        .btn-native {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 48px; /* Standard Apple/Android touch target */
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary-action {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #FFFFFF;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        }
+
+        /* Reusable glass card and grid system */
+        .card-grid,
+        .shop-product-grid,
+        .products-grid,
+        .games-grid,
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .glass-card,
+        .product-card,
+        .home-product-card,
+        .game-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+            overflow: hidden;
+            border-radius: var(--border-radius-lg);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(10, 10, 20, 0.82));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 26%);
+            pointer-events: none;
+            opacity: 0.25;
+        }
+
+        @media (hover:hover) {
+            .glass-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 22px 62px rgba(0, 0, 0, 0.34), 0 0 28px rgba(124, 58, 237, 0.14);
+                border-color: rgba(255, 255, 255, 0.18);
+            }
+            .glass-card:hover .glass-card-image,
+            .glass-card:hover .product-image,
+            .glass-card:hover .home-product-card-banner,
+            .glass-card:hover .game-card-banner,
+            .glass-card:hover .game-banner {
+                transform: scale(1.05);
+            }
+        }
+
+        .glass-card:active {
+            transform: scale(0.992);
+        }
+
+        .glass-card-image,
+        .glass-card-banner,
+        .product-image,
+        .home-product-card-banner,
+        .game-card-banner,
+        .game-banner {
+            position: relative;
+            width: 100%;
+            padding-top: 62%;
+            background-size: cover;
+            background-position: center;
+            transform: translateZ(0);
+            transition: transform 0.35s ease, opacity 0.35s ease;
+        }
+
+        .glass-card-overlay,
+        .product-card-overlay,
+        .home-product-card-overlay,
+        .game-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(10, 10, 15, 0.04) 0%, rgba(10, 10, 15, 0.5) 60%, rgba(10, 10, 15, 0.92) 100%);
+            pointer-events: none;
+        }
+
+        .glass-card-body,
+        .product-card-content,
+        .home-product-card-content,
+        .game-card-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            padding: 1.25rem;
+            min-height: 120px;
+        }
+
+        .glass-card-badge,
+        .product-badge,
+        .game-package-count,
+        .home-product-price-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: #FFFFFF;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            backdrop-filter: blur(16px);
+        }
+
+        .glass-card-title,
+        .product-name,
+        .home-product-name,
+        .game-name {
+            font-size: clamp(1rem, 1.8vw, 1.2rem);
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .glass-card-meta,
+        .product-meta,
+        .game-short,
+        .home-product-price-subtext,
+        .game-products {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            line-height: 1.4;
+        }
+
+        .glass-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: auto;
+        }
+
+        .glass-card-price,
+        .price-coins,
+        .price-inr,
+        .product-price {
+            color: #FFFFFF;
+            font-weight: 800;
+        }
+
+        .glass-card-price {
+            font-size: 1rem;
+        }
+
+        .glass-card-action,
+        .btn-buy,
+        .card-buy-btn,
+        .btn-native {
+            min-height: 44px;
+            min-width: 120px;
+        }
+
+        .glass-card-action {
+            align-self: flex-start;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            min-height: 240px;
+            padding: 1.8rem;
+            border-radius: var(--border-radius-lg);
+            background: rgba(10, 10, 20, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow);
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .empty-state h3 {
+            color: var(--text-main);
+            font-size: clamp(1.5rem, 2vw, 2rem);
+            margin: 0;
+        }
+
+        .empty-state p {
+            max-width: 520px;
+            line-height: 1.75;
+        }
+
+        .back-to-top {
+            position: fixed;
+            right: 1.25rem;
+            bottom: 1.5rem;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(10, 10, 20, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: white;
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.35);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+            z-index: 1002;
+            text-decoration: none;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 38px rgba(0, 0, 0, 0.4);
+            background: rgba(15, 15, 30, 0.96);
+        }
+
+        .card-skeleton {
+            position: relative;
+            overflow: hidden;
+            min-height: 220px;
+            border-radius: var(--border-radius-lg);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow);
+        }
+
+        .card-skeleton::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.05) 100%);
+            transform: translateX(-100%);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            to { transform: translateX(100%); }
+        }
+
+        @media (max-width: 768px) {
+            .glass-card {
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: rgba(10, 10, 20, 0.94);
+                box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+            }
+            .card-grid,
+            .shop-product-grid,
+            .products-grid,
+            .games-grid,
+            .product-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 1rem;
+            }
+            .glass-card-overlay {
+                background: linear-gradient(180deg, rgba(10, 10, 15, 0.08) 0%, rgba(10, 10, 15, 0.48) 60%, rgba(10, 10, 15, 0.95) 100%);
+            }
+        }
+
+        /* Colorful tab/button utilities */
+        .tab-red { background: linear-gradient(135deg, var(--primary-3), var(--accent-3)); color: white; }
+        .tab-violet { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: white; }
+        .tab-cyan { background: linear-gradient(135deg, var(--accent-2), var(--accent-3)); color: white; }
+
+        .btn-native,
+        button,
+        a,
+        .nav-link,
+        .btn-nav,
+        .product-card,
+        .home-product-card,
+        .contact-card,
+        .ocard,
+        .txn-card,
+        .wallet-card {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.12);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+            will-change: transform, box-shadow, background-color;
+        }
+
+        .btn-primary-action:active,
+        button:active,
+        a:active,
+        .nav-link:active,
+        .btn-nav:active,
+        .product-card:active,
+        .home-product-card:active,
+        .contact-card:active,
+        .ocard:active,
+        .txn-card:active,
+        .wallet-card:active {
+            transform: scale(0.985);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+            background-color: rgba(255, 255, 255, 0.04);
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* =========================================
+           BACKGROUND ENGINE (ARTWORK, HEX GRID, PARTICLES)
+           ========================================= */
+        .bg-artwork {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop') center/cover;
+            opacity: 0.08;
+            z-index: -3;
+            pointer-events: none;
+            mix-blend-mode: luminosity;
+        }
+
+        @media (max-width: 768px) {
+            .bg-artwork {
+                opacity: 0.05;
+            }
+        }
+
+        .bg-hex-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='69.28' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 17.32l-20 11.55L0 17.32V-5.77l20-11.55L40-5.77V17.32zm0 46.19l-20 11.55-20-11.55V40.41l20-11.55 20 11.55v23.09zM20 51.96l-20 11.55v-23.09l20-11.55 20 11.55v23.09L20 51.96z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .bg-hex-grid {
+                background-image: url("data:image/svg+xml,%3Csvg width='40' height='69.28' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 17.32l-20 11.55L0 17.32V-5.77l20-11.55L40-5.77V17.32zm0 46.19l-20 11.55-20-11.55V40.41l20-11.55 20 11.55v23.09zM20 51.96l-20 11.55v-23.09l20-11.55 20 11.55v23.09L20 51.96z' fill='%23ffffff' fill-opacity='0.01' fill-rule='evenodd'/%3E%3C/svg%3E");
+            }
+        }
+
+        /* Nebula Glows - Reduced on Mobile */
+        .nebula {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.3;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .nebula-violet {
+            background: var(--primary);
+            width: 60vw;
+            height: 60vw;
+            top: -10%;
+            left: -10%;
+        }
+        .nebula-cyan {
+            background: var(--accent);
+            width: 40vw;
+            height: 40vw;
+            bottom: 0;
+            right: -5%;
+        }
+
+        /* Mobile: Reduce nebula size and opacity */
+        @media (max-width: 768px) {
+            .nebula {
+                opacity: 0.15;
+                filter: blur(80px);
+            }
+            .nebula-violet {
+                width: 80vw;
+                height: 80vw;
+                top: -30%;
+                left: -30%;
+            }
+            .nebula-cyan {
+                width: 60vw;
+                height: 60vw;
+                bottom: -20%;
+                right: -20%;
+            }
+        }
+
+        /* Floating Particles Container */
+        #particles-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0; pointer-events: none; overflow: hidden;
+        }
+        .gem-particle {
+            position: absolute; bottom: -50px;
+            animation: floatUp linear infinite; opacity: 0;
+            filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.8));
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg) scale(0.5); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100vh) rotate(360deg) scale(1); opacity: 0; }
+        }
+
+        /* =========================================
+           GLASS NAVBAR (DYNAMIC SCROLL)
+           ========================================= */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background-clip: text; -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900; letter-spacing: 1px;
+        }
+
+        .glass-nav {
+            background: rgba(10, 10, 15, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            will-change: background-color, box-shadow;
+        }
+
+        .glass-nav.scrolled {
+            background: rgba(10, 10, 15, 0.9);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(124, 58, 237, 0.2);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+            animation: navSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Hamburger Menu Button */
+        .hamburger {
+
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background: transparent;   /* ← removes the white box */
+        border: none;              /* ← removes any button border */
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+        .hamburger:hover { background: rgba(255,255,255,0.1); }
+        .hamburger span {
+            width: 25px; height: 3px; background: white; margin: 3px 0;
+            transition: all 0.3s ease; border-radius: 2px;
+        }
+        .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); }
+
+        /* LEFT SLIDE-IN DRAWER (Mobile Menu) */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: min(300px, 85vw);
+            height: 100dvh;
+            background: rgba(10, 10, 15, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 0;
+            padding: 5rem 1.5rem 2rem;
+            overflow-y: auto;
+            transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-right: 1px solid rgba(124, 58, 237, 0.3);
+        }
+
+        .mobile-menu.open {
+            left: 0;
+        }
+
+        .drawer-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+
+        .drawer-overlay.open {
+            display: block;
+        }
+
+        .mobile-menu .nav-link {
+            font-size: 1.25rem; padding: 1rem 1.25rem;
+            width: min(90%, 340px); max-width: 340px; text-align: center;
+            border-radius: 14px; transition: all 0.3s ease;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .mobile-menu .nav-link:hover {
+            background: rgba(124, 58, 237, 0.25); transform: scale(1.03);
+        }
+        .mobile-menu .nav-actions { 
+            flex-direction: column; 
+            gap: 1rem; 
+            width: 100%; 
+            align-items: center; 
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(124, 58, 237, 0.3);
+        }
+        .mobile-menu .btn-nav { width: min(90%, 340px); max-width: 340px; }
+
+        /* =========================================
+           RESPONSIVE DESIGN - MOBILE FIRST
+           ========================================= */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.8rem 1rem;
+                gap: 1rem;
+            }
+            .nav-brand {
+                font-size: 1.4rem;
+            }
+            .nav-links {
+                display: none;
+            }
+            .hamburger {
+                display: flex;
+            }
+            .nav-actions {
+                display: none;
+            }
+            .glass-nav {
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0.75rem 1rem;
+            }
+            .nav-brand {
+                font-size: 1.2rem;
+            }
+            .mobile-menu {
+                padding: 4rem 1rem 2rem;
+            }
+            .mobile-menu .nav-link {
+                font-size: 1.1rem;
+                width: 100%;
+                max-width: none;
+                padding: 0.8rem 1rem;
+            }
+            .mobile-menu .btn-nav {
+                width: 100%;
+                max-width: none;
+            }
+        }
+
+        @keyframes navSlideDown {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-brand {
+            font-size: 1.8rem;
+            transition: all 0.3s ease;
+            animation: navSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .nav-brand:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.7));
+        }
+
+        .nav-links { display: flex; gap: 2.5rem; align-items: center; }
+
+        .nav-link {
+            font-size: 1rem; color: var(--text-main); font-weight: 500;
+            transition: all 0.3s ease; position: relative; padding-bottom: 4px;
+        }
+
+        /* Animated underline bar that slides in from left */
+        .nav-link::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0;
+            width: 0%; height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+            transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+        }
+
+        .nav-link:hover {
+            color: var(--accent);
+            text-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+        }
+
+        .nav-link:hover::after { width: 100%; }
+
+        /* Active page indicator — always shown */
+        .nav-link.active-page {
+            color: var(--accent);
+        }
+        .nav-link.active-page::after { width: 100%; }
+
+        .nav-actions { display: flex; gap: 1.2rem; align-items: center; }
+
+        /* Staggered link entrance */
+        .nav-links .nav-link:nth-child(1) { animation: navFadeIn 0.5s 0.1s both; }
+        .nav-links .nav-link:nth-child(2) { animation: navFadeIn 0.5s 0.2s both; }
+        .nav-links .nav-link:nth-child(3) { animation: navFadeIn 0.5s 0.3s both; }
+        .nav-links .nav-link:nth-child(4) { animation: navFadeIn 0.5s 0.4s both; }
+
+        @keyframes navFadeIn {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Navbar Buttons */
+        .btn-nav {
+            padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 0.95rem;
+            transition: all 0.3s ease; text-decoration: none; cursor: pointer;
+        }
+        .btn-nav-outline {
+            border: 1px solid rgba(255,255,255,0.2); color: white;
+        }
+        .btn-nav-outline:hover {
+            border-color: var(--accent); color: var(--accent); box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+        }
+        .btn-nav-solid {
+            background: var(--primary); color: white; border: none;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.4);
+        }
+        .btn-nav-solid:hover {
+            background: #8B5CF6; box-shadow: 0 0 25px rgba(124, 58, 237, 0.7); transform: translateY(-2px);
+        }
+
+        main {
+            flex: 1;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+            padding-bottom: 60px;
+        }
+
+        /* =========================================
+           BOTTOM NAVIGATION BAR (Mobile Only)
+           ========================================= */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(124, 58, 237, 0.3);
+            z-index: 1000;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 8px;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            color: rgba(160, 160, 176, 0.7);
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            font-size: 10px;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .bottom-nav-item.active,
+        .bottom-nav-item:hover {
+            color: #7C3AED;
+        }
+
+        .bottom-nav-item svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        @media (max-width: 768px) {
+            .bottom-nav {
+                display: flex;
+            }
+            main {
+                padding-bottom: 70px;
+            }
+            footer {
+                padding-bottom: calc(2rem + 60px) !important;
+            }
+        }
+
+        /* =========================================
+           REVERSE GLOWING RAIN EFFECT
+           ========================================= */
+        #reverse-rain-container {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2; /* Sits behind the Glass Cards but above the Background Images */
+            pointer-events: none;
+            overflow: hidden;
+            contain: strict;
+        }
+
+        .rain-drop {
+            position: absolute;
+            bottom: -100px; /* Start hidden below screen */
+            border-radius: 50%;
+            animation: shootUp linear infinite;
+            will-change: transform, opacity;
+        }
+
+        /* Cyber Cyan Rain Drop with White-Hot Tip */
+        .rain-cyan {
+            background: linear-gradient(to top, rgba(6,182,212,0), rgba(6,182,212,0.8), #ffffff);
+            box-shadow: 0 0 10px #06B6D4, 0 0 20px #06B6D4, 0 0 40px rgba(6,182,212,0.6);
+        }
+
+        /* Neon Violet Rain Drop with White-Hot Tip */
+        .rain-violet {
+            background: linear-gradient(to top, rgba(124,58,237,0), rgba(124,58,237,0.8), #ffffff);
+            box-shadow: 0 0 10px #7C3AED, 0 0 20px #7C3AED, 0 0 40px rgba(124,58,237,0.6);
+        }
+
+        @keyframes shootUp {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            80% { opacity: 1; filter: brightness(1.5); }
+            100% { transform: translateY(-120vh); opacity: 0; }
+        }
+
+        /* =========================================
+           MOBILE RESPONSIVENESS FIXES
+           ========================================= */
+        @media (max-width: 1024px) {
+            html, body {
+                overflow-x: hidden !important;
+                width: 100% !important;
+                max-width: 100%;
+            }
+
+            .bg-slideshow, 
+            .bg-artwork,
+            .bg-hex-grid,
+            .nebula, 
+            #particles-container, 
+            #reverse-rain-container,
+            .shop-bg-container {
+                width: 100% !important;
+            }
+
+            .hero-split {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 2rem;
+                padding-top: 4rem;
+                width: 100%;
+                overflow-x: hidden;
+            }
+
+            .hero-content {
+                align-items: center;
+                text-align: center;
+                width: 100%;
+                padding: 0 1rem;
+            }
+
+            .hero-title-aaa {
+                font-size: clamp(2.2rem, 10vw, 3.5rem);
+                line-height: 1.2;
+                width: 100%;
+                word-wrap: break-word;
+            }
+
+            .hero-subtitle-aaa {
+                font-size: 0.95rem;
+                line-height: 1.6;
+                margin: 0 auto 2.5rem;
+                max-width: 100%;
+            }
+
+            .glass-scene {
+                display: block !important;
+            }
+
+            .cta-group {
+                flex-direction: row !important;
+                justify-content: center;
+                width: 100%;
+                max-width: 100% !important;
+                gap: 1rem;
+            }
+
+            .btn-glass-action,
+            .btn-topup,
+            .btn-community {
+                width: 100%;
+                max-width: 160px !important;
+                font-size: 0.9rem !important;
+                padding: 0.8rem 1.2rem !important;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .btn-glass-action svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hamburger { 
+                display: flex !important; 
+            }
+            
+            .nav-links, .nav-actions { 
+                display: none !important; 
+            }
+
+            /* Show mobile menu actions */
+            .mobile-menu .nav-actions {
+                display: flex !important;
+                flex-direction: column;
+                gap: 1rem;
+                margin-top: 1rem;
+                padding-top: 1rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                width: 100%;
+                align-items: center;
+            }
+
+            .mobile-menu .btn-nav {
+                width: min(90%, 340px);
+                max-width: 340px;
+                text-align: center;
+                padding: 0.8rem 1rem;
+                font-size: 0.95rem;
+            }
+
+            /* (Per-page templates handle their own .product-grid / .product-card / .btn-buy mobile sizing —
+               base.html no longer forces a 1-column grid or rebinds buy-button height here.) */
+        }
+
+        @media (max-width: 480px) {
+            .cta-group {
+                gap: 0.5rem;
+            }
+            
+            .btn-glass-action,
+            .btn-topup,
+            .btn-community {
+                padding: 0.8rem 0.5rem !important;
+                font-size: 0.85rem !important;
+                max-width: 140px !important;
+            }
+        }
+
+        /* =========================================
+           🚀 HOMEPAGE PRODUCT CARD COMPACT GRID (mobile only)
+           Scoped to homepage shop section so it doesn't conflict with shop pages
+           ========================================= */
+        @media (max-width: 768px) {
+            #shop-section > div > div {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+                gap: 1rem !important;
+            }
+
+            .home-product-card {
+                padding: 1rem !important;
+                border-radius: 14px !important;
+            }
+
+            .home-product-card .card-emoji {
+                width: 50px !important;
+                height: 50px !important;
+                font-size: 3rem !important;
+                margin: 0 auto 0.8rem auto !important;
+            }
+
+            .home-product-card .card-amount {
+                font-size: 1.4rem !important;
+                margin-bottom: 0.2rem !important;
+            }
+
+            .home-product-card .card-name {
+                font-size: 0.75rem !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .home-product-card .card-price-box {
+                background: rgba(124, 58, 237, 0.45) !important;
+                backdrop-filter: blur(10px) !important;
+                border: 1px solid rgba(124, 58, 237, 0.8) !important;
+                padding: 8px !important;
+                margin-bottom: 1rem !important;
+                border-radius: 8px !important;
+            }
+
+            .home-product-card .card-price-box .price-coins {
+                font-size: 0.95rem !important;
+            }
+
+            .home-product-card .card-price-box .price-inr {
+                font-size: 0.75rem !important;
+                color: rgba(255, 255, 255, 0.85) !important;
+            }
+
+            .home-product-card .card-buy-btn {
+                height: 38px !important;
+                font-size: 0.85rem !important;
+                border-radius: 8px !important;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .glass-scene {
+                display: flex !important;
+                transform: scale(0.65) !important;
+                transform-origin: top center !important;
+                height: 320px !important;
+                margin-top: -2rem !important;
+                margin-bottom: -4rem !important;
+                width: 100% !important;
+            }
+
+            .hero-split {
+                padding-top: 2rem !important;
+                gap: 1rem !important;
+            }
+
+            .hero-title-aaa {
+                font-size: clamp(2.5rem, 8vw, 3.5rem) !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .hero-subtitle-aaa {
+                font-size: 0.9rem !important;
+                max-width: 90% !important;
+                margin: 0 auto 1.5rem !important;
+            }
+
+            .btn-glass-action {
+                padding: 0.8rem 1.5rem !important;
+                font-size: 0.9rem !important;
+                min-width: 130px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-grid, #shop-section > div > div {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.75rem !important;
+                padding: 0 0.5rem !important;
+            }
+
+            .glass-scene {
+                transform: scale(0.5) !important;
+                height: 250px !important;
+                margin-bottom: -5rem !important;
+            }
+
+            .hero-badge {
+                padding: 0.4rem 1rem !important;
+                font-size: 0.75rem !important;
+            }
+        }
+
+        /* =========================================
+           📱 GLOBAL NATIVE APP MOBILE OVERRIDES
+           Scoped to product/shop containers only — does NOT affect
+           contact, orders, wallet, auth, etc. cards.
+           ========================================= */
+        @media (max-width: 768px) {
+            /* 1. PRODUCT GRID — 2 column compact (only inside shop/product sections) */
+            .product-grid,
+            .game-shop-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px !important;
+                padding: 0 12px !important;
+            }
+
+            /* 2. HOME-PAGE PRODUCT CARD STYLING — only homepage cards */
+            .home-product-card {
+                padding: 16px 12px !important;
+                border-radius: 16px !important;
+                background: rgba(15, 15, 25, 0.85) !important;
+                border: 1.5px solid rgba(124, 58, 237, 0.4) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                min-height: 180px !important;
+            }
+
+            /* Remove the giant dark placeholder boxes inside homepage product cards */
+            .home-product-card > .image-placeholder,
+            .home-product-card > .card-image-bg {
+                background: transparent !important;
+                height: auto !important;
+                width: auto !important;
+                min-height: 0 !important;
+                padding: 0 !important;
+                margin-bottom: 10px !important;
+            }
+
+            /* Center homepage product card icons (sizing is controlled by the page itself) */
+            .home-product-card .card-icon,
+            .home-product-card .card-emoji {
+                margin: 0 auto 10px auto !important;
+                object-fit: contain !important;
+            }
+
+            /* 3. NATIVE SWIPEABLE FILTER TABS */
+            .filter-container {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                justify-content: flex-start !important;
+                padding: 0 16px 16px 16px !important;
+                margin: 0 -16px 20px -16px !important;
+                gap: 10px !important;
+            }
+
+            .filter-container::-webkit-scrollbar {
+                display: none !important;
+            }
+
+            .filter-tab {
+                white-space: nowrap !important;
+                flex: 0 0 auto !important;
+                padding: 10px 20px !important;
+                font-size: 0.9rem !important;
+                border-radius: 50px !important;
+            }
+
+            /* 4. NATIVE 3D WIDGET FLATTEN (homepage glass-scene only) */
+            .glass-scene {
+                perspective: none !important;
+                height: auto !important;
+                min-height: 250px !important;
+                margin: 2rem auto 4rem auto !important;
+                transform: none !important;
+            }
+
+            .glass-stack {
+                width: 100% !important;
+                max-width: 340px !important;
+                height: auto !important;
+                transform: none !important;
+                margin: 0 auto !important;
+                transition: none !important;
+            }
+
+            .stack-layer-1 { display: none !important; }
+
+            .stack-layer-2 {
+                position: relative !important;
+                transform: none !important;
+                padding: 24px !important;
+                background: linear-gradient(135deg, rgba(25, 20, 40, 0.9), rgba(10, 10, 20, 0.95)) !important;
+                border-radius: 20px !important;
+            }
+
+            .stack-orb {
+                width: 70px !important;
+                height: 70px !important;
+                margin-bottom: 1.2rem !important;
+            }
+
+            .stack-layer-3 { display: none !important; }
+
+            /* 5. TYPOGRAPHY — homepage hero only */
+            .hero-title-aaa {
+                font-size: clamp(2rem, 8vw, 2.5rem) !important;
+                line-height: 1.2 !important;
+                padding: 0 16px !important;
+                margin-bottom: 1rem !important;
+            }
+
+            /* Homepage product price box */
+            .home-product-card .card-price-box {
+                width: 100% !important;
+                padding: 8px !important;
+                background: rgba(124, 58, 237, 0.3) !important;
+                border: 1px solid rgba(124, 58, 237, 0.6) !important;
+            }
+
+            /* Native-app form controls — minimum 44px touch target,
+               proper readable size (16px) so iOS doesn't auto-zoom on focus */
+            input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="hidden"]),
+            select,
+            textarea {
+                font-size: 16px !important; /* Prevents iOS zoom on focus */
+                min-height: 44px;
+            }
+        }
+
+        /* Native App Page Header (Mobile Only) */
+        .native-app-header {
+            display: none;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-right: 12px;
+        }
+
+        .back-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .page-header-title {
+            color: #FFFFFF;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            /* Hide the main desktop navbar on specific app pages if desired, or keep both */
+            /* .glass-nav { display: none; } */ 
+            
+            .native-app-header {
+                display: flex;
+            }
+            
+            /* Adjust padding below header */
+            .hero-split, .wallet-container, .shop-container, .contact-layout-wrapper {
+                padding-top: 1rem !important;
+            }
+        }
+
+        /* =========================================================
+           🚀 GLOBAL GAME CARD FIX (STRICT ASPECT RATIO)
+           ========================================================= */
+        /* Target the grid container */
+        .games-grid, 
+        #games-section > div[style*="grid"] {
+            display: grid !important;
+            /* Use a fixed minimum width, but allow it to fill space. NEVER stretch height */
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+            gap: 16px !important;
+            align-items: start !important; /* Prevents rows from stretching to match tallest item */
+            padding: 0 16px !important;
+            width: 100% !important;
+        }
+
+        /* Target the cards themselves */
+        .game-card {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            
+            /* 🚨 THE MAGIC FIX: Force a square/compact shape, physically impossible to stretch 🚨 */
+            height: auto !important;
+            min-height: 0 !important;
+            aspect-ratio: 1 / 1.1 !important; /* Almost perfectly square */
+            
+            padding: 16px 12px !important;
+            background: rgba(15, 15, 25, 0.9) !important;
+            border: 1px solid rgba(124, 58, 237, 0.4) !important;
+            border-radius: 16px !important;
+            text-align: center !important;
+            overflow: hidden !important;
+            position: relative !important;
+        }
+
+        /* Strip out all the broken internal wrappers causing empty space */
+        .game-card-content, 
+        .game-card-top, 
+        .game-card-bottom {
+            display: contents !important; /* Makes the wrappers invisible to the layout */
+        }
+
+        /* Fix the Game Icon sizes inside the card */
+        .game-icon-wrap, .game-icon {
+            width: 56px !important;
+            height: 56px !important;
+            margin: 0 auto 12px auto !important;
+            flex-shrink: 0 !important;
+            background: rgba(0, 0, 0, 0.4) !important;
+            border-radius: 12px !important;
+            border: 1px solid rgba(124, 58, 237, 0.5) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .game-icon-wrap img, .game-icon img {
+            width: 80% !important;
+            height: 80% !important;
+            object-fit: contain !important;
+        }
+
+        /* Fix the Text Typography */
+        .game-name {
+            font-size: 0.85rem !important;
+            font-weight: 700 !important;
+            line-height: 1.2 !important;
+            margin-bottom: 6px !important;
+            display: -webkit-box !important;
+            line-clamp: 2 !important;
+            -webkit-line-clamp: 2 !important; /* Max 2 lines */
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            color: #FFFFFF !important;
+        }
+
+        .game-short { display: none !important; } /* Hide this to save space on mobile */
+
+        /* Fix the Package Counter Pill */
+        .game-package-count, .game-products {
+            background: rgba(6, 182, 212, 0.15) !important;
+            color: #06B6D4 !important;
+            border: 1px solid rgba(6, 182, 212, 0.3) !important;
+            padding: 4px 10px !important;
+            border-radius: 50px !important;
+            font-size: 0.7rem !important;
+            font-weight: 700 !important;
+            margin-top: auto !important; /* Push to bottom of the new square card */
+        }
+
+        /* Hide the random arrow circles causing layout breaks */
+        .game-arrow { display: none !important; }
+
+        /* 📱 MOBILE SPECIFIC TWEAKS */
+        @media (max-width: 480px) {
+            .games-grid, #games-section > div[style*="grid"] {
+                grid-template-columns: repeat(2, 1fr) !important; /* EXACTLY 2 per row on small phones */
+                gap: 12px !important;
+            }
+            
+            .game-card {
+                padding: 12px 8px !important;
+            }
+            
+            .game-icon-wrap, .game-icon {
+                width: 48px !important;
+                height: 48px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .game-name { font-size: 0.75rem !important; }
+        }
+
+        /* FOOTER STYLES */
+        .site-footer {
+            background-color: #0A0A0F;
+            border-top: 1px solid rgba(124, 58, 237, 0.25);
+            padding: 4rem 5% 2rem;
+            margin-top: auto;
+            width: 100%;
+        }
+
+        .footer-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+
+        .footer-brand,
+        .footer-links,
+        .footer-support {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .footer-brand h2,
+        .footer-support h3 {
+            margin: 0 0 0.75rem;
+            font-size: 1.6rem;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .footer-brand p,
+        .footer-links a,
+        .footer-support a {
+            color: rgba(226, 232, 240, 0.9);
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+        }
+
+        .footer-links a {
+            font-weight: 500;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: color 0.25s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .footer-support a.cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.85rem 1.75rem;
+            background: rgba(124, 58, 237, 0.15);
+            border: 1px solid rgba(124, 58, 237, 0.45);
+            border-radius: 12px;
+            color: #FFFFFF;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .footer-support a.cta:hover {
+            transform: translateY(-2px);
+            background: rgba(124, 58, 237, 0.25);
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.15);
+        }
+
+        .footer-copy {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            color: #71717A;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer-inner {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .footer-support {
+                text-align: left;
+            }
+            .footer-copy {
+                margin-top: 2rem;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body id="top" data-page="{% block body_data_page %}{% endblock %}">
+
+    <!-- 🌌 CINEMATIC BACKGROUND ENGINE -->
+    <div class="bg-artwork"></div>
+    <div class="bg-hex-grid"></div>
+    <div class="nebula nebula-violet"></div>
+    <div class="nebula nebula-cyan"></div>
+    <div id="particles-container"></div> <!-- Vanilla JS controls this below -->
+     <div id="reverse-rain-container"></div>
+
+    <!-- Navbar -->
+    <header class="glass-nav" id="mainNav">
+        <nav class="navbar">
+            <a href="{% url 'home' %}" class="nav-brand gradient-text">Hazumake</a>
+            
+            <div class="nav-links">
+                <a href="{% url 'home' %}" 
+                   class="nav-link {% if request.resolver_match.url_name == 'home' %}active-page{% endif %}"
+                   id="nav-home-btn">Home</a>
+
+                <!-- On homepage: scrolls down to shop section. On other pages: goes to /shop/ -->
+                <a href="{% url 'shop' %}" 
+                   class="nav-link {% if request.resolver_match.url_name == 'shop' %}active-page{% endif %}"
+                   id="nav-shop-btn">Shop</a>
+
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'orders' %}" 
+                   class="nav-link {% if request.resolver_match.url_name == 'orders' %}active-page{% endif %}">My Orders</a>
+                <a href="{% url 'wallet' %}" 
+                   class="nav-link {% if request.resolver_match.url_name == 'wallet' %}active-page{% endif %}">Wallet</a>
+                <a href="{% url 'contact' %}" 
+                   class="nav-link {% if request.resolver_match.url_name == 'contact' %}active-page{% endif %}">Contact</a>
+                {% endif %}
+            </div>
+
+            <div class="nav-actions">
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn-nav btn-nav-outline">Profile</a>
+                    <form method="POST" action="/auth/signout/" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-nav btn-nav-solid signout-btn">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-nav btn-nav-outline">Login</a>
+                    <a href="{% url 'register' %}" class="btn-nav btn-nav-solid">Register</a>
+                {% endif %}
+            </div>
+
+            <!-- Hamburger Menu Button -->
+            <button class="hamburger" id="hamburger-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Drawer Overlay -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+
+    <!-- LEFT SLIDE-IN DRAWER MENU (Mobile) -->
+    <nav class="mobile-menu" id="mobile-menu">
+        <a href="{% url 'home' %}" 
+           class="nav-link {% if request.resolver_match.url_name == 'home' %}active-page{% endif %}">Home</a>
+        <a href="{% url 'shop' %}" 
+           class="nav-link {% if request.resolver_match.url_name == 'shop' %}active-page{% endif %}">Shop</a>
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'orders' %}" 
+           class="nav-link {% if request.resolver_match.url_name == 'orders' %}active-page{% endif %}">My Orders</a>
+        <a href="{% url 'wallet' %}" 
+           class="nav-link {% if request.resolver_match.url_name == 'wallet' %}active-page{% endif %}">Wallet</a>
+        <a href="{% url 'contact' %}" 
+           class="nav-link {% if request.resolver_match.url_name == 'contact' %}active-page{% endif %}">Contact</a>
+        {% endif %}
+        
+        <div class="nav-actions">
+            {% if request.user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn-nav btn-nav-outline">Profile</a>
+                <form method="POST" action="/auth/signout/" style="display: inline; width: 100%;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-nav btn-nav-solid signout-btn" style="width: 100%;">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-nav btn-nav-outline" style="width: 100%;">Login</a>
+                <a href="{% url 'register' %}" class="btn-nav btn-nav-solid" style="width: 100%;">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- BOTTOM NAVIGATION (Mobile Only) -->
+    <nav class="bottom-nav">
+        <a href="{% url 'home' %}" 
+           class="bottom-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            <span>Home</span>
+        </a>
+        <a href="{% url 'shop' %}"
+           class="bottom-nav-item {% if request.resolver_match.url_name == 'shop' %}active{% endif %}">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <span>Shop</span>
+        </a>
+        <a href="{% url 'contact' %}"
+           class="bottom-nav-item {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <span>Support</span>
+        </a>
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'dashboard' %}"
+           class="bottom-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            <span>Profile</span>
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}"
+           class="bottom-nav-item {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+            </svg>
+            <span>Login</span>
+        </a>
+        {% endif %}
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+   <!-- Vanilla JS Engine -->
+    <script>
+    // 1. Dynamic Navbar Scroll Effect
+    window.addEventListener('scroll', () => {
+        const nav = document.getElementById('mainNav');
+        if(window.scrollY > 50) { nav.classList.add('scrolled'); } 
+        else { nav.classList.remove('scrolled'); }
+    });
+
+    // 1b. MOBILE HAMBURGER MENU TOGGLE (LEFT DRAWER)
+    document.addEventListener('DOMContentLoaded', function() {
+        const hamburger = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const drawerOverlay = document.getElementById('drawer-overlay');
+        
+        if (hamburger && mobileMenu && drawerOverlay) {
+            hamburger.addEventListener('click', function() {
+                hamburger.classList.toggle('open');
+                mobileMenu.classList.toggle('open');
+                drawerOverlay.classList.toggle('open');
+            });
+            
+            drawerOverlay.addEventListener('click', function() {
+                hamburger.classList.remove('open');
+                mobileMenu.classList.remove('open');
+                drawerOverlay.classList.remove('open');
+            });
+            
+            // Close menu when clicking a link
+            mobileMenu.addEventListener('click', function(e) {
+                if (e.target.classList.contains('nav-link') || e.target.classList.contains('btn-nav') || e.target.tagName === 'BUTTON') {
+                    hamburger.classList.remove('open');
+                    mobileMenu.classList.remove('open');
+                    drawerOverlay.classList.remove('open');
+                }
+            });
+        }
+    });
+
+    // 1c. SMART SHOP BUTTON — scroll on homepage, navigate on other pages
+    document.addEventListener('DOMContentLoaded', function() {
+        const shopBtn = document.getElementById('nav-shop-btn');
+        const isHomePage = document.body.dataset.page === 'home';
+
+        if (shopBtn && isHomePage) {
+            shopBtn.addEventListener('click', function(e) {
+                const shopSection = document.getElementById('shop-section');
+                if (shopSection) {
+                    e.preventDefault();
+                    shopSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Close mobile menu if open
+                    const hamburger = document.getElementById('hamburger-btn');
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    const drawerOverlay = document.getElementById('drawer-overlay');
+                    if (hamburger && mobileMenu) {
+                        hamburger.classList.remove('open');
+                        mobileMenu.classList.remove('open');
+                        drawerOverlay.classList.remove('open');
+                    }
+                }
+            });
+        }
+
+        const backToTop = document.getElementById('backToTop');
+        if (backToTop) {
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 320) {
+                    backToTop.classList.add('visible');
+                } else {
+                    backToTop.classList.remove('visible');
+                }
+            });
+        }
+    });
+
+    // 2. REVERSE GLOWING RAIN ENGINE
+    document.addEventListener("DOMContentLoaded", function() {
+        const rainContainer = document.getElementById('reverse-rain-container');
+
+        // Pages set their own density via: document.body.dataset.rainDensity = '160'
+        // Default is 80 if no page sets it
+        const isMobile = window.innerWidth <= 768;
+        if (!document.body.dataset.rainDensity) {
+            document.body.dataset.rainDensity = isMobile ? '40' : '80';
+        }
+        const dropCount = parseInt(document.body.dataset.rainDensity || (isMobile ? '40' : '80'));
+
+        for (let i = 0; i < dropCount; i++) {
+            createRainDrop();
+        }
+
+        function createRainDrop() {
+            const drop = document.createElement('div');
+            drop.classList.add('rain-drop');
+
+            const isCyan = Math.random() > 0.5;
+            drop.classList.add(isCyan ? 'rain-cyan' : 'rain-violet');
+
+            // Taller drops = more dramatic streaks
+            const height = Math.random() * 80 + 30; // 30px to 110px
+            drop.style.height = `${height}px`;
+
+            const width = Math.random() * 2 + 1;
+            drop.style.width = `${width}px`;
+
+            drop.style.left = `${Math.random() * 100}vw`;
+
+            // Wider speed range for variety
+            const duration = Math.random() * 3 + 1; // 1s to 4s
+            drop.style.animationDuration = `${duration}s`;
+
+            // Longer max delay so screen stays populated at all times
+            const delay = Math.random() * 8;
+            drop.style.animationDelay = `${delay}s`;
+
+            rainContainer.appendChild(drop);
+        }
+    });
+</script>
+<script type="module">
+  import { auth } from "{% static 'js/firebase_config.js' %}";
+  import { signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  document.querySelectorAll('.signout-btn').forEach((button) => {
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      const form = e.target.closest('form');
+      if (form) {
+        form.submit();
+      }
+    });
+  });
+</script>
+    {% block extra_js %}{% endblock %}
+
+    <a href="#top" class="back-to-top" id="backToTop" aria-label="Back to top">↑</a>
+
+    <!-- ==========================================
+         SOLID, UNBREAKABLE PREMIUM FOOTER 
+         ========================================== -->
+   <!-- ==========================================
+         SLEEK, MINIMAL PREMIUM FOOTER 
+         ========================================== -->
+    <footer style="background-color: #0A0A0F; border-top: 1px solid rgba(124, 58, 237, 0.3); padding: 4rem 5% 2rem; margin-top: auto; position: relative; z-index: 9999; width: 100%;">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 3rem;">
+            
+            <!-- Brand Info -->
+            <div style="flex: 1; min-width: 250px;">
+                <h2 style="font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #7C3AED, #06B6D4); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; letter-spacing: -0.5px;">Hazumake</h2>
+                <p style="color: #9CA3AF; font-size: 0.95rem; line-height: 1.6; max-width: 300px;">Power Up Your Game with internationally recognised MLBB & BGMI servicing.</p>
+            </div>
+
+            <!-- Minimal Quick Links -->
+            <div style="flex: 1; min-width: 250px; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
+                <a href="{% url 'home' %}" style="color: #E2E8F0; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;" onmouseover="this.style.color='#06B6D4'" onmouseout="this.style.color='#E2E8F0'">Home</a>
+                <a href="{% url 'shop' %}" style="color: #E2E8F0; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;" onmouseover="this.style.color='#06B6D4'" onmouseout="this.style.color='#E2E8F0'">Shop</a>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'orders' %}" style="color: #E2E8F0; text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;" onmouseover="this.style.color='#06B6D4'" onmouseout="this.style.color='#E2E8F0'">My Orders</a>
+                {% endif %}
+                <!-- Highlighted Contact Link -->
+                <a href="{% url 'contact' %}" style="color: #06B6D4; text-decoration: none; font-weight: 600; font-size: 0.95rem; text-shadow: 0 0 10px rgba(6,182,212,0.4);">Contact Us</a>
+            </div>
+
+            <!-- Sleek CTA to Contact Page -->
+            <div class="footer-support">
+                <h3>Need Assistance?</h3>
+                <a class="cta" href="{% url 'contact' %}">Visit Support Center →</a>
+            </div>
+            
+        </div>
+
+        <div class="footer-copy">
+            &copy; 2026 Hazumake Store. All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>

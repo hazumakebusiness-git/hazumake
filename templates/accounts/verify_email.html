@@ -1,0 +1,349 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Email - Hazumake{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --bg-dark: #0A0A14;
+        --text-primary: #FFFFFF;
+        --text-muted: #A0A0B0;
+        --accent-purple: #7C3AED;
+        --accent-cyan: #06B6D4;
+        --border-color: rgba(124, 58, 237, 0.3);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(135deg, #0A0A14 0%, #1A0F2E 50%, #0A0A1F 100%);
+        color: var(--text-primary);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* =========================================
+       PREMIUM CARD & WRAPPER
+       ========================================= */
+    .auth-wrapper {
+        padding: 3rem 1rem;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .premium-card {
+        max-width: 450px;
+        width: 100%;
+        background: rgba(15, 15, 30, 0.8);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(124, 58, 237, 0.3);
+        border-radius: 24px;
+        padding: 48px 40px;
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            0 0 60px rgba(124, 58, 237, 0.15),
+            inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    }
+
+    /* =========================================
+       HEADER ELEMENTS
+       ========================================= */
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .auth-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #7C3AED, #06B6D4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.75rem;
+        letter-spacing: -1px;
+    }
+
+    .auth-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-weight: 400;
+    }
+
+    /* =========================================
+       OTP INPUT FIELD
+       ========================================= */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-wrapper::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: rgba(124, 58, 237, 0.5);
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+        transition: all 0.3s ease;
+        z-index: 5;
+    }
+
+    .form-control {
+        width: 100%;
+        background: rgba(10, 10, 20, 0.75);
+        border: 1.5px solid rgba(124, 58, 237, 0.5);
+        border-radius: 12px;
+        padding: 16px 18px;
+        color: white;
+        font-size: 1.1rem;
+        letter-spacing: 0.2em;
+        text-align: center;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .form-control::placeholder {
+        color: rgba(160, 160, 176, 0.4);
+        letter-spacing: 0.1em;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #7C3AED;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25), 0 0 20px rgba(124, 58, 237, 0.4);
+    }
+
+    .input-wrapper:focus-within::before {
+        background: #7C3AED;
+        box-shadow: 2px 0 10px rgba(124, 58, 237, 0.8);
+    }
+
+    /* =========================================
+       SUBMIT BUTTON
+       ========================================= */
+    .btn-verify {
+        width: 100%;
+        height: 52px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #7C3AED, #5B21B6);
+        color: white;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 24px rgba(124, 58, 237, 0.5);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-verify::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transform: skewX(-25deg);
+        transition: left 0.5s ease;
+    }
+
+    .btn-verify:hover {
+        background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+        box-shadow: 0 6px 32px rgba(124, 58, 237, 0.75);
+        transform: translateY(-2px);
+    }
+
+    .btn-verify:hover::after {
+        left: 200%;
+    }
+
+    .btn-verify:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 15px rgba(124, 58, 237, 0.9);
+    }
+
+    /* =========================================
+       RESEND OTP LINK
+       ========================================= */
+    .resend-section {
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    .resend-link {
+        color: var(--accent-cyan);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .resend-link:hover {
+        text-decoration: underline;
+        text-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+    }
+
+    /* =========================================
+       ERROR MESSAGES
+       ========================================= */
+    .error-list {
+        background: rgba(239, 68, 68, 0.1);
+        border-left: 2px solid #EF4444;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .error-list p {
+        color: #EF4444;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    /* =========================================
+       INFO MESSAGE
+       ========================================= */
+    .info-message {
+        background: rgba(6, 182, 212, 0.1);
+        border-left: 2px solid #06B6D4;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-message p {
+        color: #06B6D4;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .email-display {
+        color: var(--accent-cyan);
+        font-weight: 600;
+        word-break: break-all;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .auth-wrapper {
+            padding: 2rem 1rem;
+            min-height: auto;
+        }
+
+        .premium-card {
+            max-width: 420px;
+            padding: 32px 26px;
+        }
+
+        .auth-title {
+            font-size: 1.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .premium-card {
+            padding: 24px 18px;
+            border-radius: 16px;
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+        }
+
+        .btn-verify {
+            height: 48px;
+            font-size: 0.95rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="premium-card">
+
+        <div class="auth-header">
+            <h1 class="auth-title">Verify Email</h1>
+            <p class="auth-subtitle">Enter the 6-digit code sent to<br><span class="email-display">{{ email }}</span></p>
+        </div>
+
+        {% if messages %}
+            <div class="error-list">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'verify_email' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="otp">Verification Code</label>
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="otp" 
+                        name="otp" 
+                        class="form-control" 
+                        required 
+                        placeholder="000000"
+                        maxlength="6"
+                        inputmode="numeric"
+                        pattern="[0-9]{6}"
+                    >
+                </div>
+                <small style="color: rgba(160, 160, 176, 0.6); margin-top: 0.5rem; display: block;">
+                    Check your email for the 6-digit verification code
+                </small>
+            </div>
+
+            <button type="submit" class="btn-verify">Verify Email</button>
+        </form>
+
+        <div class="resend-section">
+            Didn't receive a code?
+            <form method="POST" action="{% url 'resend_otp' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="resend-link" style="border: none; background: none; padding: 0; cursor: pointer;">
+                    Resend Code
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

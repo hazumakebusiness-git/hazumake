@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order {{ order.id }} — Hazumake{% endblock %}
+
+{% block extra_css %}
+<style>
+:root{--violet:#7C3AED;--cyan:#06B6D4}
+.page-wrap{padding:1rem 0 4rem;display:flex;justify-content:center}
+.container{width:100%;max-width:680px;padding:1rem}
+.panel{background: rgba(15,15,28,0.85);border:1px solid rgba(124,58,237,0.25);border-radius:14px;padding:1.2rem;backdrop-filter:blur(12px)}
+.section{margin-top:0.9rem}
+.header-row{display:flex;align-items:center;gap:12px;margin-bottom:0.6rem}
+.back-link{color:var(--cyan);text-decoration:none;font-weight:700}
+.oid{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--cyan);font-weight:700}
+.meta{color:var(--text-muted);font-size:0.95rem}
+.info-grid{display:grid;grid-template-columns:1fr;gap:0.75rem}
+.panel-title{font-weight:800;color:#FFF;margin-bottom:0.5rem}
+.row{display:flex;justify-content:space-between;align-items:center}
+.label{color:var(--text-muted);font-size:0.85rem}
+.value{color:#FFFFFF;font-weight:700}
+.badge{display:inline-block;padding:0.22rem 0.7rem;border-radius:50px;font-size:0.7rem;font-weight:700;letter-spacing:0.4px}
+.obadge-COMPLETED  { background: rgba(16,185,129,0.15); color: #10B981; border: 1px solid rgba(16,185,129,0.3); }
+.obadge-PENDING    { background: rgba(245,158,11,0.15); color: #F59E0B; border: 1px solid rgba(245,158,11,0.3); }
+.obadge-PROCESSING { background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); }
+.obadge-FAILED     { background: rgba(239,68,68,0.15);  color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
+.obadge-REFUNDED   { background: rgba(249,115,22,0.15); color: #f97316; border: 1px solid rgba(249,115,22,0.3); }
+.obadge-WALLET     { background: rgba(6,182,212,0.15);  color: #06B6D4; border: 1px solid rgba(6,182,212,0.3); }
+.obadge-RAZORPAY   { background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); }
+
+.player-table{width:100%;border-collapse:collapse}
+.player-table td{padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.03)}
+.empty-note{color:var(--text-muted);font-style:italic}
+
+.status-box{margin-top:0.9rem;padding:0.95rem;border-radius:10px;font-weight:700}
+.status-success{background:rgba(16,185,129,0.08);color:#10B981;border:1px solid rgba(16,185,129,0.12)}
+.status-failed{background:rgba(239,68,68,0.06);color:#EF4444;border:1px solid rgba(239,68,68,0.12)}
+.status-processing{background:rgba(245,158,11,0.06);color:#F59E0B;border:1px solid rgba(245,158,11,0.12)}
+.status-pending{background:rgba(160,160,176,0.04);color:var(--text-muted);border:1px solid rgba(255,255,255,0.03)}
+
+.support-btn{display:inline-block;margin-top:0.6rem;padding:0.55rem 0.9rem;border-radius:10px;background:var(--violet);color:#fff;text-decoration:none;font-weight:700}
+
+@media(min-width:681px){.container{padding:1.2rem}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <div class="container">
+
+    <div class="panel">
+      <div class="header-row">
+        <a href="{% url 'orders' %}" class="back-link">← My Orders</a>
+      </div>
+      <div class="section">
+        <div class="row" style="margin-bottom:0.45rem">
+          <div>
+            <div class="oid">#{{ order.id }}</div>
+            <div class="meta">{{ order.created_at|date:"M d, Y · g:i A" }}</div>
+          </div>
+          <div>
+            <span class="badge obadge-{{ order.status }}">{{ order.status }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="panel">
+        <div class="panel-title">Product Info</div>
+        <div class="info-grid">
+          <div class="row"><div class="label">Game</div><div class="value">{{ order.game.name }}</div></div>
+          <div class="row"><div class="label">Product</div><div class="value">{{ order.product.name }}</div></div>
+          {% if order.product.diamond_amount %}
+          <div class="row"><div class="label">Diamonds</div><div class="value">{{ order.product.diamond_amount }} 💎</div></div>
+          {% endif %}
+          <div class="row"><div class="label">Quantity</div><div class="value">{{ order.quantity }}</div></div>
+          <div class="row"><div class="label">Total Coins</div><div class="value">{{ order.total_coins }}</div></div>
+          <div class="row"><div class="label">Total Paid</div><div class="value">₹{{ order.total_inr }}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="panel">
+        <div class="panel-title">Payment Info</div>
+        <div class="row"><div class="label">Method</div><div class="value"><span class="badge obadge-{{ order.payment_method }}">{{ order.payment_method }}</span></div></div>
+        <div style="height:8px"></div>
+        <div class="row"><div class="label">Status</div><div class="value"><span class="badge obadge-{{ order.payment_status }}">{{ order.payment_status }}</span></div></div>
+        <div style="height:8px"></div>
+        <div class="row"><div class="label">Smile Order ID</div><div class="value">{{ order.smile_order_id|default:"N/A" }}</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="panel">
+        <div class="panel-title">Player Info</div>
+        {% if order.player_fields %}
+        <table class="player-table">
+          <tbody>
+            {% for key, val in order.player_fields.items %}
+            <tr><td class="label">{{ key|title }}</td><td class="value">{{ val }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-note">No player info recorded</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="section">
+      {% if order.status == 'COMPLETED' %}
+      <div class="status-box status-success">✅ Your diamonds have been delivered successfully!</div>
+      {% elif order.status == 'FAILED' %}
+      <div class="status-box status-failed">❌ Delivery failed. Please contact support with your Order ID.<br><a class="support-btn" href="{% url 'contact' %}">Contact Support →</a></div>
+      {% elif order.status == 'PROCESSING' %}
+      <div class="status-box status-processing">⏳ Your order is being processed...</div>
+      {% elif order.status == 'PENDING' %}
+      <div class="status-box status-pending">🕐 Waiting to be processed.</div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

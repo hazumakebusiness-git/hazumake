@@ -1,0 +1,445 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Hazumake{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        color: white;
+    }
+
+    .dashboard-hero {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 2rem;
+        align-items: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .hero-panel {
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        padding: 2.5rem;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: 999px;
+        background: rgba(6, 182, 212, 0.12);
+        color: #a5f3fc;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+
+    .hero-title {
+        font-size: clamp(2.25rem, 3vw, 3.5rem);
+        line-height: 1.05;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #38bdf8, #a78bfa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-copy {
+        color: rgba(255, 255, 255, 0.82);
+        margin-bottom: 2rem;
+        max-width: 640px;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .hero-actions .btn-dashboard {
+        min-width: 170px;
+    }
+
+    .hero-panel-secondary {
+        background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .avatar-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(6,182,212,0.3), rgba(139,92,246,0.38));
+        display: grid;
+        place-items: center;
+        margin: 0 auto 1.5rem;
+        color: white;
+        font-size: 3rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .hero-stat {
+        margin: 1rem 0;
+        padding: 1rem 1.25rem;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+    }
+
+    .hero-stat strong {
+        display: block;
+        font-size: 1.25rem;
+        color: #38bdf8;
+        margin-bottom: 0.35rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .dashboard-card,
+    .wallet-card,
+    .orders-card,
+    .settings-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        padding: 1.75rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dashboard-card:hover,
+    .wallet-card:hover,
+    .orders-card:hover,
+    .settings-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+    }
+
+    .metric-label {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.74);
+    }
+
+    .metric-value {
+        font-size: 2rem;
+        margin-top: 0.5rem;
+        font-weight: 700;
+        color: #e2e8f0;
+    }
+
+    .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+
+    .badge-success {
+        background: rgba(34,197,94,0.16);
+        color: #a7f3d0;
+    }
+
+    .badge-pending {
+        background: rgba(234,179,8,0.16);
+        color: #fde68a;
+    }
+
+    .badge-failed {
+        background: rgba(239,68,68,0.16);
+        color: #fecaca;
+    }
+
+    .action-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn-dashboard {
+        background: linear-gradient(135deg, #06B6D4, #8B5CF6);
+        color: white;
+        padding: 0.85rem 1.25rem;
+        border: none;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+    }
+
+    .btn-dashboard:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(6, 182, 212, 0.22);
+    }
+
+    .btn-ghost {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #f8fafc;
+    }
+
+    .btn-danger {
+        background: rgba(239, 68, 68, 0.88);
+    }
+
+    .order-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 1rem;
+    }
+
+    .order-item {
+        padding: 1rem 1.25rem;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .order-item h4 {
+        margin: 0 0 0.25rem;
+        font-size: 1rem;
+        color: #f8fafc;
+    }
+
+    .order-meta {
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.72);
+    }
+
+    .settings-grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .settings-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        color: #e2e8f0;
+    }
+
+    .settings-field input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+        color: #f8fafc;
+    }
+
+    .settings-field input:focus {
+        outline: 2px solid rgba(56, 189, 248, 0.5);
+        outline-offset: 2px;
+    }
+
+    .secondary-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.95rem;
+    }
+
+    @media (max-width: 900px) {
+        .dashboard-hero {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            padding: 0 1rem;
+        }
+
+        .dashboard-hero .hero-panel-secondary {
+            order: -1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container { padding: 1rem 0.85rem 3rem; }
+
+        .hero-panel,
+        .hero-panel-secondary {
+            padding: 1.4rem 1.25rem;
+            border-radius: 18px;
+        }
+
+        .hero-title {
+            font-size: clamp(1.7rem, 6.5vw, 2.2rem);
+            margin-bottom: 0.75rem;
+        }
+
+        .hero-copy { font-size: 0.92rem; }
+
+        .hero-badge {
+            padding: 0.55rem 0.85rem;
+            font-size: 0.78rem;
+            margin-bottom: 1rem;
+        }
+
+        .avatar-circle {
+            width: 84px;
+            height: 84px;
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-stat { padding: 0.85rem 1rem; }
+        .hero-stat strong { font-size: 1.05rem; }
+
+        .dashboard-card,
+        .wallet-card,
+        .orders-card,
+        .settings-card {
+            padding: 1.25rem 1.15rem;
+            border-radius: 18px;
+        }
+
+        .metric-value { font-size: 1.6rem; }
+
+        .settings-field input {
+            font-size: 16px; /* iOS no-zoom */
+            min-height: 46px;
+        }
+
+        .btn-dashboard {
+            font-size: 0.95rem;
+            padding: 0.8rem 1.1rem;
+        }
+    }
+
+    @media (max-width: 620px) {
+        .action-row,
+        .hero-actions {
+            grid-template-columns: 1fr;
+        }
+
+        .order-item {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-hero">
+        <section class="hero-panel">
+            <span class="hero-badge">Premium Dashboard</span>
+            <h1 class="hero-title">Hazumake account overview</h1>
+            <p class="hero-copy">Stay on top of your MLBB diamond purchases, wallet balance, and recent orders in one polished control panel.</p>
+            <div class="hero-actions">
+                <a href="{% url 'shop' %}" class="btn-dashboard">Browse Shop</a>
+                <a href="{% url 'wallet' %}" class="btn-dashboard btn-ghost">Wallet Details</a>
+            </div>
+        </section>
+
+        <aside class="hero-panel-secondary">
+            <div class="avatar-circle">{{ user.username|slice:":1"|upper }}</div>
+            <p class="metric-label">Logged in as</p>
+            <p class="metric-value">{{ user.username }}</p>
+            <div class="hero-stat">
+                <strong>Wallet Balance</strong>
+                {% if wallet.balance %}
+                    ₱{{ wallet.balance|floatformat:0 }}
+                {% else %}
+                    ₱0
+                {% endif %}
+            </div>
+            <div class="hero-stat">
+                <strong>Total Orders</strong>
+                {{ total_orders }}
+            </div>
+        </aside>
+    </div>
+
+    <div class="dashboard-grid">
+        <article class="wallet-card">
+            <h2 class="metric-label">Wallet Summary</h2>
+            <p class="secondary-label">Your wallet is ready for instant diamond top-ups.</p>
+            <div class="metric-value">₱{{ wallet.balance|floatformat:0 }}</div>
+            <div class="action-row">
+                <a href="{% url 'wallet' %}" class="btn-dashboard">Top Up Wallet</a>
+                <a href="{% url 'orders' %}" class="btn-dashboard btn-ghost">Transaction History</a>
+            </div>
+        </article>
+
+        <article class="orders-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem;">
+                <div>
+                    <h2 class="metric-label">Recent Orders</h2>
+                    <p class="secondary-label">Your latest purchases appear here.</p>
+                </div>
+                <span class="badge-pill badge-success">{{ total_orders }} orders</span>
+            </div>
+
+            {% if recent_orders %}
+                <ul class="order-list">
+                    {% for order in recent_orders %}
+                        <li class="order-item">
+                            <div>
+                                <h4>{{ order.product.name }}</h4>
+                                <p class="order-meta">{{ order.product.diamond_amount }} diamonds • {{ order.created_at|date:'M d, Y' }}</p>
+                            </div>
+                            <span class="badge-pill {% if order.status == 'completed' %}badge-success{% elif order.status == 'pending' %}badge-pending{% else %}badge-failed{% endif %}">{{ order.status|title }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="secondary-label">No orders yet. Head to the shop and start your first purchase.</p>
+                <div class="action-row" style="margin-top:1rem;">
+                    <a href="{% url 'shop' %}" class="btn-dashboard">Shop Diamonds</a>
+                </div>
+            {% endif %}
+        </article>
+
+        <section class="settings-card">
+            <h2 class="metric-label">Account Details</h2>
+            <div class="settings-grid">
+                <div class="settings-field">
+                    <label>Username</label>
+                    <input type="text" value="{{ user.username }}" readonly>
+                </div>
+                <div class="settings-field">
+                    <label>Email</label>
+                    <input type="text" value="{{ user.email }}" readonly>
+                </div>
+                <!-- MLBB ID removed from profile -->
+            </div>
+            <div class="action-row" style="margin-top:1.5rem;">
+                <form method="post" action="{% url 'logout' %}" style="margin:0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-dashboard btn-danger" style="width:100%;">Logout</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.body.dataset.rainDensity = '70';
+</script>
+{% endblock %}

@@ -1,0 +1,487 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Hazumake{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* =========================================
+       DASHBOARD — MOBILE FIRST
+       ========================================= */
+
+    .dashboard-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 1.5rem 1rem 5rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* =========================================
+       HEADER
+       ========================================= */
+    .dashboard-header {
+        margin-bottom: 1.75rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: clamp(1.6rem, 5vw, 2.2rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, var(--accent));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.3rem;
+        line-height: 1.2;
+    }
+
+    .dashboard-header p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* =========================================
+       STAT CARDS ROW
+       ========================================= */
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .stat-card {
+        background: rgba(10, 10, 25, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 1rem 1.1rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .stat-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+        font-size: 1.6rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+        margin-bottom: 0.2rem;
+    }
+
+    .stat-unit {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+    }
+
+    /* =========================================
+       ACCOUNT INFO CARD
+       ========================================= */
+    .info-card {
+        background: rgba(10, 10, 25, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .info-card-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        gap: 1rem;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .info-label {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    .info-value {
+        color: #f8fafc;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-align: right;
+        word-break: break-all;
+    }
+
+    /* Status badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.25rem 0.65rem;
+        border-radius: 50px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        background: rgba(16, 185, 129, 0.12);
+        color: #10B981;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    /* =========================================
+       RECENT ORDERS TABLE
+       ========================================= */
+    .orders-card {
+        background: rgba(10, 10, 25, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+    }
+
+    .orders-card-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .orders-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -1.25rem;
+        padding: 0 1.25rem;
+    }
+
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 480px;
+    }
+
+    .orders-table th {
+        text-align: left;
+        padding: 0.6rem 0.75rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        white-space: nowrap;
+    }
+
+    .orders-table td {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+        color: #f8fafc;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        vertical-align: middle;
+    }
+
+    .orders-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .orders-table tr:hover td {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .order-status {
+        display: inline-block;
+        padding: 0.28rem 0.65rem;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .order-status.completed {
+        background: rgba(16, 185, 129, 0.12);
+        color: #6ee7b7;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .order-status.pending {
+        background: rgba(251, 191, 36, 0.12);
+        color: #fcd34d;
+        border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+
+    .order-status.failed {
+        background: rgba(248, 113, 113, 0.12);
+        color: #fca5a5;
+        border: 1px solid rgba(248, 113, 113, 0.2);
+    }
+
+    .no-orders {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* =========================================
+       QUICK ACTIONS
+       ========================================= */
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.65rem;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.85rem 1rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        text-align: center;
+        border: 1px solid transparent;
+    }
+
+    .action-btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: #fff;
+        grid-column: 1 / -1; /* full width on its own row */
+    }
+
+    .action-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+    }
+
+    .action-btn-secondary {
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .action-btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(124, 58, 237, 0.35);
+    }
+
+    /* =========================================
+       DESKTOP
+       ========================================= */
+    @media (min-width: 769px) {
+        .dashboard-container {
+            padding: 2.5rem 2rem 4rem;
+        }
+
+        .stat-grid {
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            padding: 1.25rem 1.4rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+        }
+
+        .stat-label,
+        .stat-unit {
+            font-size: 0.78rem;
+        }
+
+        .info-card,
+        .orders-card {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-row {
+            padding: 0.85rem 0;
+        }
+
+        .info-label,
+        .info-value {
+            font-size: 0.9rem;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 0.85rem 1rem;
+            font-size: 0.88rem;
+        }
+
+        .actions-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+
+        .action-btn-primary {
+            grid-column: auto; /* normal on desktop */
+        }
+
+        .action-btn {
+            padding: 0.9rem 1rem;
+            font-size: 0.88rem;
+        }
+    }
+
+    /* =========================================
+       SMALL MOBILE
+       ========================================= */
+    @media (max-width: 400px) {
+        .stat-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .stat-card {
+            padding: 0.8rem 0.7rem;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+        }
+
+        .stat-label,
+        .stat-unit {
+            font-size: 0.65rem;
+        }
+
+        .action-btn {
+            font-size: 0.8rem;
+            padding: 0.75rem 0.6rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1>Welcome back, {{ request.user.first_name|default:request.user.username }} 👋</h1>
+        <p>Here's your account overview</p>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-label">Wallet</div>
+            <div class="stat-value">{{ wallet.balance|default:"0" }}</div>
+            <div class="stat-unit">Coins</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Orders</div>
+            <div class="stat-value">{{ recent_orders|length|default:"0" }}</div>
+            <div class="stat-unit">Total</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Status</div>
+            <div class="stat-value" style="font-size: 1.4rem;">✅</div>
+            <div class="stat-unit">Verified</div>
+        </div>
+    </div>
+
+    <!-- Account Info -->
+    <div class="info-card">
+        <div class="info-card-title">Account Information</div>
+        <div class="info-row">
+            <span class="info-label">Email</span>
+            <span class="info-value">{{ request.user.email }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Name</span>
+            <span class="info-value">
+                {{ request.user.first_name|default:"Not set" }}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Member since</span>
+            <span class="info-value">{{ request.user.date_joined|date:"M d, Y" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Account status</span>
+            <span class="info-value">
+                <span class="status-badge">● Active</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="orders-card">
+        <div class="orders-card-title">Recent Orders</div>
+        {% if recent_orders %}
+        <div class="orders-table-wrap">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>{{ order.product.name }}</td>
+                        <td>₹{{ order.product.price_inr }}</td>
+                        <td>
+                            <span class="order-status {% if order.status == 'COMPLETED' %}completed{% elif order.status == 'PENDING' %}pending{% elif order.status == 'FAILED' %}failed{% endif %}">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td style="color: var(--text-muted);">{{ order.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="no-orders">
+            No orders yet — <a href="{% url 'shop' %}" style="color: var(--accent);">browse the shop</a> to get started.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="actions-grid">
+        <a href="{% url 'shop' %}" class="action-btn action-btn-primary">🎮 Browse Games</a>
+        <a href="{% url 'wallet' %}" class="action-btn action-btn-secondary">👛 Wallet</a>
+        <a href="{% url 'orders' %}" class="action-btn action-btn-secondary">📦 My Orders</a>
+        <a href="{% url 'contact' %}" class="action-btn action-btn-secondary">💬 Support</a>
+    </div>
+
+</div>
+{% endblock %}

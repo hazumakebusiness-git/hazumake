@@ -1,0 +1,311 @@
+import json
+import logging
+import time
+from decimal import Decimal
+
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+
+from services.payments.expay_api import get_client as get_expay_client, ExPayError
+
+logger = logging.getLogger(__name__)
+
+from hazu.smile_api import create_order as smile_create_order
+from products.models import Product
+from wallet.models import Transaction
+from .models import Order
+
+
+def _normalize_player_fields(player_fields):
+    normalized = {
+        k.lower().strip(): str(v).strip()
+        for k, v in player_fields.items()
+        if v is not None and str(v).strip() != ''
+    }
+    player_uid = (
+        normalized.get('uid') or
+        normalized.get('player_id') or
+        normalized.get('userid') or
+        normalized.get('user_id') or
+        normalized.get('playerid') or
+        ''
+    )
+    player_sid = (
+        normalized.get('sid') or
+        normalized.get('zone_id') or
+        normalized.get('server_id') or
+        normalized.get('zoneid') or
+        ''
+    )
+    return player_uid, player_sid or player_uid
+
+
+def _ensure_smile_product(product):
+    if not product.smile_product_id:
+        raise ValueError('This product is not currently configured for Smile.one fulfillment.')
+
+
+@login_required
+def orders(request):
+    orders_list = request.user.orders.all().order_by('-created_at')
+    paginator = Paginator(orders_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'orders/orders.html', {
+        'orders': page_obj,
+        'page_obj': page_obj,
+    })
+
+
+@login_required
+@require_POST
+def place_order(request):
+    if request.content_type == 'application/json':
+        try:
+            payload = json.loads(request.body.decode('utf-8'))
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest('Invalid JSON body.')
+    else:
+        payload = request.POST
+
+    product_id = payload.get('product_id')
+    payment_method = payload.get('payment_method')
+
+    try:
+        quantity = int(payload.get('quantity', 1))
+        if quantity < 1:
+            return HttpResponseBadRequest('Invalid quantity.')
+    except (ValueError, TypeError):
+        return HttpResponseBadRequest('quantity must be a valid integer.')
+
+    product = get_object_or_404(Product, pk=product_id, is_active=True)
+    total_coins = product.price_coins * quantity
+    total_inr = product.price_inr * quantity
+
+    # Collect player_fields__ prefixed keys from JSON or POST data
+    player_fields = {}
+    for key, value in payload.items():
+        if key.startswith('player_fields__'):
+            field_name = key.replace('player_fields__', '')
+            player_fields[field_name] = str(value).strip()
+
+    # Validate required checkout fields
+    game = product.game
+    if game:
+        for field_spec in game.checkout_fields:
+            if field_spec.get('required') and not player_fields.get(field_spec['name']):
+                messages.error(request, f"{field_spec['label']} is required.")
+                return redirect('product_detail', pk=product.id)
+
+    player_uid, player_sid = _normalize_player_fields(player_fields)
+    if not player_uid:
+        messages.error(request, 'Player ID is required for this purchase.')
+        return redirect('product_detail', pk=product.id)
+
+    try:
+        _ensure_smile_product(product)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+        return redirect('product_detail', pk=product.id)
+
+    # ─── WALLET PAYMENT ───────────────────────────────────────────
+    if payment_method == 'WALLET':
+        wallet = request.user.wallet
+
+        if wallet.balance < total_inr:
+            messages.error(request, 'Insufficient wallet balance.')
+            return redirect(request.META.get('HTTP_REFERER', '/shop/'))
+
+        wallet.balance = wallet.balance - total_inr
+        wallet.save()
+
+        Transaction.objects.create(
+            wallet=wallet,
+            type='DEBIT',
+            amount=total_inr,
+            balance_after=wallet.balance,
+            note=f'Purchase: {product.name} x{quantity}',
+        )
+
+        logger.info("player_fields keys: %s", list(player_fields.keys()))
+        logger.info("player_uid resolved: %s | player_sid: %s", player_uid, player_sid)
+
+        order = Order.objects.create(
+            user=request.user,
+            product=product,
+            game=game,
+            quantity=quantity,
+            player_uid=player_uid,
+            player_sid=player_sid,
+            player_fields=player_fields,
+            total_coins=total_coins,
+            total_inr=total_inr,
+            payment_method='WALLET',
+            payment_status='PAID',
+            status='PROCESSING',
+        )
+
+        game_slug = (game.supplier_game_code or game.slug or '') if game else ''
+        game_slug = game_slug.replace(' ', '').replace('-', '').lower()
+        smile_order_id = smile_create_order(
+            game_slug=game_slug,
+            product_id=product.smile_product_id,
+            player_uid=player_uid,
+            player_sid=player_sid,
+        )
+
+        if smile_order_id:
+            order.smile_order_id = smile_order_id
+            order.status = 'COMPLETED'
+            order.save()
+            messages.success(request, f'✅ {product.name} delivered! Order ID: {smile_order_id}')
+        else:
+            order.status = 'FAILED'
+            order.notes = 'Smile.one fulfillment failed.'
+            order.save()
+            messages.error(request, '⚠️ Payment deducted but delivery failed. Contact support with your order ID.')
+
+        return redirect('orders')
+
+    # ─── EXPAY PAYMENT ─────────────────────────────────────────
+    if payment_method == 'EXPAY':
+        try:
+            expay_api = get_expay_client()
+            order_id = f"order_{request.user.id}_{int(time.time() * 1000)}"
+
+            result = expay_api.create_order(
+                customer_mobile=request.user.phone or '9000000000',
+                amount=str(total_inr),
+                order_id=order_id,
+                remark1=f'user_{request.user.id}',
+                remark2=f'product_{product.id}',
+            )
+
+            order = Order.objects.create(
+                user=request.user,
+                product=product,
+                game=game,
+                quantity=quantity,
+                player_uid=player_uid,
+                player_sid=player_sid,
+                player_fields=player_fields,
+                total_coins=total_coins,
+                total_inr=total_inr,
+                payment_method='EXPAY',
+                payment_status='UNPAID',
+                status='PENDING',
+                payment_transaction_id=result['orderId'],
+            )
+
+            return JsonResponse({
+                'payment_url': result['payment_url'],
+                'expay_order_id': result['orderId'],
+                'order_id': str(order.id),
+            })
+        except ExPayError as exc:
+            return JsonResponse({'error': str(exc)}, status=400)
+        except Exception as exc:
+            logger.exception('ExPay order creation failed: %s', exc)
+            return JsonResponse({'error': 'Payment gateway error.'}, status=500)
+
+    return HttpResponseBadRequest('Invalid payment method.')
+
+
+@login_required
+@require_POST
+def razorpay_order_success(request):
+    session_data = request.session.get('pending_razorpay')
+    if not session_data:
+        messages.error(request, 'Payment session expired. Please try again.')
+        return redirect('orders')
+
+    razorpay_payment_id = request.POST.get('razorpay_payment_id')
+    razorpay_order_id = request.POST.get('razorpay_order_id')
+    razorpay_signature = request.POST.get('razorpay_signature')
+
+    if not (razorpay_payment_id and razorpay_order_id and razorpay_signature):
+        messages.error(request, 'Payment verification failed.')
+        return redirect('orders')
+
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    try:
+        client.utility.verify_payment_signature({
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature,
+        })
+    except razorpay.errors.SignatureVerificationError:
+        messages.error(request, 'Payment verification failed.')
+        return redirect('orders')
+
+    product = get_object_or_404(Product, pk=session_data['product_id'])
+    quantity = int(session_data['quantity'])
+    total_coins = int(session_data['total_coins'])
+    total_inr = Decimal(session_data['total_inr'])
+    player_fields = session_data['player_fields']
+
+    player_uid, player_sid = _normalize_player_fields(player_fields)
+    if not player_uid:
+        messages.error(request, 'Player ID is missing from the payment session. Please try again.')
+        request.session.pop('pending_razorpay', None)
+        return redirect('orders')
+
+    logger.info("player_fields keys: %s", list(player_fields.keys()))
+    logger.info("player_uid resolved: %s | player_sid: %s", player_uid, player_sid)
+
+    try:
+        _ensure_smile_product(product)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+        request.session.pop('pending_razorpay', None)
+        return redirect('orders')
+
+    order = Order.objects.create(
+        user=request.user,
+        product=product,
+        game=product.game,
+        quantity=quantity,
+        player_uid=player_uid,
+        player_sid=player_sid,
+        player_fields=player_fields,
+        total_coins=total_coins,
+        total_inr=total_inr,
+        payment_method='RAZORPAY',
+        payment_status='PAID',
+        status='PROCESSING',
+    )
+
+    game = product.game
+    game_slug = (game.supplier_game_code or game.slug or '') if game else ''
+    game_slug = game_slug.replace(' ', '').replace('-', '').lower()
+    smile_order_id = smile_create_order(
+        game_slug=game_slug,
+        product_id=product.smile_product_id,
+        player_uid=player_uid,
+        player_sid=player_sid,
+    )
+
+    if smile_order_id:
+        order.smile_order_id = smile_order_id
+        order.status = 'COMPLETED'
+        order.save()
+        messages.success(request, f'✅ {product.name} delivered! Order ID: {smile_order_id}')
+    else:
+        order.status = 'FAILED'
+        order.notes = 'Smile.one fulfillment failed.'
+        order.save()
+        messages.error(request, '⚠️ Payment received but delivery failed. Contact support.')
+
+    request.session.pop('pending_razorpay', None)
+    return redirect('orders')
+
+
+@login_required
+def order_detail(request, pk):
+    order = get_object_or_404(Order, id=pk, user=request.user)
+    return render(request, 'orders/order_detail.html', {'order': order})
