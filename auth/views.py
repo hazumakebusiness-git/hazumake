@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils.crypto import get_random_string
 User = get_user_model()
 
 if not firebase_admin._apps:
@@ -43,12 +44,17 @@ def firebase_session(request):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            # Create new user with uid as username
-            user = User.objects.create(
+            # Create new user with a real (random, hashed) password so
+            # they can also log in later via email/password if they set one
+            random_password = get_random_string(32)
+            user = User.objects.create_user(
                 username=uid,
                 email=email,
+                password=random_password,
                 first_name=decoded_token.get('name', '').split(' ')[0],
                 last_name=' '.join(decoded_token.get('name', '').split(' ')[1:]),
+                is_active=True,
+                is_email_verified=decoded_token.get('email_verified', False),
             )
 
         # Ensure wallet exists
