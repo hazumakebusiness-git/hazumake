@@ -233,7 +233,8 @@ AFTER:
 <input type="radio" name="payment_method" value="EXPAY">
 ExPay (Fast & Secure)
 
-<input type="radio" name="payment_method" value="RAZORPAY">
+<input type="radio" name="payment_method" value="EXPAY">
+
 Razorpay (Card/UPI/Wallet)
 
 <input type="radio" name="payment_method" value="WALLET">

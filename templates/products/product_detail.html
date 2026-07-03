@@ -5,9 +5,6 @@
 
 {% block extra_css %}
 <style>
-    /* =========================================
-       PRODUCT DETAIL — MOBILE-FIRST
-       ========================================= */
     .detail-container {
         display: grid;
         grid-template-columns: 1fr;
@@ -20,9 +17,6 @@
         position: relative;
     }
 
-    /* =========================================
-       LEFT: PRODUCT INFO
-       ========================================= */
     .product-info {
         padding: 1.5rem;
         background: rgba(10, 10, 25, 0.6);
@@ -75,14 +69,12 @@
         font-size: 0.9rem;
     }
 
-    /* Product image — consistent height, nice fallback */
     .detail-image-wrap {
         width: 100%;
         border-radius: 12px;
         overflow: hidden;
         margin-bottom: 1.25rem;
         background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(6, 182, 212, 0.1));
-        /* Fixed height so it never collapses or goes giant */
         height: 200px;
         display: flex;
         align-items: center;
@@ -148,9 +140,6 @@
         margin-top: 2px;
     }
 
-    /* =========================================
-       RIGHT: CHECKOUT CARD
-       ========================================= */
     .checkout-card {
         background: rgba(10, 10, 25, 0.6);
         border-radius: 14px;
@@ -199,7 +188,6 @@
         background: rgba(0, 0, 0, 0.3);
     }
 
-    /* Payment Methods */
     .payment-label {
         color: #A0A0B0;
         font-size: 0.78rem;
@@ -269,7 +257,6 @@
         color: #06B6D4;
     }
 
-    /* Buttons */
     .btn-submit {
         width: 100%;
         padding: 0.9rem;
@@ -294,7 +281,6 @@
         cursor: not-allowed;
     }
 
-    /* Verify */
     #verify-btn {
         width: 100%;
         padding: 0.7rem;
@@ -308,9 +294,7 @@
         transition: all 0.2s;
     }
 
-    #verify-btn:hover {
-        background: rgba(6, 182, 212, 0.18);
-    }
+    #verify-btn:hover { background: rgba(6, 182, 212, 0.18); }
 
     #verify-result {
         display: none;
@@ -321,7 +305,6 @@
         font-weight: 600;
     }
 
-    /* Order error */
     #order-error {
         display: none;
         color: #fca5a5;
@@ -329,7 +312,6 @@
         font-size: 0.9rem;
     }
 
-    /* Error Box */
     .error-box {
         background: rgba(239, 68, 68, 0.1);
         border-left: 3px solid var(--error);
@@ -344,7 +326,6 @@
         margin-bottom: 0.2rem;
     }
 
-    /* Auth Prompt */
     .auth-prompt {
         text-align: center;
         padding: 2rem 1rem;
@@ -355,9 +336,6 @@
         font-size: 1.2rem;
     }
 
-    /* =========================================
-       DESKTOP: 2-col layout
-       ========================================= */
     @media (min-width: 1024px) {
         .detail-container {
             grid-template-columns: 1.2fr 1fr;
@@ -366,99 +344,35 @@
             max-width: 1040px;
             margin: 1rem auto 0;
         }
-
-        .product-info {
-            padding: 2rem;
-            order: 1;
-        }
-
-        .checkout-card {
-            padding: 2rem;
-            order: 2;
-            position: sticky;
-            top: 6rem;
-            align-self: start;
-        }
-
-        .detail-image-wrap {
-            height: 240px;
-        }
-
-        .detail-title {
-            font-size: 2rem;
-        }
+        .product-info { padding: 2rem; order: 1; }
+        .checkout-card { padding: 2rem; order: 2; position: sticky; top: 6rem; align-self: start; }
+        .detail-image-wrap { height: 240px; }
+        .detail-title { font-size: 2rem; }
     }
 
-    /* Tablet */
     @media (max-width: 1023px) and (min-width: 769px) {
-        .detail-container {
-            padding: 0 1.5rem 4.5rem;
-        }
-
-        .product-info,
-        .checkout-card {
-            padding: 1.75rem;
-        }
-
-        .detail-title {
-            font-size: 1.75rem;
-        }
+        .detail-container { padding: 0 1.5rem 4.5rem; }
+        .product-info, .checkout-card { padding: 1.75rem; }
+        .detail-title { font-size: 1.75rem; }
     }
 
-    /* Mobile */
     @media (max-width: 768px) {
-        .detail-container {
-            padding: 0 0.75rem 3.5rem;
-            gap: 1rem;
-        }
-
-        .product-info,
-        .checkout-card {
-            padding: 1.1rem;
-            border-radius: 12px;
-        }
-
-        .detail-image-wrap {
-            height: 160px;
-            border-radius: 10px;
-        }
-
-        .detail-title {
-            font-size: 1.4rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .detail-desc {
-            font-size: 0.85rem;
-            margin-bottom: 0.9rem;
-        }
-
-        .price-display .coins {
-            font-size: 1.4rem;
-        }
-
-        .checkout-title {
-            font-size: 1.05rem;
-        }
-
-        /* Sticky pay button on mobile */
-        .btn-submit {
-            display: none; /* hidden; sticky bar below used instead */
-        }
+        .detail-container { padding: 0 0.75rem 3.5rem; gap: 1rem; }
+        .product-info, .checkout-card { padding: 1.1rem; border-radius: 12px; }
+        .detail-image-wrap { height: 160px; border-radius: 10px; }
+        .detail-title { font-size: 1.4rem; margin-bottom: 0.5rem; }
+        .detail-desc { font-size: 0.85rem; margin-bottom: 0.9rem; }
+        .price-display .coins { font-size: 1.4rem; }
+        .checkout-title { font-size: 1.05rem; }
+        .btn-submit { display: none; }
     }
 
-    /* =========================================
-       MOBILE STICKY CHECKOUT BAR
-       ========================================= */
-    .mobile-sticky-checkout {
-        display: none;
-    }
+    .mobile-sticky-checkout { display: none; }
 
     @media (max-width: 768px) {
         .mobile-sticky-checkout {
             position: fixed;
-            bottom: 0;
-            left: 0;
+            bottom: 0; left: 0;
             width: 100%;
             background: rgba(10, 10, 15, 0.98);
             backdrop-filter: blur(20px);
@@ -472,7 +386,6 @@
             box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.5);
             box-sizing: border-box;
         }
-
         .btn-primary-action {
             flex: 1;
             padding: 0.82rem 1.2rem;
@@ -486,59 +399,23 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 14px rgba(124, 58, 237, 0.28);
         }
-
-        .btn-primary-action:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
-        }
-
-        .btn-primary-action:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        .btn-primary-action:disabled { opacity: 0.6; cursor: not-allowed; }
     }
 
     @media (min-width: 769px) {
-        .mobile-sticky-checkout {
-            display: none !important;
-        }
-
-        .btn-submit {
-            display: block;
-        }
+        .mobile-sticky-checkout { display: none !important; }
+        .btn-submit { display: block; }
     }
 
-    /* Small mobile */
     @media (max-width: 480px) {
-        .detail-container {
-            padding: 0 0.6rem 3rem;
-        }
-
-        .detail-image-wrap {
-            height: 140px;
-        }
-
-        .detail-title {
-            font-size: 1.3rem;
-        }
-
-        .price-display .coins {
-            font-size: 1.25rem;
-        }
-
-        .mobile-sticky-checkout {
-            padding: 9px 10px;
-        }
-
-        .btn-primary-action {
-            font-size: 0.88rem;
-            padding: 0.78rem 1rem;
-        }
+        .detail-container { padding: 0 0.6rem 3rem; }
+        .detail-image-wrap { height: 140px; }
+        .detail-title { font-size: 1.3rem; }
+        .price-display .coins { font-size: 1.25rem; }
+        .mobile-sticky-checkout { padding: 9px 10px; }
+        .btn-primary-action { font-size: 0.88rem; padding: 0.78rem 1rem; }
     }
 
-    /* =========================================
-       PAYMENT PROCESSING OVERLAY
-       ========================================= */
     #payment-processing-overlay {
         display: none;
         position: fixed;
@@ -553,8 +430,7 @@
     }
 
     .payment-spinner {
-        width: 56px;
-        height: 56px;
+        width: 56px; height: 56px;
         border: 4px solid rgba(124, 58, 237, 0.2);
         border-top-color: #06B6D4;
         border-right-color: #7C3AED;
@@ -564,39 +440,22 @@
         box-shadow: 0 0 22px rgba(124, 58, 237, 0.35);
     }
 
-    @keyframes spinLoader {
-        to { transform: rotate(360deg); }
-    }
+    @keyframes spinLoader { to { transform: rotate(360deg); } }
 
-    .payment-text {
-        color: #FFF;
-        font-size: 1.1rem;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-    }
-
-    .payment-sub {
-        color: #A0A0B0;
-        font-size: 0.82rem;
-        margin-top: 6px;
-    }
+    .payment-text { color: #FFF; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
+    .payment-sub { color: #A0A0B0; font-size: 0.82rem; margin-top: 6px; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="detail-container">
 
-    <!-- ===== LEFT: Product Info ===== -->
     <div class="product-info glass">
         <div class="badge-row">
             <span class="product-badge">{{ product.diamond_amount }} Diamonds</span>
-            {% if game %}
-            <span class="game-badge">{{ product.game.name }}</span>
-            {% endif %}
+            {% if game %}<span class="game-badge">{{ product.game.name }}</span>{% endif %}
         </div>
-
         <h1 class="detail-title gradient-text">{{ product.name }}</h1>
-
         <div class="detail-image-wrap">
             {% if product.image %}
             <img src="{{ product.image.url }}" alt="{{ product.name }}" class="detail-image">
@@ -607,33 +466,25 @@
             </div>
             {% endif %}
         </div>
-
         <p class="detail-desc">
             {{ product.description|default:"Top up your account instantly. Safe, secure, and fast delivery directly to your game." }}
         </p>
-
         <div class="price-display">
             <div class="coins">{{ product.price_coins }} <span>Coins</span></div>
             <div class="inr">Equivalent to ₹{{ product.price_inr }}</div>
         </div>
     </div>
 
-    <!-- ===== RIGHT: Checkout ===== -->
     <div class="checkout-card glass">
         <h2 class="checkout-title">Purchase Details</h2>
 
         {% if request.user.is_authenticated %}
-
             {% if form.errors %}
             <div class="error-box">
                 {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                        <p>{{ field|title }}: {{ error }}</p>
-                    {% endfor %}
+                    {% for error in errors %}<p>{{ field|title }}: {{ error }}</p>{% endfor %}
                 {% endfor %}
-                {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
+                {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
             </div>
             {% endif %}
 
@@ -678,9 +529,8 @@
                                 </div>
                             </div>
                         </label>
-
                         <label class="payment-method-card">
-                            <input type="radio" name="payment_method" value="RAZORPAY">
+                            <input type="radio" name="payment_method" value="EXPAY">
                             <div class="payment-card-ui">
                                 <span class="pay-icon">💳</span>
                                 <div class="pay-info">
@@ -693,12 +543,9 @@
                 </div>
 
                 <div id="order-error"></div>
-
-                <!-- Desktop only submit (hidden on mobile) -->
                 <button type="submit" class="btn-submit">Confirm Purchase</button>
             </form>
 
-            <!-- Mobile sticky bar -->
             <div class="mobile-sticky-checkout">
                 <button type="submit" form="purchase-form" class="btn-primary-action">Pay Now</button>
             </div>
@@ -712,7 +559,6 @@
         {% endif %}
     </div>
 
-    <!-- Payment Overlay -->
     <div id="payment-processing-overlay">
         <div class="payment-spinner"></div>
         <div class="payment-text">Processing Payment...</div>
@@ -724,17 +570,6 @@
 
 {% block extra_js %}
 <script>
-    const loadRazorpayScript = () => new Promise((resolve, reject) => {
-        if (typeof window.Razorpay !== 'undefined') return resolve(window.Razorpay);
-        const s = document.createElement('script');
-        s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        s.async = true;
-        s.crossOrigin = 'anonymous';
-        s.onload = () => resolve(window.Razorpay);
-        s.onerror = () => reject(new Error('Razorpay script failed to load'));
-        document.head.appendChild(s);
-    });
-
     const purchaseForm = document.getElementById('purchase-form');
     const orderError = document.getElementById('order-error');
     const overlay = document.getElementById('payment-processing-overlay');
@@ -756,74 +591,58 @@
         purchaseForm.addEventListener('submit', async (e) => {
             const method = purchaseForm.querySelector('input[name="payment_method"]:checked')?.value;
 
-            if (overlay) overlay.style.display = 'flex';
-
-            if (method !== 'RAZORPAY') return; // normal form submit for wallet
-
-            e.preventDefault();
-            orderError.style.display = 'none';
-            orderError.textContent = '';
-            setButtons(true, 'Processing...');
-
-            const formData = new FormData(purchaseForm);
-            const payload = {
-                product_id: formData.get('product_id'),
-                quantity: formData.get('quantity'),
-                payment_method: formData.get('payment_method'),
-            };
-            for (const [key, value] of formData.entries()) {
-                if (key.startsWith('player_fields__')) payload[key] = value;
+            // WALLET — let the normal form POST happen, just show the overlay
+            if (method === 'WALLET') {
+                if (overlay) overlay.style.display = 'flex';
+                return;
             }
 
-            try {
-                const res = await fetch(purchaseForm.action, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
-                    body: JSON.stringify(payload),
-                });
-                const data = await res.json();
-                if (!res.ok || data.error) throw new Error(data.error || 'Unable to create payment order.');
+            // EXPAY — intercept and handle via fetch
+            if (method === 'EXPAY') {
+                e.preventDefault();
+                if (overlay) overlay.style.display = 'flex';
+                orderError.style.display = 'none';
+                orderError.textContent = '';
+                setButtons(true, 'Processing...');
 
-                await loadRazorpayScript();
-                const rzp = new Razorpay({
-                    key: data.key_id,
-                    amount: data.amount_paise,
-                    currency: 'INR',
-                    order_id: data.razorpay_order_id,
-                    name: '{{ product.name }}',
-                    description: 'Hazumake purchase',
-                    handler: async function(response) {
-                        const body = new FormData();
-                        body.append('razorpay_payment_id', response.razorpay_payment_id);
-                        body.append('razorpay_order_id', response.razorpay_order_id);
-                        body.append('razorpay_signature', response.razorpay_signature);
-                        const result = await fetch('{% url "razorpay_order_success" %}', {
-                            method: 'POST',
-                            headers: { 'X-CSRFToken': getCsrfToken() },
-                            body,
-                        });
-                        if (result.ok || result.redirected) {
-                            window.location.href = '{% url "orders" %}';
-                        } else {
-                            overlay.style.display = 'none';
-                            orderError.style.display = 'block';
-                            orderError.textContent = 'Order confirmation failed. Check My Orders.';
-                            setButtons(false, 'Pay Now');
-                        }
-                    },
-                    modal: {
-                        ondismiss() {
-                            overlay.style.display = 'none';
-                            setButtons(false, 'Pay Now');
-                        }
+                const formData = new FormData(purchaseForm);
+                const payload = {
+                    product_id: formData.get('product_id'),
+                    quantity: formData.get('quantity'),
+                    payment_method: 'EXPAY',
+                };
+                for (const [key, value] of formData.entries()) {
+                    if (key.startsWith('player_fields__')) payload[key] = value;
+                }
+
+                try {
+                    const res = await fetch(purchaseForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCsrfToken()
+                        },
+                        body: JSON.stringify(payload),
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok || data.error) {
+                        throw new Error(data.error || 'Unable to create payment order.');
                     }
-                });
-                rzp.open();
-            } catch (err) {
-                overlay.style.display = 'none';
-                orderError.style.display = 'block';
-                orderError.textContent = err.message || 'Payment request failed.';
-                setButtons(false, 'Pay Now');
+
+                    if (data.payment_url) {
+                        window.location.href = data.payment_url;
+                    } else {
+                        throw new Error('No payment URL returned from gateway.');
+                    }
+
+                } catch (err) {
+                    overlay.style.display = 'none';
+                    orderError.style.display = 'block';
+                    orderError.textContent = err.message || 'Payment request failed.';
+                    setButtons(false, 'Pay Now');
+                }
             }
         });
     }
