@@ -2,6 +2,36 @@ import uuid
 from decimal import Decimal
 from django.conf import settings
 from django.db import models
+from django.utils.text import slugify
+
+
+class Category(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name) or 'category'
+            slug = base_slug
+            counter = 1
+            while Category.objects.exclude(pk=self.pk).filter(slug=slug).exists():
+                slug = f'{base_slug}-{counter}'
+                counter += 1
+            self.slug = slug
+        else:
+            self.slug = slugify(self.slug) or self.slug
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
 
 class Game(models.Model):
     FIELD_PRESETS = (
@@ -52,6 +82,7 @@ class Product(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     game = models.ForeignKey('Game', on_delete=models.CASCADE, related_name='products', null=True)
+    category = models.ForeignKey('Category', on_delete=models.SET_NULL, related_name='products', null=True, blank=True)
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     smile_product_id = models.CharField(max_length=20, unique=True, null=True, blank=True)

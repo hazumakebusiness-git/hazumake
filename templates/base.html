@@ -1,4 +1,4 @@
-{% load static %}
+{% load static core_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1529,7 +1529,7 @@
     </style>
     {% block extra_css %}{% endblock %}
 </head>
-<body id="top" data-page="{% block body_data_page %}{% endblock %}">
+<body id="top" data-page="{% block body_data_page %}{% endblock %}" style="{% page_background_style %}">
 
     <!-- 🌌 CINEMATIC BACKGROUND ENGINE -->
     <div class="bg-artwork"></div>
@@ -1661,7 +1661,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main>
+    <main style="{% page_background_style %}">
         {% block content %}{% endblock %}
     </main>
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SiteSettings, ContactMessage
+from .models import SiteSettings, ContactMessage, PageBackground
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
@@ -17,6 +17,17 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         return not SiteSettings.objects.exists()
     def has_delete_permission(self, request, obj=None):
         return False
+
+@admin.register(PageBackground)
+class PageBackgroundAdmin(admin.ModelAdmin):
+    list_display = ('page_identifier', 'background_type', 'background_color', 'background_image')
+    list_filter = ('background_type',)
+    search_fields = ('page_identifier',)
+    fieldsets = (
+        ('Page', {'fields': ('page_identifier',)}),
+        ('Background', {'fields': ('background_type', 'background_color', 'background_image')}),
+    )
+
 
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):

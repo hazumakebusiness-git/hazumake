@@ -1,5 +1,27 @@
 from django.db import models
 
+
+class PageBackground(models.Model):
+    BACKGROUND_TYPES = (
+        ('color', 'Color'),
+        ('image', 'Image'),
+    )
+
+    page_identifier = models.CharField(max_length=100, unique=True, help_text='Example: home, shop, login, dashboard')
+    background_type = models.CharField(max_length=10, choices=BACKGROUND_TYPES, default='color')
+    background_color = models.CharField(max_length=7, blank=True, help_text='Hex color, e.g. #1f2937')
+    background_image = models.ImageField(upload_to='backgrounds/page/', blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Page Background'
+        verbose_name_plural = 'Page Backgrounds'
+        ordering = ['page_identifier']
+
+    def __str__(self):
+        return self.page_identifier
+
+
 class SiteSettings(models.Model):
     # Singleton model — only one row ever exists
     store_manager_name = models.CharField(max_length=100, default='Store Manager')

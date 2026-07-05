@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Count, Q
 from django.views.decorators.http import require_POST
-from .models import Product, Game
+from .models import Product, Game, Category
 from hazu.smile_api import verify_player
 import logging
 logger = logging.getLogger(__name__)
@@ -35,15 +35,27 @@ def shop(request):
 def game_shop(request, game_slug):
     game = get_object_or_404(Game, slug=game_slug, is_active=True)
     product_type = request.GET.get('type')
+    category_slug = request.GET.get('category')
     products = Product.objects.filter(game=game, is_active=True).order_by('price_coins')
+
     if product_type:
         products = products.filter(type=product_type)
+
+    active_category = None
+    if category_slug:
+        active_category = get_object_or_404(Category, slug=category_slug)
+        products = products.filter(category=active_category)
+
     available_types = Product.objects.filter(game=game, is_active=True).values_list('type', flat=True).distinct()
+    available_categories = Category.objects.filter(products__game=game, products__is_active=True).distinct().order_by('name')
+
     return render(request, 'products/game_shop.html', {
         'game': game,
         'products': products,
         'available_types': available_types,
         'active_type': product_type,
+        'available_categories': available_categories,
+        'active_category': active_category,
     })
 
 def product_detail(request, pk):

@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from unittest.mock import patch
 
-from .models import Game, Product
+from .models import Game, Product, Category
 
 
 class VerifyPlayerViewTests(TestCase):
@@ -89,6 +89,38 @@ class VerifyPlayerViewTests(TestCase):
             player_uid='123456789',
             player_sid='1234',
         )
+
+    def test_game_shop_filters_products_by_category_slug(self):
+        category = Category.objects.create(name='Top-up', slug='top-up')
+        matching_product = Product.objects.create(
+            game=self.game,
+            category=category,
+            name='Top-up Pack',
+            smile_product_id='topup_pack',
+            type='DIAMOND',
+            diamond_amount=100,
+            price_coins=100,
+            price_inr=100.00,
+        )
+        Product.objects.create(
+            game=self.game,
+            name='Another Pack',
+            smile_product_id='another_pack',
+            type='DIAMOND',
+            diamond_amount=50,
+            price_coins=50,
+            price_inr=50.00,
+        )
+
+        response = self.client.get(
+            reverse('game_shop', kwargs={'game_slug': self.game.slug}),
+            {'category': category.slug},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context['products']), [matching_product])
+        self.assertEqual(response.context['active_category'], category)
+        self.assertIn(category, response.context['available_categories'])
 
     def test_product_detail_renders_verify_player_route_and_productid(self):
         product = Product.objects.create(

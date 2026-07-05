@@ -648,6 +648,7 @@
     }
 
     // Verify Player
+    const verifyUrl = "{% url 'verify_player' game.slug %}";
     const verifyBtn = document.getElementById('verify-btn');
     const verifyResult = document.getElementById('verify-result');
 
@@ -670,7 +671,7 @@
         verifyResult.style.display = 'none';
 
         try {
-            const res = await fetch("{% url 'verify_player' game.slug %}", {
+            const res = await fetch(verifyUrl, {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
