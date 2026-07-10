@@ -5,7 +5,7 @@
 from django.contrib import admin
 from django.db.models import Count, Q
 from django.utils.html import format_html
-from hazu.core.svg_image import SVGImageAdminMixin
+from core.svg_image import SVGImageAdminMixin
 from .models import Product, Game, Category
 
 @admin.register(Game)
