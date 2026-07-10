@@ -5,8 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Hazumake Store - Premium Top-Up{% endblock %}</title>
-    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
-    
+    <meta name="description" content="{% block meta_description %}Hazumake is your elite mobile game top-up store offering fast diamond, coin, and gift-card recharge for top games with secure checkout and instant delivery.{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}Hazumake Store - Premium Top-Up{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Fast, secure mobile game top-ups for diamonds, coins, and gift cards across popular titles.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'images/hero1.jpg' %}{% endblock %}">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="{% block canonical_url %}https://hazumakestore.com/{% endblock %}">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
