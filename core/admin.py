@@ -1,8 +1,9 @@
 from django.contrib import admin
 from .models import SiteSettings, ContactMessage, PageBackground
+from .svg_image import SVGImageAdminMixin
 
 @admin.register(SiteSettings)
-class SiteSettingsAdmin(admin.ModelAdmin):
+class SiteSettingsAdmin(SVGImageAdminMixin, admin.ModelAdmin):
     fieldsets = (
         ('Store Manager Contact', {
             'description': 'This number appears publicly on the Contact page.',
@@ -19,7 +20,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         return False
 
 @admin.register(PageBackground)
-class PageBackgroundAdmin(admin.ModelAdmin):
+class PageBackgroundAdmin(SVGImageAdminMixin, admin.ModelAdmin):
     list_display = ('page_identifier', 'background_type', 'background_color', 'background_image')
     list_filter = ('background_type',)
     search_fields = ('page_identifier',)
